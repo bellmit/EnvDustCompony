@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IWeatherDao">
+
+	<resultMap type="com.tcb.env.pojo.HeWeather" id="heWeatherResultMap">
+		<id property="id" column="id" />
+		<result property="cid" column="cid" />
+		<result property="location" column="location" />
+		<result property="parentCity" column="parent_city" />
+		<result property="adminArea" column="admin_area" />
+		<result property="cnty" column="cnty" />
+		<result property="lat" column="lat" />
+		<result property="lon" column="lon" />
+		<result property="tz" column="tz" />
+		<result property="status" column="status" />
+		<result property="loc" column="loc" />
+		<result property="utc" column="utc" />
+		<result property="cloud" column="cloud" />
+		<result property="condCode" column="cond_code" />
+		<result property="condTxt" column="cond_txt" />
+		<result property="fl" column="fl" />
+		<result property="hum" column="hum" />
+		<result property="pcpn" column="pcpn" />
+		<result property="pres" column="pres" />
+		<result property="tmp" column="tmp" />
+		<result property="vis" column="vis" />
+		<result property="windDeg" column="wind_deg" />
+		<result property="windDir" column="wind_dir" />
+		<result property="windSc" column="wind_sc" />
+		<result property="windSpd" column="wind_spd" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 查询区域天气信息个数 -->
+	<select id="getWeatherCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_weather tw
+		<where>
+			<if test="weather.cid != null and weather.cid != ''">
+				AND tw.cid = #{weather.cid}
+			</if>
+			<if test="weather.loc != null and weather.loc != ''">
+				AND DATE(tw.loc) = DATE(#{weather.loc, jdbcType = VARCHAR})
+				AND HOUR(tw.loc) = HOUR(#{weather.loc, jdbcType = VARCHAR})
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询区域天气信息 -->
+	<select id="getWeather" resultMap="heWeatherResultMap">
+		SELECT
+			tw.id,
+			tw.cid,
+			tw.location,
+			tw.parent_city,
+			tw.admin_area,
+			tw.cnty,
+			tw.lat,
+			tw.lon,
+			tw.tz,
+			tw.status,
+			tw.loc,
+			tw.utc,
+			tw.cloud,
+			tw.cond_code,
+			tw.cond_txt,
+			tw.fl,
+			tw.hum,
+			tw.pcpn,
+			tw.pres,
+			tw.tmp,
+			tw.vis,
+			tw.wind_deg,
+			tw.wind_dir,
+			tw.wind_sc,
+			tw.wind_spd,
+			tw.opt_time
+		FROM
+			tbl_weather tw
+		<where>
+			<if test="weather.cid != null and weather.cid != ''">
+				AND tw.cid = #{weather.cid}
+			</if>
+			<if test="weather.loc != null and weather.loc != ''">
+				AND DATE(tw.loc) = DATE(#{weather.loc, jdbcType = VARCHAR})
+				AND HOUR(tw.loc) = HOUR(#{weather.loc, jdbcType = VARCHAR})
+			</if>
+		</where>
+		ORDER BY tw.loc DESC
+	</select>
+
+
+	<!-- 查询某天的总云量和最低云量 -->
+	<select id="getCloudDataByDay" resultType="java.util.Map">
+		SELECT
+			sum(cloud) AS totalCloud,
+			min(cloud) AS minCloud
+		FROM
+			tbl_weather tw
+		WHERE
+			tw.cid IN ( SELECT city_id FROM tbl_area WHERE area_id IN ( SELECT parent_id FROM tbl_area WHERE area_id = #{areaId} ) )
+			and loc between #{beginTime} AND #{endTime}
+	</select>
+
+	<!-- 查询某天的总云量和最低云量 -->
+	<select id="getWindDataByDay" resultType="java.util.Map">
+		SELECT
+		wind_deg AS windDeg,
+		wind_spd AS windSpeed,
+		wind_sc AS windSc
+		FROM
+		tbl_weather tw
+		WHERE
+		tw.cid IN ( SELECT city_id FROM tbl_area WHERE area_id IN ( SELECT parent_id FROM tbl_area WHERE area_id = #{areaId} ) )
+		and loc &lt;= #{datatime}
+		ORDER BY loc desc
+		LIMIT 1
+	</select>
+
+	<!--风力玫瑰图-->
+	<select id="getRoseWindData" resultType="java.lang.Integer">
+		SELECT
+		ROUND(wind_deg/45)
+		FROM
+		tbl_weather tw
+		WHERE
+		tw.cid IN (
+			SELECT city_id FROM tbl_area WHERE area_id IN (
+				SELECT parent_id FROM tbl_area WHERE area_id = #{areaId}
+			)
+		)
+        AND tw.loc BETWEEN (#{dateTime} - interval 24 hour) AND #{dateTime}
+		<choose>
+			<when test="windSc > 6">
+				AND tw.wind_sc >= #{windSc}
+			</when>
+			<otherwise>
+				AND tw.wind_sc = #{windSc}
+			</otherwise>
+		</choose>
+	</select>
+	
+</mapper>

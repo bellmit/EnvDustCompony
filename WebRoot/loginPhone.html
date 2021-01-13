@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>移动在线监测</title>
+<link rel='stylesheet prefetch' href='./javascript/btzero_7_Director/css/bootstrap.min.css' rel="stylesheet" type="text/css" />
+<!-- font Awesome -->
+<link href="./javascript/btzero_7_Director/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link rel="stylesheet" href="./javascript/btzero_7_Director/css/login.css" media="screen" type="text/css" />
+<script type="text/javascript" src="javascript/jquery-easyui-1.4.4/jquery.min.js"></script>
+	<script type="text/javascript" src="javascript/util/config.js"></script>
+<script type="text/javascript" src="javascript/util/login.js"></script>
+	<style>
+		.form-control{
+			border:0px;
+			box-shadow:inset 0 1px 1px rgba(0,0,0,0);
+		}
+		.btn-success{
+			background-color:#7dcc93;
+		}
+	</style>
+</head>
+
+<body class="login-page">
+
+<div class="login-form">
+
+	<div class="login-content">
+
+		<div class="form-login-error">
+			<h3>Invalid login</h3>
+			<p>Enter <strong>demo</strong>/<strong>demo</strong> as login and password.</p>
+		</div>
+		<div class="loginHeader" style="color:#fff;height:180px;background:#7dcc93;">
+			<div style="margin:0 auto;" id="companyLogoMobileId"></div>
+			<div style="font-size:30px;margin-top:5px;">移动在线监测</div>
+		</div>
+		<div class="loginForm" style="background:#fff;">
+			<form action="./UserController/toMobileMain" method="post" onSubmit="return ajaxVaild()" role="form" id="Form1" style="padding:30px 8px;">
+
+				<div class="form-group">
+					<div class="input-group">
+						<div class="input-group-addon">
+							<i class="fa fa-user" style="color:black;"></i>
+						</div>
+
+						<input type="text" class="form-control" id="userID" name="userCode" placeholder="用户名" autocomplete="off" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="input-group">
+						<div class="input-group-addon">
+							<i class="fa fa-key" style="color:black;"></i>
+						</div>
+						<input type="password" class="form-control" id="userPwd" name="userPassword" placeholder="密码" autocomplete="off" />
+					</div>
+
+				</div>
+
+				<div class="form-group" style="margin:50px 20px 10px;">
+					<button type="submit" id="btn" value="loginbtn"  class="btn btn-success btn-block btn-login">
+						<i class="fa fa-sign-in"></i>
+						登录
+					</button>
+				</div>
+
+				<div style="margin:10px 20px 30px;">
+					<a href="http://114.115.217.241/docs/app-envdust.apk" style="float:left;text-decoration:none; "><i class="fa fa-download" style="color:#333;"></i><span style="margin-left:5px;color:#333;">安卓APP</span></a>
+					<a href="./login.html" style="float:right;text-decoration:none; "><i class="fa fa-desktop" style="color:#333;"></i><span style="margin-left:5px;color:#333;">电脑版</span></a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+    setLogoMobile("./")
+    document.onkeydown = function(e) {
+        var theEvent = window.event || e;
+        var code = theEvent.keyCode || theEvent.which;
+        if (code == 13) {
+            $("#btn button").click();
+        }
+    };
+</script>
+</body>
+</html>

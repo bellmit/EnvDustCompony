@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IVideoDeviceDao">
+	<!-- 查询用户名称 -->
+	<select id="getVideoDeviceIpByMn" resultType="java.lang.String">
+		SELECT
+			TOP(1) Framed_IP_Address
+		FROM 
+			accounting_data
+		WHERE Packet_Type = '4'
+		AND User_Name = #{deviceMn}
+		AND Framed_IP_Address IS NOT NULL
+		ORDER BY timestamp DESC
+	</select>
+</mapper>

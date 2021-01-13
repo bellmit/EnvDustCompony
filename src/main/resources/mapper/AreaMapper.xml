@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IAreaDao">
+	<resultMap type="com.tcb.env.pojo.AreaLevel" id="areaLevelResultMap">
+		<id property="levelId" column="level_id" />
+		<result property="levelName" column="level_name" />
+		<result property="levelFlag" column="level_flag" />
+	</resultMap>
+	<!-- <resultMap type="com.tcb.env.pojo.AreaB" id="parentAreaResultMap"> 
+		<id property="areaId" column="area_id" /> <result property="areaName" column="area_name" 
+		/> <result property="areaPath" column="area_path_b" /> <result property="optUser" 
+		column="opt_user_b" /> <result property="optTime" column="opt_time_b" /> 
+		</resultMap> -->
+	<resultMap type="com.tcb.env.pojo.Area" id="areaResultMap">
+		<id property="areaId" column="area_id" />
+		<result property="areaName" column="area_name" />
+		<result property="areaPath" column="area_path" />
+		<result property="parentId" column="parent_id" />
+		<result property="cityId" column="city_id" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联组织表 <association property="parentArea" column="parent_id" javaType="com.tcb.env.pojo.Area" 
+			resultMap="com.tcb.env.dao.IAreaDao.parentAreaResultMap"></association> -->
+		<association property="areaLevel" column="level_id"
+			javaType="com.tcb.env.pojo.AreaLevel" resultMap="com.tcb.env.dao.IAreaDao.areaLevelResultMap"></association>
+	</resultMap>
+
+	<resultMap type="com.tcb.env.pojo.HeWeather" id="heWeatherResultMap">
+		<id property="id" column="id" />
+		<result property="cid" column="cid" />
+		<result property="location" column="location" />
+		<result property="parentCity" column="parent_city" />
+		<result property="adminArea" column="admin_area" />
+		<result property="cnty" column="cnty" />
+		<result property="lat" column="lat" />
+		<result property="lon" column="lon" />
+		<result property="tz" column="tz" />
+		<result property="status" column="status" />
+		<result property="loc" column="loc" />
+		<result property="utc" column="utc" />
+		<result property="cloud" column="cloud" />
+		<result property="condCode" column="cond_code" />
+		<result property="condTxt" column="cond_txt" />
+		<result property="fl" column="fl" />
+		<result property="hum" column="hum" />
+		<result property="pcpn" column="pcpn" />
+		<result property="pres" column="pres" />
+		<result property="tmp" column="tmp" />
+		<result property="vis" column="vis" />
+		<result property="windDeg" column="wind_deg" />
+		<result property="windDir" column="wind_dir" />
+		<result property="windSc" column="wind_sc" />
+		<result property="windSpd" column="wind_spd" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 查询所有底层权限区域 -->
+	<select id="getBottomAuthorityAreas" resultMap="areaResultMap">
+			SELECT
+				DISTINCT ta.area_id,
+				ta.area_name,
+				ta.parent_id,
+				ta.area_path,
+				ta.city_id,
+				ta.opt_user,
+				ta.opt_time,
+				tal.level_id,
+				tal.level_name,
+				tal.level_flag
+			FROM
+				tbl_area ta
+			INNER JOIN tbl_area_level tal ON ta.level_id = tal.level_id
+			INNER JOIN tbl_device td ON ta.area_id = td.area_id
+			WHERE
+				tal.level_flag = #{levelFlag}
+			AND td.device_code IN (
+				SELECT DISTINCT tad.device_code
+				FROM tbl_access_device tad
+				INNER JOIN tbl_user_ahr tua ON tad.authority_code = tua.authority_code
+				WHERE tua.user_code = #{userCode}
+			)
+	</select>
+	<!-- 查询用户权限区域 -->
+	<select id="getAuthorityAreas" resultMap="areaResultMap">
+			SELECT
+				DISTINCT ta.area_id,
+				ta.area_name,
+				ta.parent_id,
+				ta.area_path,
+				ta.city_id,
+				ta.opt_user,
+				ta.opt_time,
+				tal.level_id,
+				tal.level_name,
+				tal.level_flag
+			FROM
+				tbl_area ta
+			INNER JOIN tbl_area_level tal ON ta.level_id = tal.level_id
+			INNER JOIN tbl_device td ON ta.area_id = td.area_id
+			WHERE
+				td.device_code IN (
+				SELECT DISTINCT tad.device_code
+				FROM tbl_access_device tad
+				INNER JOIN tbl_user_ahr tua ON tad.authority_code = tua.authority_code
+				WHERE tua.user_code = #{userCode}
+			)
+			order by tal.level_flag
+	</select>
+
+	<!-- 查询个数（国家） -->
+	<select id="getCountryCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM
+		tbl_area A,tbl_area_level C
+		WHERE
+		A.level_id =
+		C.level_id
+		AND A.parent_id
+		IS NULL
+		<if test="area.areaId != -1">
+			AND A.area_id = #{area.areaId}
+		</if>
+		<if test="area.areaLevel.levelFlag != -1">
+			AND C.level_flag = #{area.areaLevel.levelFlag}
+		</if>
+		<if test="area.areaName != null and area.areaName != ''">
+			AND A.area_name LIKE
+			CONCAT('%',CONCAT(#{area.areaName},'%'))
+		</if>
+	</select>
+	<!-- 查询个数（不包括国家） -->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM
+		tbl_area A,tbl_area B,tbl_area_level C
+		WHERE
+		A.parent_id = B.area_id
+		AND
+		A.level_id = C.level_id
+		<if test="area.areaId != -1">
+			AND A.area_id = #{area.areaId}
+		</if>
+		<if test="area.areaLevel.levelFlag != -1">
+			AND C.level_flag = #{area.areaLevel.levelFlag}
+		</if>
+		<if test="area.areaName != null and area.areaName != ''">
+			AND A.area_name LIKE
+			CONCAT('%',CONCAT(#{area.areaName},'%'))
+		</if>
+		<if test="area.parentId != -1">
+			AND A.parent_id = #{area.parentId}
+		</if>
+	</select>
+
+	<!-- 查询区域数据 -->
+	<select id="getAreas" resultMap="areaResultMap">
+		<if test="ignorecountry == 0">
+			SELECT
+			A.area_id,
+			A.area_name,
+			A.parent_id,
+			A.area_path,
+			A.city_id,
+			A.opt_user,
+			A.opt_time,
+			C.level_id,
+			C.level_name,
+			C.level_flag
+			FROM
+			tbl_area A,tbl_area_level C
+			WHERE
+			A.level_id = C.level_id
+			AND
+			A.parent_id IS NULL
+			<if test="area.areaId != -1">
+				AND A.area_id = #{area.areaId}
+			</if>
+			<if test="area.areaLevel != null and area.areaLevel.levelFlag != -1">
+				AND C.level_flag = #{area.areaLevel.levelFlag}
+			</if>
+			<if test="area.areaName != null and area.areaName != ''">
+				AND A.area_name LIKE
+				CONCAT('%',CONCAT(#{area.areaName},'%'))
+			</if>
+			UNION
+		</if>
+		SELECT
+		A.area_id,
+		A.area_name,
+		A.parent_id,
+		A.area_path,
+		A.city_id,
+		A.opt_user,
+		A.opt_time,
+		C.level_id,
+		C.level_name,
+		C.level_flag
+		FROM
+		tbl_area
+		A,tbl_area_level C
+		WHERE
+		A.level_id = C.level_id
+		<if test="area.areaId != -1">
+			AND A.area_id = #{area.areaId}
+		</if>
+		<if test="area.areaLevel != null and area.areaLevel.levelFlag != -1">
+			AND C.level_flag = #{area.areaLevel.levelFlag}
+		</if>
+		<if test="area.areaName != null and area.areaName != ''">
+			AND A.area_name LIKE
+			CONCAT('%',CONCAT(#{area.areaName},'%'))
+		</if>
+		<if test="area.parentId != -1">
+			AND A.parent_id = #{area.parentId}
+		</if>
+		ORDER BY level_flag,area_name
+		<if test="area.rowCount != -1 and area.rowIndex != -1">
+			LIMIT #{area.rowIndex, jdbcType =
+			INTEGER},#{area.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+
+	<!-- 查询路径 -->
+	<select id="getAreaPath" resultType="java.lang.String">
+		SELECT area_path
+		FROM tbl_area
+		WHERE tbl_area.area_id = #{areaid}
+	</select>
+	
+	<!-- 查询名称 -->
+	<select id="getAreaName" resultType="java.lang.String">
+		SELECT area_name
+		FROM tbl_area
+		WHERE tbl_area.area_id = #{areaid}
+	</select>
+
+	<!-- 获取区域级别 -->
+	<select id="getAreaLevelFlag" resultType="java.lang.String">
+		SELECT tal.level_flag
+		FROM tbl_area_level tal
+		INNER JOIN tbl_area ta ON tal.level_id = ta.level_id
+		WHERE ta.area_id = #{areaid}
+		LIMIT 0,1
+	</select>
+
+	<!-- 插入区域数据 -->
+	<insert id="insertAreas" parameterType="com.tcb.env.pojo.Area">
+		INSERT INTO tbl_area(
+		area_name,
+		<if test="area.parentId != -1">
+			parent_id,
+		</if>
+		level_id,
+		area_path,
+		city_id,
+		opt_user
+		)
+		VALUES
+		(
+		#{area.areaName},
+		<if test="area.parentId != -1">
+			#{area.parentId},
+		</if>
+		#{area.areaLevel.levelId},
+		#{area.areaPath},
+		#{area.cityId},
+		#{area.optUser}
+		)
+
+	</insert>
+
+	<!-- 更新区域数据 -->
+	<update id="updateAreas" parameterType="java.util.List">
+		<foreach collection="listarea" item="item" index="index"
+			separator=",">
+			UPDATE tbl_area SET
+			tbl_area.opt_user = #{item.optUser}
+			,tbl_area.opt_time = #{item.optTime}
+			<if test="item.areaName != null and item.areaName != ''">
+				,tbl_area.area_name = #{item.areaName}
+			</if>
+			<if test="item.parentId != -1">
+				,tbl_area.parent_id = #{item.parentId}
+			</if>
+			<if test="item.areaLevel.levelId != -1">
+				,tbl_area.level_id = #{item.areaLevel.levelId}
+			</if>
+			<if test="item.areaPath != null and item.areaPath != ''">
+				,tbl_area.area_path = #{item.areaPath}
+			</if>
+			<if test="item.cityId != null and item.cityId != ''">
+				,tbl_area.city_id = #{item.cityId}
+			</if>
+			WHERE tbl_area.area_id = #{item.areaId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+
+	<!-- 物理删除区域数据 -->
+	<delete id="deleteAreas" parameterType="java.util.List">
+		DELETE FROM tbl_area
+		WHERE tbl_area.area_id IN
+		<foreach collection="listid" item="item" open="(" separator=","
+			close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<!-- 查询是否存在同名区域 -->
+	<select id="getAreaExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_area
+		WHERE tbl_area.area_name =
+		#{areaname,jdbcType = VARCHAR}
+		<if test="areaid != -1">
+			AND tbl_area.area_id != #{areaid, jdbcType = INTEGER}
+		</if>
+	</select>
+
+	<!-- 插入区域天气信息 -->
+	<insert id="insertAreaWeather" parameterType="com.tcb.env.pojo.HeWeather">
+		INSERT INTO
+		tbl_weather(
+			cid,
+			location,
+			parent_city,
+			admin_area,
+			cnty,
+			lat,
+			lon,
+			tz,
+			status,
+			loc,
+			utc,
+			cloud,
+			cond_code,
+			cond_txt,
+			fl,
+			hum,
+			pcpn,
+			pres,
+			tmp,
+			vis,
+			wind_deg,
+			wind_dir,
+			wind_sc,
+			wind_spd,
+			opt_time
+		)
+		VALUES
+		(
+			#{weather.cid},
+			#{weather.location},
+			#{weather.parentCity},
+			#{weather.adminArea},
+			#{weather.cnty},
+			#{weather.lat},
+			#{weather.lon},
+			#{weather.tz},
+			#{weather.status},
+			#{weather.loc},
+			#{weather.utc},
+			#{weather.cloud},
+			#{weather.condCode},
+			#{weather.condTxt},
+			#{weather.fl},
+			#{weather.hum},
+			#{weather.pcpn},
+			#{weather.pres},
+			#{weather.tmp},
+			#{weather.vis},
+			#{weather.windDeg},
+			#{weather.windDir},
+			#{weather.windSc},
+			#{weather.windSpd},
+			#{weather.optTime}
+		)
+	</insert>
+
+	<!-- 查询区域天气信息个数 -->
+	<select id="getAreaWeatherCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_weather tw
+		<where>
+			<if test="weather.cid != null and weather.cid != ''">
+				AND tw.cid = #{weather.cid}
+			</if>
+			<if test="weather.loc != null and weather.loc != ''">
+				AND tw.loc = #{weather.loc, jdbcType = VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询区域天气信息 -->
+	<select id="getAreaWeather" resultMap="heWeatherResultMap">
+		SELECT
+			tw.id,
+			tw.cid,
+			tw.location,
+			tw.parent_city,
+			tw.admin_area,
+			tw.cnty,
+			tw.lat,
+			tw.lon,
+			tw.tz,
+			tw.status,
+			tw.loc,
+			tw.utc,
+			tw.cloud,
+			tw.cond_code,
+			tw.cond_txt,
+			tw.fl,
+			tw.hum,
+			tw.pcpn,
+			tw.pres,
+			tw.tmp,
+			tw.vis,
+			tw.wind_deg,
+			tw.wind_dir,
+			tw.wind_sc,
+			tw.wind_spd,
+			tw.opt_time
+		FROM
+			tbl_weather tw
+		<where>
+			<if test="weather.cid != null and weather.cid != ''">
+				AND tw.cid = #{weather.cid}
+			</if>
+			<if test="weather.loc != null and weather.loc != ''">
+				AND tw.loc = #{weather.loc, jdbcType = VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<!-- 获取用户权限区域ID -->
+	<select id="getAuthorityAreaId" resultType="java.lang.Integer">
+		SELECT
+			DISTINCT tbl_device.area_id
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device TD,
+					tbl_user_ahr TUH
+				WHERE
+					TD.authority_code = TUH.authority_code
+				AND TUH.user_code = #{userCode,jdbcType = VARCHAR}
+			)
+	</select>
+	
+	<!-- 获取工地园区设备排放信息 -->
+	<select id="getAreaAvgValue" resultType="java.lang.Double">
+		SELECT AVG(temp.ttd.data_value)
+		FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT
+					ttd.data_value
+				FROM
+					${dbOldName}.tbl_therm_data ttd
+				INNER JOIN ${dbName}.tbl_device td ON ttd.device_code = td.device_code
+				WHERE ttd.data_type = #{dataType}
+				AND ttd.thing_code = #{thingCode}
+				<if test="listAreaId != null and listAreaId.size()>0">
+					AND	td.area_id IN 
+					<foreach collection="listAreaId" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				<choose>
+					<when test="dataType != null and dataType == '2011'">
+						AND DATE(ttd.data_time) = DATE(#{beginTime})
+						AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+						AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+					</when>
+					<when test="dataType != null and dataType == '2051'">
+						AND DATE(ttd.data_time) = DATE(#{beginTime})
+						AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+						AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+					</when>
+					<when test="dataType != null and dataType == '2061'">
+						AND DATE(ttd.data_time) = DATE(#{beginTime})
+						AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+					</when>
+					<when test="dataType != null and dataType == '2031'">
+						AND DATE(ttd.data_time) = DATE(#{beginTime})
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+				UNION
+			</if>
+			SELECT
+				ttd.data_value
+			FROM
+				${dbName}.tbl_therm_data ttd
+			INNER JOIN ${dbName}.tbl_device td ON ttd.device_code = td.device_code
+			WHERE ttd.data_type = #{dataType}
+			AND ttd.thing_code = #{thingCode}
+			<if test="listAreaId != null and listAreaId.size()>0">
+				AND	td.area_id IN 
+				<foreach collection="listAreaId" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<choose>
+				<when test="dataType != null and dataType == '2011'">
+					AND DATE(ttd.data_time) = DATE(#{beginTime})
+					AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+					AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+				</when>
+				<when test="dataType != null and dataType == '2051'">
+					AND DATE(ttd.data_time) = DATE(#{beginTime})
+					AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+					AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+				</when>
+				<when test="dataType != null and dataType == '2061'">
+					AND DATE(ttd.data_time) = DATE(#{beginTime})
+					AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+				</when>
+				<when test="dataType != null and dataType == '2031'">
+					AND DATE(ttd.data_time) = DATE(#{beginTime})
+				</when>
+				<otherwise>
+				</otherwise>
+			</choose>
+		)
+	</select>
+	
+	<!-- 查询地方/城市ID -->
+	<select id="getAreaCityId" resultType="java.lang.String">
+		SELECT DISTINCT(city_id)
+		FROM
+			tbl_area
+		WHERE city_id IS NOT NULL
+		AND TRIM(city_id) != ''
+	</select>
+	
+	<!-- 存在关联区域或设备个数 -->
+	<select id="getRelationCount" resultType="java.lang.Integer">
+		SELECT SUM(TEMP.count)
+		FROM
+			(
+				SELECT
+					COUNT(0) AS count
+				FROM
+					tbl_area ta
+				WHERE
+					ta.parent_id = #{areaId}
+				UNION
+					SELECT
+						COUNT(0) AS count
+					FROM
+						tbl_device td
+					WHERE
+						td.area_id = #{areaId}
+			) TEMP
+	</select>
+
+	<select id="queryFourthAreaInfo" resultType="java.util.Map">
+		SELECT
+		area_id AS areaId,
+		area_name AS areaName
+		FROM tbl_area
+		WHERE level_id = 4
+	</select>
+
+</mapper>

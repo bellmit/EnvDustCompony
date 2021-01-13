@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IMobileDao">
+
+    <resultMap type="com.tcb.env.model.MobilePointModel" id="mobilePointResultMap">
+        <id property="pointId" column="point_id"/>
+        <result property="areaId" column="area_id"/>
+        <result property="areaName" column="area_name"/>
+        <result property="pointCode" column="point_code"/>
+        <result property="pointName" column="point_name"/>
+        <result property="pointLat" column="point_lat"/>
+        <result property="pointLng" column="point_lng"/>
+        <result property="pointStatus" column="point_status"/>
+        <result property="pointStatusName" column="point_status_name"/>
+        <result property="pointLevelName" column="point_level_name"/>
+        <result property="pointLevelNo" column="point_level_no"/>
+        <result property="pointLevelColor" column="point_level_color"/>
+        <result property="pointData" column="point_data"/>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.MobilePointModel" id="mobilePointMonitorResultMap">
+        <id property="pointId" column="point_id"/>
+        <result property="areaId" column="area_id"/>
+        <result property="areaName" column="area_name"/>
+        <result property="pointCode" column="point_code"/>
+        <result property="pointName" column="point_name"/>
+        <result property="pointLat" column="point_lat"/>
+        <result property="pointLng" column="point_lng"/>
+        <result property="pointStatus" column="point_status"/>
+        <result property="pointStatusName" column="point_status_name"/>
+        <result property="pointLevelName" column="point_level_name"/>
+        <result property="pointLevelNo" column="point_level_no"/>
+        <result property="pointLevelColor" column="point_level_color"/>
+        <collection property="pointListData" ofType="com.tcb.env.model.MobileMonitorModel" resultMap="mobileMonitorModel" ></collection>
+    </resultMap>
+
+    <resultMap id="mobileMonitorModel" type="com.tcb.env.model.MobileMonitorModel">
+        <id property="thingId" column="thing_id"/>
+        <result property="thingCode" column="thing_code"/>
+        <result property="thingName" column="thing_name"/>
+        <result property="thingValue" column="thing_value"/>
+        <result property="thingUnit" column="thing_unit"/>
+        <result property="thingOrder" column="thing_order"/>
+        <result property="thingLevelName" column="thing_level_name"/>
+        <result property="thingLevelNo" column="thing_level_no"/>
+        <result property="thingLevelColor" column="thing_level_color"/>
+    </resultMap>
+
+    <!-- 获取设备点位信息 -->
+    <select id="getMobilePoint" resultMap="mobilePointResultMap">
+        SELECT DISTINCT
+            td.device_id AS point_id,
+            ta.area_id AS area_id,
+            ta.area_name AS area_name,
+            td.device_code AS point_code,
+            td.device_name AS point_name,
+            td.device_x AS point_lng,
+            td.device_y AS point_lat,
+            ts.status_code AS point_status,
+            ts.status_name AS point_status_name,
+            tdd.recent_data AS point_data,
+            bml.level_name AS point_level_name,
+            bml.level_no AS point_level_no,
+            bml.level_color AS point_level_color
+		FROM
+			tbl_device td
+        INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		LEFT JOIN tbl_status ts ON td.status_code = ts.status_code
+        LEFT JOIN tbl_device_data tdd ON td.device_code = tdd.device_code
+        AND tdd.thing_code = #{thingCode} AND tdd.data_type = #{dataType}
+        LEFT JOIN tbl_monitor_level bml ON tdd.thing_code = bml.thing_code
+        AND tdd.recent_data >= bml.level_min AND tdd.recent_data &lt; bml.level_max
+		WHERE td.device_type = '1'
+        <choose>
+            <when test="deviceCodeList != null and deviceCodeList.size()>0">
+                AND td.device_code IN
+                <foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </when>
+            <otherwise>
+                AND td.device_code IS NULL
+            </otherwise>
+        </choose>
+        <if test="levelNo != null and levelNo != ''">
+            AND bml.level_no = #{levelNo}
+        </if>
+    </select>
+
+    <!-- 获取设备最新上传数据 -->
+    <select id="getPointRecentData" resultMap="mobilePointMonitorResultMap">
+        SELECT DISTINCT
+            td.device_id AS point_id,
+            ta.area_id AS area_id,
+            ta.area_name AS area_name,
+            td.device_code AS point_code,
+            td.device_name AS point_name,
+            td.device_x AS point_lng,
+            td.device_y AS point_lat,
+            ts.status_code AS point_status,
+            ts.status_name AS point_status_name,
+            tm.thing_id AS thing_id,
+            tm.thing_code AS thing_code,
+            tm.thing_name AS thing_name,
+            tm.thing_unit AS thing_unit,
+            tdd.recent_data AS thing_value,
+            tm.thing_order AS thing_order,
+            bml.level_name AS thing_level_name,
+            bml.level_no AS thing_level_no,
+            bml.level_color AS thing_level_color
+        FROM
+            tbl_device td
+        INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+        LEFT JOIN tbl_status ts ON td.status_code = ts.status_code
+        LEFT JOIN tbl_device_data tdd ON td.device_code = tdd.device_code
+        LEFT JOIN tbl_monitor tm ON tdd.thing_code = tm.thing_code
+        LEFT JOIN tbl_monitor_level bml ON tdd.thing_code = bml.thing_code
+        AND tdd.recent_data >= bml.level_min AND tdd.recent_data &lt; bml.level_max
+        WHERE td.device_type = '1'
+        AND td.device_code = #{deviceCode}
+        AND tdd.data_type = #{dataType}
+        AND tm.thing_order IS NOT NULL
+        ORDER BY tm.thing_order
+    </select>
+
+    <!-- 获取多设备最新上传平均数据 -->
+    <select id="getPointsRecentData" resultMap="mobilePointMonitorResultMap">
+        SELECT DISTINCT
+                TEMP.thing_id,
+                TEMP.thing_code,
+                TEMP.thing_name,
+                TEMP.thing_unit,
+                TEMP.thing_value,
+                TEMP.thing_order,
+                bml.level_name AS thing_level_name,
+                bml.level_no AS thing_level_no,
+                bml.level_color AS thing_level_color
+        FROM (
+            SELECT DISTINCT
+                tm.thing_id AS thing_id,
+                tm.thing_code AS thing_code,
+                tm.thing_name AS thing_name,
+                tm.thing_unit AS thing_unit,
+                ROUND(AVG(tdd.recent_data),3) AS thing_value,
+                tm.thing_order AS thing_order
+            FROM
+                tbl_device td
+            LEFT JOIN tbl_status ts ON td.status_code = ts.status_code
+            LEFT JOIN tbl_device_data tdd ON td.device_code = tdd.device_code
+            <choose>
+                <when test="thingCodeList != null and thingCodeList.size()>0">
+                    AND tdd.thing_code IN
+                    <foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    AND tdd.thing_code IS NULL
+                </otherwise>
+            </choose>
+            LEFT JOIN tbl_monitor tm ON tdd.thing_code = tm.thing_code
+            WHERE td.device_type = '1'
+            <choose>
+                <when test="deviceCodeList != null and deviceCodeList.size()>0">
+                    AND td.device_code IN
+                    <foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    AND td.device_code IS NULL
+                </otherwise>
+            </choose>
+            AND tdd.data_type = #{dataType}
+            AND tm.thing_order IS NOT NULL
+            GROUP BY tm.thing_id,tm.thing_code,tm.thing_name,tm.thing_unit,tm.thing_order
+        ) TEMP
+        LEFT JOIN tbl_monitor_level bml ON TEMP.thing_code = bml.thing_code
+        AND TEMP.thing_value >= bml.level_min AND TEMP.thing_value &lt; bml.level_max
+        ORDER BY TEMP.thing_order
+    </select>
+
+    <!-- 获取监测物级别信息 -->
+    <select id="getThingLevel" resultMap="mobileMonitorModel">
+        SELECT DISTINCT
+            tm.thing_id AS thing_id,
+            tm.thing_code AS thing_code,
+            tm.thing_name AS thing_name,
+            tm.thing_unit AS thing_unit,
+            #{mobileMonitorModel.thingValue} AS thing_value,
+            tm.thing_order AS thing_order,
+            bml.level_name AS thing_level_name,
+            bml.level_no AS thing_level_no,
+            bml.level_color AS thing_level_color
+        FROM
+            tbl_monitor tm
+        LEFT JOIN tbl_monitor_level bml ON tm.thing_code = bml.thing_code
+        AND #{mobileMonitorModel.thingValue} >= bml.level_min AND #{mobileMonitorModel.thingValue} &lt; bml.level_max
+        WHERE tm.thing_code = #{mobileMonitorModel.thingCode}
+    </select>
+
+</mapper>

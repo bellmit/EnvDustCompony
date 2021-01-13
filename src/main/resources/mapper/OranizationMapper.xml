@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IOranizationDao">
+	<!-- 类名和数据库中表的属性名一一对应 -->
+	<resultMap type="com.tcb.env.pojo.Oranization" id="orgResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="orgId" column="org_id" />
+		<result property="orgName" column="org_name" />
+		<result property="orgIdParent" column="org_id_parent" />
+		<result property="levelType" column="level_type" />
+		<result property="orgAddress" column="org_address" />
+		<result property="orgPath" column="org_path" />
+		<result property="orgTelephone" column="org_telephone" />
+		<result property="orgFax" column="org_fax" />
+		<result property="orgLiaison" column="org_liaison" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+	<!-- 增加方法中查询数据个数看是否有重复的名称 COUNT(0)表示忽略所有lie -->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM
+		tbl_oranization
+		WHERE
+		1 = 1
+		<if test="oranization.orgId != -1">
+			AND tbl_oranization.org_id = #{oranization.orgId, jdbcType = INTEGER}
+		</if>
+		<if
+			test="isLike == false and oranization.orgName != null and oranization.orgName != ''">
+			AND tbl_oranization.org_name = #{oranization.orgName,jdbcType =
+			VARCHAR}
+		</if>
+		<if
+			test="isLike == true and oranization.orgName != null and oranization.orgName != ''">
+			AND tbl_oranization.org_name LIKE
+			CONCAT('%',CONCAT(#{oranization.orgName},'%'))
+		</if>
+	</select>
+	<!-- 查询数据库 -->
+	<select id="getOranization" parameterType="com.tcb.env.pojo.Oranization"
+		resultMap="orgResultMap">
+		SELECT
+		tbl_oranization.org_id,
+		tbl_oranization.org_id_parent,
+		tbl_oranization.org_name,
+		tbl_oranization.level_type,
+		tbl_oranization.org_address,
+		tbl_oranization.org_path,
+		tbl_oranization.org_telephone,
+		tbl_oranization.org_fax,
+		tbl_oranization.org_liaison,
+		tbl_oranization.opt_user,
+		tbl_oranization.opt_time
+		FROM
+		tbl_oranization
+		WHERE<!-- 表示条件：如果此字段不为空则以此字段作为条件，来取出整行， 
+			如果此字段为空，则不做为条件，也就是没有取出条件，不取出 哪个不空取哪个 -->
+		1 = 1
+		<if test="oranization.orgId != -1">
+			AND tbl_oranization.org_id = #{oranization.orgId, jdbcType
+			= INTEGER}
+		</if>
+		<if test="oranization.orgName != null and oranization.orgName != ''">
+			AND tbl_oranization.org_name LIKE CONCAT('%',CONCAT(#{oranization.orgName},'%'))
+		</if>
+		<if test="oranization.rowCount != -1 and oranization.rowIndex != -1">
+			LIMIT #{oranization.rowIndex, jdbcType = INTEGER},#{oranization.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	<!-- 插入语句 valuse为要传入的参数 数据库自动生成主键值 插入成功会将返回1 useGeneratedKeys="true" keyProperty="orgId" -->
+	<insert id="insertOranization" parameterType="com.tcb.env.pojo.Oranization">
+		insert into tbl_oranization
+		(
+			org_name,
+			<if test="oranization.orgIdParent != -1">
+				org_id_parent,
+			</if>
+			level_type,
+			org_address,
+			org_path,
+			org_telephone,
+			org_fax,
+			org_liaison,
+			opt_user
+		)
+		values
+		(
+			#{oranization.orgName},
+			<if test="oranization.orgIdParent != -1">
+				#{oranization.orgIdParent},
+			</if>
+			#{oranization.levelType},	
+			#{oranization.orgAddress},
+			#{oranization.orgPath},
+			#{oranization.orgTelephone},
+			#{oranization.orgFax},
+			#{oranization.orgLiaison},
+			#{oranization.optUser}
+		)
+	</insert>
+	<!-- 删除语句 成功返回1，不成功返回0 -->
+	<delete id="deleteOranization" parameterType="java.util.List">
+		DELETE FROM tbl_oranization
+		WHERE
+		tbl_oranization.org_id IN
+		<foreach collection="oranizationid" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<!-- 更新操作 -->
+	<update id="updateOranization" parameterType="java.util.List">
+		<!-- SET列名称，新值，具体哪一行看where -->
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			UPDATE tbl_oranization
+			SET
+			tbl_oranization.opt_time = #{item.optTime}
+			<if test="item.orgIdParent != -1">
+				,tbl_oranization.org_id_parent = #{item.orgIdParent}
+			</if>
+			<if test="item.orgName != null and item.orgName != ''">
+				,tbl_oranization.org_name = #{item.orgName}
+			</if>
+			<if test="item.levelType != null and item.levelType != ''">
+				,tbl_oranization.level_type = #{item.levelType}
+			</if>
+			<if test="item.orgAddress != null and item.orgAddress != ''">
+				,tbl_oranization.org_address = #{item.orgAddress}
+			</if>
+			<if test="item.orgPath != null and item.orgPath != ''">
+				,tbl_oranization.org_path = #{item.orgPath}
+			</if>
+			<if test="item.orgLiaison != null and item.orgLiaison != ''">
+				,tbl_oranization.org_liaison = #{item.orgLiaison}
+			</if>
+			<if test="item.orgFax != null and item.orgFax != ''">
+				,tbl_oranization.org_fax = #{item.orgFax}
+			</if>
+			<if test="item.orgTelephone != null and item.orgTelephone != ''">
+				,tbl_oranization.org_telephone = #{item.orgTelephone}
+			</if>
+			<if test="item.optUser != -1">
+				,tbl_oranization.opt_user = #{item.optUser}
+			</if>
+
+			<!-- where列名称，某值，修改某行的标识 -->
+			WHERE tbl_oranization.org_id = #{item.orgId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+	<!-- 查询是否存在组织名称 -->
+	<select id="getOranizationExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_oranization
+		WHERE 1=1
+		<if test="oranizationid != -1">
+			AND tbl_oranization.org_id != #{oranizationid, jdbcType = INTEGER}
+		</if>
+		<if test="oranizationname != null and oranizationname != ''">
+			AND tbl_oranization.org_name = #{oranizationname,jdbcType = VARCHAR}
+		</if>
+	</select>
+	<!-- 根据组织ID得到相应组织名称方法 -->
+	<select id="getOranizationPathById" resultType="java.lang.String">
+		SELECT
+		tbl_oranization.org_path
+		FROM tbl_oranization
+		WHERE 1=1
+		<if test="orgid != -1">
+			AND tbl_oranization.org_id = #{orgid, jdbcType = INTEGER}
+		</if>
+		<if test="orgid == -1">
+			AND tbl_oranization.org_path IS NULL
+		</if>
+
+		LIMIT 0,1
+	</select>
+
+</mapper>

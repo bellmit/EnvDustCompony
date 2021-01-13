@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IEffectiveRateDao">
+	<resultMap type="com.tcb.env.pojo.EffectiveRate" id="effectiveRateResultMap">
+		<id property="erId" column="er_id" />
+		<result property="effectiveTime" column="effective_time" />
+		<result property="effectiveRate" column="effective_rate" />
+		<result property="effectiveInfo" column="effective_info" />
+		<result property="allCount" column="all_count" />
+		<result property="erCount" column="er_count" />
+		<!-- 级联表 -->
+		<association property="device" column="device_code" javaType="com.tcb.env.pojo.Device"
+			resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+	</resultMap>
+	
+	<!-- 获取小时有效率个数 -->
+	<select id="getHourEffectiveRateCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT ter.er_id)
+		FROM
+			tbl_effective_rate ter
+		INNER JOIN tbl_device td ON ter.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND ter.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY ter.effective_time ASC,ter.effective_rate DESC
+	</select>
+	
+	<!-- 获取小时有效率 -->
+	<select id="getHourEffectiveRate" resultMap="effectiveRateResultMap">
+		SELECT
+			DISTINCT
+			ter.er_id,
+			td.device_code,
+			td.device_name,
+			DATE_FORMAT(ter.effective_time,'%Y-%m-%d %H') AS effective_time,
+			ter.effective_rate,
+			ter.effective_info,
+			ter.all_count,
+			ter.er_count
+		FROM
+			tbl_effective_rate ter
+		INNER JOIN tbl_device td ON ter.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND ter.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY ter.effective_time ASC,ter.effective_rate DESC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取日有效率个数 -->
+	<select id="getDayEffectiveRateCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT
+				@rownum:=@rownum+1 as er_id,
+				SUM(ter.all_count) AS all_count,
+				SUM(ter.er_count) AS er_count,
+				td.device_code,
+				td.device_name,
+				DATE(ter.effective_time) AS effective_time
+			FROM
+				(SELECT @rownum:=0) r,tbl_effective_rate ter
+			INNER JOIN tbl_device td ON ter.device_code = td.device_code
+			WHERE
+				TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+			AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+			<if test="deviceCodeList.size()>0">
+				AND ter.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY ter.device_code,DATE(ter.effective_time)
+			ORDER BY ter.effective_time ASC,ter.effective_time DESC,ter.device_code ASC
+		) AS TEMP
+	</select>
+	
+	<!-- 获取日有效率 -->
+	<select id="getDayEffectiveRate" resultMap="effectiveRateResultMap">
+		SELECT
+			@rownum:=@rownum+1 as er_id,
+			SUM(ter.all_count) AS all_count,
+			SUM(ter.er_count) AS er_count,
+			CASE WHEN SUM(ter.all_count) > 0 THEN SUM(ter.er_count)/SUM(ter.all_count) ELSE 0 END AS effective_rate,
+			td.device_code,
+			td.device_name,
+			DATE(ter.effective_time) AS effective_time
+		FROM
+			(SELECT @rownum:=0) r,tbl_effective_rate ter
+		INNER JOIN tbl_device td ON ter.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND ter.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY ter.device_code,DATE(ter.effective_time)
+		ORDER BY ter.effective_time ASC,ter.effective_time DESC,ter.device_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取月有效率个数 -->
+	<select id="getMonthEffectiveRateCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT
+				@rownum:=@rownum+1 as er_id,
+				SUM(ter.all_count) AS all_count,
+				SUM(ter.er_count) AS er_count,
+				CASE WHEN SUM(ter.all_count) > 0 THEN SUM(ter.er_count)/SUM(ter.all_count) ELSE 0 END AS effective_rate,
+				td.device_code,
+				td.device_name,
+				CONCAT(YEAR(ter.effective_time),"-",LPAD(MONTH(ter.effective_time),2,0)) AS effective_time
+			FROM
+				(SELECT @rownum:=0) r,tbl_effective_rate ter
+			INNER JOIN tbl_device td ON ter.device_code = td.device_code
+			WHERE
+				TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+			AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+			<if test="deviceCodeList.size()>0">
+				AND ter.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY ter.device_code,YEAR(ter.effective_time),MONTH(ter.effective_time)
+			ORDER BY ter.effective_time ASC,ter.effective_time DESC,ter.device_code ASC
+		) AS TEMP
+	</select>
+	
+	<!-- 获取月有效率 -->
+	<select id="getMonthEffectiveRate" resultMap="effectiveRateResultMap">
+		SELECT
+			@rownum:=@rownum+1 as er_id,
+			SUM(ter.all_count) AS all_count,
+			SUM(ter.er_count) AS er_count,
+			CASE WHEN SUM(ter.all_count) > 0 THEN SUM(ter.er_count)/SUM(ter.all_count) ELSE 0 END AS effective_rate,
+			td.device_code,
+			td.device_name,
+			CONCAT(YEAR(ter.effective_time),"-",LPAD(MONTH(ter.effective_time),2,0)) AS effective_time
+		FROM
+			(SELECT @rownum:=0) r,tbl_effective_rate ter
+		INNER JOIN tbl_device td ON ter.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND ter.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY ter.device_code,YEAR(ter.effective_time),MONTH(ter.effective_time)
+		ORDER BY ter.effective_time ASC,ter.effective_time DESC,ter.device_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取年有效率个数 -->
+	<select id="getYearEffectiveRateCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT
+				@rownum:=@rownum+1 as er_id,
+				SUM(ter.all_count) AS all_count,
+				SUM(ter.er_count) AS er_count,
+				CASE WHEN SUM(ter.all_count) > 0 THEN SUM(ter.er_count)/SUM(ter.all_count) ELSE 0 END AS effective_rate,
+				td.device_code,
+				td.device_name,
+				YEAR(ter.effective_time) AS effective_time
+			FROM
+				(SELECT @rownum:=0) r,tbl_effective_rate ter
+			INNER JOIN tbl_device td ON ter.device_code = td.device_code
+			WHERE
+				TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+			AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+			<if test="deviceCodeList.size()>0">
+				AND ter.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY ter.device_code,YEAR(ter.effective_time)
+			ORDER BY ter.effective_time ASC,ter.effective_time DESC,ter.device_code ASC
+		) AS TEMP
+	</select>
+	
+	<!-- 获取年有效率 -->
+	<select id="getYearEffectiveRate" resultMap="effectiveRateResultMap">
+		SELECT
+			@rownum:=@rownum+1 as er_id,
+			SUM(ter.all_count) AS all_count,
+			SUM(ter.er_count) AS er_count,
+			CASE WHEN SUM(ter.all_count) > 0 THEN SUM(ter.er_count)/SUM(ter.all_count) ELSE 0 END AS effective_rate,
+			td.device_code,
+			td.device_name,
+			YEAR(ter.effective_time) AS effective_time
+		FROM
+			(SELECT @rownum:=0) r,tbl_effective_rate ter
+		INNER JOIN tbl_device td ON ter.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},ter.effective_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,ter.effective_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND ter.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY ter.device_code,YEAR(ter.effective_time)
+		ORDER BY ter.effective_time ASC,ter.effective_time DESC,ter.device_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+</mapper>

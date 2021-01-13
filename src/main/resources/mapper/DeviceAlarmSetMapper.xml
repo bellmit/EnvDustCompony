@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IDeviceAlarmSetDao">
+
+	<resultMap type="com.tcb.env.pojo.DeviceAlarmSet" id="deviceAlarmSetResultMap">
+		<id property="dasId" column="das_id" />
+		<result property="maxValue" column="max_value" />
+		<result property="minValue" column="min_value" />
+		<result property="dataFlag" column="data_flag" />
+		<result property="levelNo" column="level_no" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联表 -->
+		<association property="device" javaType="com.tcb.env.pojo.Device"
+			resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+		<association property="monitor" javaType="com.tcb.env.pojo.Monitor"
+			resultMap="com.tcb.env.dao.IMonitorDao.monitorResultMap"></association>
+		<association property="commMain" javaType="com.tcb.env.pojo.CommMain"
+			resultMap="com.tcb.env.dao.ICommMainDao.commMainResultMap"></association>
+		<association property="deviceProject" javaType="com.tcb.env.pojo.DeviceProject"
+					 resultMap="com.tcb.env.dao.IDeviceProjectDao.deviceProjectResultMap"></association>
+	</resultMap>
+
+	<!-- 报警门限是否存在 -->
+	<select id="exitDeviceAlarmSet" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_device_alarmset tda
+		WHERE 1=1
+		<if test="deviceAlarmSet.device.deviceCode != null and deviceAlarmSet.device.deviceCode != ''">
+			AND tda.device_code = #{deviceAlarmSet.device.deviceCode,jdbcType=VARCHAR}
+		</if>
+		<if test="deviceAlarmSet.monitor.thingCode != null and deviceAlarmSet.monitor.thingCode != ''">
+			AND tda.thing_code = #{deviceAlarmSet.monitor.thingCode,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!-- 获取报警门限CommId -->
+	<select id="getAlarmMainCommId" resultType="java.lang.String">
+		SELECT
+			DISTINCT tcm.comm_id
+		FROM
+			tbl_device_alarmset tda
+			INNER JOIN tbl_comm_main tcm ON tda.comm_qn = tcm.qn
+		WHERE 1=1
+		<if test="deviceCode != null and deviceCode != ''">
+			AND tda.device_code = #{deviceCode,jdbcType=VARCHAR}
+		</if>
+		<if test="thingCode != null and thingCode != ''">
+			AND tda.thing_code = #{thingCode,jdbcType=VARCHAR}
+		</if>
+		<if test="cnCode != null and cnCode != ''">
+			AND tcm.cn = #{cnCode,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!-- 查询设备报警门限信息个数 -->
+	<select id="getDeviceAlarmSetCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_device_alarmset tda
+		INNER JOIN tbl_device td 		ON tda.device_code = td.device_code
+		INNER JOIN tbl_monitor tm 		ON tda.thing_code = tm.thing_code
+		LEFT JOIN tbl_comm_main tcm 	ON tda.comm_qn = tcm.qn
+		LEFT JOIN tbl_comm_status tcs 	ON tcm.status_id = tcs.status_id
+		LEFT JOIN tbl_comm_cn tcc   	ON tcm.cn = tcc.cn_code
+		LEFT JOIN tbl_area ta   		ON td.area_id = ta.area_id
+		WHERE
+			1 = 1
+		<if test="deviceAlarmSet.device.deviceName != null and deviceAlarmSet.device.deviceName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{deviceAlarmSet.device.deviceName},'%'))
+		</if>
+		<if test="listDeviceCode.size()>0">
+			AND td.device_code IN
+			<foreach collection="listDeviceCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listDeviceCode.size()==0">
+			AND td.device_code IS NULL
+		</if>
+		<if test="listThingCode.size()>0">
+			AND tm.thing_code IN
+			<foreach collection="listThingCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listThingCode.size()==0">
+			AND tm.thing_code IS NULL
+		</if>
+		<if test="deviceAlarmSet.device != null and deviceAlarmSet.device.area != null and deviceAlarmSet.device.area.areaId != null and deviceAlarmSet.device.area.areaId > 0">
+			AND ta.area_id = #{deviceAlarmSet.device.area.areaId}
+		</if>
+	</select>
+
+	<!-- 查询设备报警门限信息 -->
+	<select id="getDeviceAlarmSet" resultMap="deviceAlarmSetResultMap">
+		SELECT
+			tda.das_id,
+			td.device_code,
+			td.device_mn,
+			td.device_name,
+			ta.area_id,
+			ta.area_name,
+			tm.thing_code,
+			tm.thing_name,
+			tda.max_value,
+			tda.min_value,
+			tda.data_flag,
+			tda.level_no,
+			tcm.qn,
+			tcm.excute_time,
+			tcs.status_id,
+			tcs.status_name,
+			tcc.cn_code,
+			tcc.cn_name,
+            tdp.project_id,
+            tdp.project_code,
+            tdp.project_name,
+            tdp.project_order,
+			tda.opt_user,
+			tda.opt_time
+		FROM
+			tbl_device_alarmset tda
+		INNER JOIN tbl_device td 		ON tda.device_code = td.device_code
+		INNER JOIN tbl_monitor tm 		ON tda.thing_code = tm.thing_code
+		LEFT JOIN tbl_comm_main tcm 	ON tda.comm_qn = tcm.qn
+		LEFT JOIN tbl_comm_status tcs 	ON tcm.status_id = tcs.status_id
+		LEFT JOIN tbl_comm_cn tcc 		ON tcm.cn = tcc.cn_code
+	 	LEFT JOIN tbl_area ta 			ON td.area_id = ta.area_id
+		LEFT JOIN tbl_device_project tdp ON td.project_id = tdp.project_id
+		WHERE
+			1 = 1
+		<if test="deviceAlarmSet.device.deviceName != null and deviceAlarmSet.device.deviceName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{deviceAlarmSet.device.deviceName},'%'))
+		</if>
+		<if test="listDeviceCode.size()>0">
+			AND td.device_code IN
+			<foreach collection="listDeviceCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listDeviceCode.size()==0">
+			AND td.device_code IS NULL
+		</if>
+		<if test="listThingCode.size()>0">
+			AND tm.thing_code IN
+			<foreach collection="listThingCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listThingCode.size()==0">
+			AND tm.thing_code IS NULL
+		</if>
+		<if test="deviceAlarmSet.device != null and deviceAlarmSet.device.area != null and deviceAlarmSet.device.area.areaId != null and deviceAlarmSet.device.area.areaId > 0">
+			AND ta.area_id = #{deviceAlarmSet.device.area.areaId}
+		</if>
+		<if test="deviceAlarmSet.rowCount != -1 and deviceAlarmSet.rowIndex != -1">
+			LIMIT #{deviceAlarmSet.rowIndex, jdbcType = INTEGER},#{deviceAlarmSet.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+
+	<!-- 插入设备报警门限信息 -->
+	<insert id="insertDeviceAlarmSet" parameterType="java.util.List">
+		INSERT INTO tbl_device_alarmset (
+			device_code,
+			thing_code,
+			max_value,
+			min_value,
+			data_flag,
+			level_no,
+			comm_qn,
+			opt_user
+		)
+		VALUES
+		<foreach collection="listDeviceAlarmSet" item="item" index="index" separator=",">
+			(#{item.device.deviceCode}
+			,#{item.monitor.thingCode}
+			,#{item.maxValue}
+			,#{item.minValue}
+			,#{item.dataFlag}
+			,#{item.levelNo}
+			,#{item.commMain.qn}
+			,#{item.optUser})
+		</foreach>
+	</insert>
+
+	<!-- 更新设备报警门限信息 -->
+	<update id="updateDeviceAlarmSet">
+		UPDATE tbl_device_alarmset
+		   SET max_value = #{deviceAlarmSet.maxValue}
+		   	   ,min_value = #{deviceAlarmSet.minValue}
+		   	   ,data_flag = #{item.dataFlag}
+		   	   ,comm_qn = #{deviceAlarmSet.commMain.qn}
+		   	   ,opt_user = #{deviceAlarmSet.optUser}
+		 WHERE device_code = #{deviceAlarmSet.device.deviceCode}
+		   AND thing_code = #{deviceAlarmSet.monitor.thingCode}
+	</update>
+
+	<!-- 删除报警门限信息 -->
+	<delete id="deleteDeviceAlarmSet">
+		DELETE
+		FROM
+			tbl_device_alarmset
+		<where>
+			<choose>
+				<when test="listDeviceAlarmSet.size()>0">
+					<foreach collection="listDeviceAlarmSet" item="item" separator=" or " index="index">
+						(
+							device_code = #{item.device.deviceCode} and thing_code = #{item.monitor.thingCode} and level_no = #{item.levelNo}
+						)
+					</foreach>
+				</when>
+				<otherwise>
+					device_code IS NULL
+					AND thing_code IS NULL
+				</otherwise>
+			</choose>
+		</where>
+<!--		<if test="listDeviceAlarmSet.size()>0">-->
+<!--			AND device_code IN-->
+<!--			<foreach collection="listDeviceAlarmSet" item="item"  open="(" separator="," close=")">-->
+<!--				#{item.device.deviceCode}-->
+<!--			</foreach>-->
+<!--			AND thing_code IN-->
+<!--			<foreach collection="listDeviceAlarmSet" item="item"  open="(" separator="," close=")">-->
+<!--				#{item.monitor.thingCode}-->
+<!--			</foreach>-->
+<!--		</if>-->
+<!--		<if test="listDeviceAlarmSet.size()==0">-->
+<!--			AND device_code IS NULL-->
+<!--			AND thing_code IS NUL-->
+<!--		</if>-->
+	</delete>
+
+	<!-- 获取单个报警门限信息（设备编码和监测物编码） -->
+	<select id="getDeviceAlarmSetSingle" resultMap="deviceAlarmSetResultMap">
+		SELECT DISTINCT
+			tda.das_id,
+			td.device_code,
+			td.device_mn,
+			td.device_name,
+			tm.thing_code,
+			tm.thing_name,
+			tda.max_value,
+			tda.min_value,
+			tda.data_flag,
+			tda.level_no,
+			tcm.qn,
+			tcm.excute_time,
+			tcs.status_id,
+			tcs.status_name,
+            tdp.project_id,
+            tdp.project_code,
+            tdp.project_name,
+            tdp.project_order,
+			tda.opt_user,
+			tda.opt_time
+		FROM
+			tbl_device_alarmset tda
+		INNER JOIN tbl_device td ON tda.device_code = td.device_code
+		INNER JOIN tbl_monitor tm ON tda.thing_code = tm.thing_code
+		LEFT JOIN tbl_comm_main tcm ON tda.comm_qn = tcm.qn
+		LEFT JOIN tbl_comm_status tcs ON tcm.status_id = tcs.status_id
+        LEFT JOIN tbl_device_project tdp ON td.project_id = tdp.project_id
+		WHERE
+			1 = 1
+		AND td.device_code = #{deviceCode,jdbcType=VARCHAR}
+		<choose>
+			<when test="thingCodeList != null and thingCodeList.size()>0">
+				AND tm.thing_code IN
+			<foreach collection="thingCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			</when>
+			<otherwise>
+				AND tm.thing_code IS NULL
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 获取关联计划主表的Id -->
+	<select id="getCommMainIdByDasId" resultMap="com.tcb.env.dao.ICommMainDao.commMainResultMap">
+		SELECT
+			tcm.comm_id
+		FROM
+			tbl_comm_main tcm
+		INNER JOIN tbl_device_alarmset tda ON tcm.qn = tda.comm_qn
+		WHERE 1=1
+		<if test="listDasId.size()>0">
+			AND tda.das_id IN
+			<foreach collection="listDasId" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listDasId.size()==0">
+			AND tda.das_id IS NULL
+		</if>
+	</select>
+
+	<!-- 删除报警门限信息 -->
+	<delete id="deleteDeviceAlarmSetByDasId" parameterType="java.util.List">
+		DELETE
+		FROM
+			tbl_device_alarmset
+		WHERE 1=1
+		<if test="listDasId.size()>0">
+			AND das_id IN
+			<foreach collection="listDasId" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listDasId.size()==0">
+			AND das_id IS NULL
+		</if>
+	</delete>
+
+</mapper>

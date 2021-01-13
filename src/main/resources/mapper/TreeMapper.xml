@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ITreeDao">
+
+	<resultMap type="com.tcb.env.model.TreeModel" id="areatreeResultMap">
+		<id property="id" column="area_id" />
+		<result property="text" column="area_name" />
+		<result property="iconCls" column="level_icon" />
+		<result property="levelFlag" column="level_flag" />
+		<result property="checked" column="device_checked" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="devtreeResultMap">
+		<id property="id" column="device_code" />
+		<result property="text" column="device_name" />
+		<result property="state" column="status_code" />
+		<result property="checked" column="device_checked" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="montreeResultMap">
+		<id property="id" column="thing_code" />
+		<result property="text" column="thing_name" />
+		<result property="checked" column="monitor_checked" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="ahrTreeResultMap">
+		<id property="id" column="authority_code" />
+		<result property="text" column="authority_name" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="userAhrTreeResultMap">
+		<id property="id" column="user_code" />
+		<result property="text" column="user_name" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="modtreeResultMap">
+		<id property="id" column="module_id" />
+		<result property="text" column="module_remark" />
+		<result property="levelFlag" column="level_flag" />
+		<result property="checked" column="module_checked" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="pagetreeResultMap">
+		<id property="id" column="page_id" />
+		<result property="text" column="page_remark" />
+		<result property="levelFlag" column="level_flag" />
+		<result property="checked" column="page_checked" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.TreeModel" id="controltreeResultMap">
+		<id property="id" column="control_id" />
+		<result property="text" column="control_remark" />
+		<result property="levelFlag" column="level_flag" />
+		<result property="checked" column="control_checked" />
+	</resultMap>
+	
+	<!-- 获取子类区域数据 -->
+	<select id="getAreaChildrenTree" resultMap="areatreeResultMap">
+		SELECT
+		tbl_area.area_id,tbl_area.area_name,tbl_area_level.level_icon,tbl_area_level.level_flag
+		FROM tbl_area,tbl_area_level
+		WHERE
+		tbl_area.level_id =
+		tbl_area_level.level_id
+		<if test="parentid != null and parentid != ''">
+			AND tbl_area.parent_id = #{parentid}
+		</if>
+		<if test="parentid == null or parentid == ''">
+			AND tbl_area.parent_id IS NULL
+		</if>
+		<if test="manuName != null and levelFlag == 4">
+			AND tbl_area.area_name LIKE CONCAT('%',CONCAT(#{manuName,jdbcType = VARCHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 获取子节点个数 -->
+	<select id="getSubItemCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM tbl_area
+		WHERE 1=1
+		<if test="parentid != null and parentid != ''">
+			AND tbl_area.parent_id = #{parentid}
+		</if>
+		<if test="parentid == null or parentid == ''">
+			AND tbl_area.parent_id IS NULL
+		</if>
+	</select>
+	
+	<!-- 获取用户区域权限设备数量 -->
+	<select id="getAuthorityDeviceCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device TD,
+					tbl_user_ahr TUH
+				WHERE
+					TD.authority_code = TUH.authority_code
+				AND TUH.user_code = #{usercode,jdbcType = VARCHAR}
+			)
+		<if test="projectid != null and projectid != ''">
+			AND tbl_device.project_id = #{projectid,jdbcType = VARCHAR}
+		</if>
+		<if test="areaid != -1">
+			AND tbl_device.area_id IN (#{areaid,jdbcType = INTEGER})
+		</if>
+		<if test="devicename != null and devicename != ''">
+			AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{devicename,jdbcType = VARCHAR},'%'))
+		</if>
+		<if test="status != null and status != '' ">
+			<choose>
+				<when test="status == 'other'">
+					AND tbl_device.status_code NOT IN ('N','NT','Z','O')
+				</when>
+				<otherwise>
+					AND tbl_device.status_code = #{statusCode}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="nostatus != null and nostatus != ''">
+			AND tbl_device.status_code != #{nostatus,jdbcType = VARCHAR}
+		</if>
+	</select>
+	
+	<!-- 获取用户区域权限设备信息 -->
+	<select id="getAuthorityDevice" resultMap="devtreeResultMap">
+		SELECT
+			tbl_device.device_code,tbl_device.device_name,
+			tbl_device.status_code
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device TD,
+					tbl_user_ahr TUH
+				WHERE
+					TD.authority_code = TUH.authority_code
+				AND TUH.user_code = #{usercode,jdbcType = VARCHAR}
+			)
+		<if test="projectid != null and projectid != ''">
+			AND tbl_device.project_id = #{projectid}
+		</if>
+		<if test="areaid != -1">
+			AND tbl_device.area_id IN (#{areaid,jdbcType = INTEGER})
+		</if>
+		<if test="devicename != null and devicename != ''">
+			AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{devicename,jdbcType = VARCHAR},'%'))
+		</if>
+		<if test="status != null and status != '' ">
+			<choose>
+				<when test="status == 'other'">
+					AND tbl_device.status_code NOT IN ('N','NT','Z','O')
+				</when>
+				<otherwise>
+					AND tbl_device.status_code = #{status}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="nostatus != null and nostatus != ''">
+			AND tbl_device.status_code != #{nostatus,jdbcType = VARCHAR}
+		</if>
+		ORDER BY tbl_device.area_id
+	</select>
+	<select id="getAllAreaDevices" resultMap="devtreeResultMap">
+		SELECT
+			tbl_device.device_code,tbl_device.device_name,
+			tbl_device.status_code
+		FROM
+			tbl_device
+		WHERE
+		tbl_device.status_code in ("N","NT")
+	</select>
+	
+	<!-- 获取用户区域权限设备数量(通过权限组编码) -->
+	<select id="getAuthorityDeviceCountByAhrCode" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device TD
+				WHERE
+					TD.authority_code = #{ahrCode,jdbcType = VARCHAR}
+			)
+		<if test="areaid != -1">
+			AND tbl_device.area_id IN (#{areaid,jdbcType = INTEGER})
+		</if>
+		<if test="devicename != null and devicename != ''">
+			AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{devicename,jdbcType = VARCHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 获取用户区域权限设备信息(通过权限组编码) -->
+	<select id="getAuthorityDeviceByAhrCode" resultMap="devtreeResultMap">
+		SELECT
+			tbl_device.device_code,tbl_device.device_name,
+			tbl_device.status_code
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device TD
+				WHERE
+					TD.authority_code = #{ahrCode,jdbcType = VARCHAR}
+			)
+		<if test="areaid != -1">
+			AND tbl_device.area_id IN (#{areaid,jdbcType = INTEGER})
+		</if>
+		<if test="devicename != null and devicename != ''">
+			AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{devicename,jdbcType = VARCHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 获取所有设备信息(数量) -->
+	<select id="getAllDeviceCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_device
+		LEFT JOIN tbl_access_device ON tbl_device.device_code = tbl_access_device.device_code
+		AND tbl_access_device.device_code IN (
+			SELECT
+				device_code
+			FROM
+				tbl_access_device TD,
+				tbl_authority TA
+			WHERE
+				TD.authority_code = TA.authority_code
+			AND TA.authority_code =  #{ahrcode,jdbcType = VARCHAR}
+		)
+		WHERE 1=1
+		<if test="areaid != -1">
+			AND tbl_device.area_id IN (#{areaid,jdbcType = INTEGER})
+		</if>
+		<if test="devicename != null and devicename != ''">
+			AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{devicename,jdbcType = VARCHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 获取所有设备信息 -->
+	<select id="getAllDevice" resultMap="devtreeResultMap">
+		SELECT
+			DISTINCT(tbl_device.device_code),
+			tbl_device.device_name,
+			CASE
+		WHEN tbl_access_device.device_code IS NULL THEN
+			'false'
+		ELSE
+			'true'
+		END AS device_checked
+		FROM
+			tbl_device
+		LEFT JOIN tbl_access_device ON tbl_device.device_code = tbl_access_device.device_code
+		AND tbl_access_device.device_code IN (
+			SELECT
+				device_code
+			FROM
+				tbl_access_device TD,
+				tbl_authority TA
+			WHERE
+				TD.authority_code = TA.authority_code
+			AND TA.authority_code =  #{ahrcode,jdbcType = VARCHAR}
+		)
+		WHERE 1=1
+		<if test="areaid != -1">
+			AND tbl_device.area_id IN (#{areaid,jdbcType = INTEGER})
+		</if>
+		<if test="devicename != null and devicename != ''">
+			AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{devicename,jdbcType = VARCHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 获取所有监测物信息 -->
+	<select id="getAllMonitor" resultMap="montreeResultMap">
+		SELECT
+			DISTINCT(tbl_monitor.thing_code),
+			tbl_monitor.thing_name,
+			CASE
+		WHEN tbl_access_monitor.thing_code IS NULL THEN
+			'false'
+		ELSE
+			'true'
+		END AS monitor_checked
+		FROM
+			tbl_monitor
+		LEFT JOIN tbl_access_monitor ON tbl_monitor.thing_code = tbl_access_monitor.thing_code
+		AND tbl_access_monitor.thing_code IN (
+			SELECT
+				thing_code
+			FROM
+				tbl_access_monitor TAM,
+				tbl_authority TA
+			WHERE
+				TAM.authority_code = TA.authority_code
+			AND TA.authority_code =  #{ahrcode,jdbcType = VARCHAR}
+		)
+	</select>
+	
+	<!-- 查询所有权限组数据 -->
+	<select id="getAllAuthority" resultMap="ahrTreeResultMap">
+		SELECT
+			TA.authority_code,
+			TA.authority_name
+		FROM
+			tbl_authority TA
+		WHERE
+			1 = 1
+		<if test="ahrcode != null and ahrcode != ''">
+			AND TA.authority_code = #{ahrcode,jdbcType = VARCHAR}
+		</if>
+	</select>
+	
+	<!-- 查询权限在组用户数据 -->
+	<select id="getUserByAhrCode" resultMap="userAhrTreeResultMap">
+		SELECT
+			TU.user_code,
+			TU.user_name
+		FROM
+			tbl_user_ahr TUA,
+			tbl_user TU
+		WHERE
+			TUA.user_code = TU.user_code
+			AND TUA.authority_code = #{ahrcode,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 获取所有系统模块 -->
+	<select id="getModule" resultMap="modtreeResultMap">
+		SELECT
+			TM.module_id,
+			TM.module_remark,
+			1 AS level_flag,
+			CASE
+			WHEN TAD.authority_code IS NULL THEN
+				'false'
+			WHEN TAD.check_status = 'checked' THEN
+				'true'
+			ELSE
+				'false'
+			END AS module_checked
+		FROM
+			tbl_module TM
+		LEFT JOIN tbl_authority_detail TAD ON TM.module_id = TAD.control_id
+		AND TAD.level_id = 1
+		AND TAD.authority_code =  #{ahrcode,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 获取模块下所有页面 -->
+	<select id="getPage" resultMap="pagetreeResultMap">
+		SELECT
+			TP.page_id,
+			TP.page_remark,
+			2 AS level_flag,
+			CASE
+			WHEN TAD.authority_code IS NULL THEN
+				'false'
+			WHEN TAD.check_status = 'checked' THEN
+				'true'
+			ELSE
+				'false'
+			END AS page_checked
+		FROM
+			tbl_page TP
+		INNER JOIN tbl_module TM ON TP.module_id = TM.module_id
+		LEFT JOIN tbl_authority_detail TAD ON TP.page_id = TAD.control_id
+		AND TAD.level_id = 2
+		AND TAD.authority_code = #{ahrcode,jdbcType = VARCHAR}
+		WHERE 1=1
+		AND TM.module_id = #{moduleid,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 获取页面下所有控件 -->
+	<select id="getControl" resultMap="controltreeResultMap">
+		SELECT
+			TC.control_id,
+			TC.control_remark,
+			3 AS level_flag,
+			CASE
+			WHEN TAD.authority_code IS NULL THEN
+				'false'
+			WHEN TAD.check_status = 'checked' THEN
+				'true'
+			ELSE
+				'false'
+			END AS control_checked
+		FROM
+			tbl_control TC
+		INNER JOIN tbl_page TP ON TC.page_id = TP.page_id
+		LEFT JOIN tbl_authority_detail TAD ON TC.control_id = TAD.control_id
+		AND TAD.level_id = 3
+		AND TAD.authority_code = #{ahrcode,jdbcType = VARCHAR}
+		WHERE
+			1 = 1
+		AND TP.page_id = #{pageid,jdbcType = VARCHAR}
+	</select>
+
+	<!-- 获取在线设备第一个 -->
+	<select id="getDeviceFirst" resultMap="devtreeResultMap">
+		SELECT DISTINCT
+			td.device_code,
+			td.device_name,
+			td.status_code
+		FROM
+			tbl_device td
+		WHERE td.device_code IN
+							(
+								SELECT
+									device_code
+								FROM
+									tbl_access_device TD,
+									tbl_user_ahr TUH
+								WHERE TD.authority_code = TUH.authority_code
+								AND TUH.user_code = #{userCode,jdbcType = VARCHAR}
+							)
+		<if test="statusCodeList != null and statusCodeList.size()>0">
+			AND td.status_code IN
+			<foreach collection="statusCodeList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="deviceName != null and deviceName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{deviceName,jdbcType = VARCHAR},'%'))
+		</if>
+		LIMIT 0,1
+	</select>
+	
+</mapper>

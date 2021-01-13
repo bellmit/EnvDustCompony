@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IAccessMonitorDao">
+	
+	<!-- 添加权限组监测物 -->
+	<insert id="insertAccessMonitor" parameterType="java.lang.Integer">
+		INSERT INTO tbl_access_monitor(
+			authority_code,
+			thing_code,
+			opt_user)
+		VALUES
+		<foreach collection="listMonCode" item="item" index="index" separator=",">
+			(#{ahrCode},
+			#{item},
+			#{optUser})
+		</foreach>
+	</insert>
+
+	<!-- 删除权限组监测物 -->
+	<delete id="deleteAccessMonitor">
+		DELETE FROM tbl_access_monitor
+		WHERE tbl_access_monitor.authority_code IN
+		<foreach collection="listAhrCode" item="item"  open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

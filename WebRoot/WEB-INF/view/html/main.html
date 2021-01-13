@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate"/>
+    <meta http-equiv="Expires" content="0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"/>
+    <link href="../styles/barstyle.css" rel="stylesheet">
+    <link rel="stylesheet" href="../javascript/util/css/bmap.css"/>
+    <title></title>
+    <style>
+        * {
+            touch-action: none;
+        }
+
+        body, html, #allmap {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        a img {
+            border: none
+        }
+
+        #searchmapaddrText {
+            width: 368px;
+            background: #F5F5F5;
+            box-sizing: border-box;
+            box-shadow: 0px 0px 5px 2px #ccc;
+            border: 1px;
+
+            padding: 5px 0 !important;
+            padding: 9px 0;
+            border-left: 10px solid transparent;
+            border-right: 27px solid transparent;
+            line-height: 20px;
+            font-size: 16px;
+            height: 30px;
+            color: #333;
+            position: relative;
+            border-radius: 2px 0 0 2px;
+            float: left;
+        }
+
+        #searchmapaddrBtn {
+            pointer-events: auto;
+            background: url(http://webmap0.map.bdstatic.com/wolfman/static/common/images/new/searchbox_f175577.png) no-repeat 0 -80px #3385ff;
+            width: 57px;
+            height: 30px;
+            border: 0;
+            padding: 9px 0px;
+            cursor: pointer;
+            border-radius: 0 2px 2px 0;
+            box-shadow: 1px 2px 1px rgba(0, 0, 0, .15);
+        }
+
+        .clear {
+            display: none;
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin-left: -20px;
+            margin-top: 8px;
+            background: url(http://webmap0.map.bdstatic.com/wolfman/static/common/images/new/searchbox_f175577.png) no-repeat -10px -50px;
+            outline: none;
+        }
+
+        .input::-ms-clear {
+            display: none;
+        }
+
+        .input:valid + .clear {
+            display: inline;
+        }
+
+        #r-result {
+            height: 60%;
+            width: 370px;
+        }
+
+        .testIMG {
+            float: left;
+            display: inline;
+            margin-top: 0;
+            margin-left: 5px;
+        }
+
+        .testTXT {
+            float: left;
+            display: inline;
+            margin-top: 8px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        ul, li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .layui-input, .layui-select, .layui-textarea {
+            height: 33px;
+            line-height: 1.3;
+            line-height: 38px \9;
+            border-width: 1px;
+            border-style: solid;
+            background-color: #fff;
+            border-radius: 2px;
+            width: 270px;
+            padding-left: 10px;
+        }
+
+        #video {
+            position: fixed;
+            z-index: 99999;
+            width: 1024px;
+            height: 560px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            top: 10%;
+            bottom: 10%;
+            left: -1200px;
+            margin: auto;
+            background-color: #fff;
+            border: 2px solid #D3D3D3;
+            /*box-shadow: 5px 5px 15px 5px #888888;*/
+            border-radius: 5px 5px 5px 5px;
+        }
+
+        .ptz .btn2 {
+            width: 60px;
+            height: 22px;
+            line-height: 18px;
+        }
+
+        .anchorBL {
+            display: none;
+        }
+
+        .datagrid-row {
+            height: 32px;
+        }
+    </style>
+
+    <link id="easyuiTheme" rel="stylesheet" type="text/css"
+          href="../javascript/jquery-easyui-1.4.4/themes/blue/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../javascript/jquery-easyui-1.4.4/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../styles/style.css">
+    <link rel="stylesheet" type="text/css" href="../javascript/jquery-easyui-1.4.4/themes/color.css">
+    <link rel="stylesheet" href="../styles/TimeCircles.css"/>
+    <link rel="stylesheet" href="../javascript/btzero_7_Director/bigscreen/loading.css">
+    <link rel="stylesheet" href="../javascript/video/demo.css">
+</head>
+<body class="easyui-layout">
+<div class="head-v3" style="margin-top:0px;">
+    <div class="right">
+        <a href="javascript:void(0)" id="mb" class="easyui-menubutton"
+           data-options="menu:'#mm',iconCls:'icon-user',size:'large',iconAlign:'left'" style="margin-top:5px;"></a>
+        <div id="mm" class="menu-content" style="width:190px;background:white;font-size:14px;">
+
+            <div style="margin:5px;height:26px;clear:both;display:block;float:left;font-size:14px;">
+                <span style="color:#287dd7;float:left;margin-top:5px;">主题：</span>
+                <a href="#" class="easyui-linkbutton" data-options="plain:true"
+                   onclick="checkRadio(2)" style="color:#287dd7;float:left;margin-right:6px;">蓝色</a>
+            </div>
+            <div style="margin:5px 0px 2px;height:26px;display:block;float:left;font-size:14px;">
+                <a href="#" class="easyui-linkbutton" data-options="plain:true"
+                   onclick="checkRadio(0)" style="color:#19a97b;margin-right:6px;">浅绿</a>
+            </div>
+            <div style="margin:5px 0px 2px;height:26px;display:block;float:left;font-size:14px;">
+                <a href="#" class="easyui-linkbutton" data-options="plain:true"
+                   onclick="checkRadio(3)" style="color:#d14233;margin-right:3px;">红色</a>
+            </div>
+            <div style="margin:5px;height:1px;clear:both;display:block;float:left;font-size:14px;border-top:1px solid #ccc;width:100%;"></div>
+            <div style="margin:5px;height:26px;display:block;float:left;font-size:14px;">
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-lock',plain:true"
+                   onclick="$.getScript('../javascript/menu/system/modifyPWD.js');" style="float:right;color:#287dd7">修改密码</a>
+            </div>
+            <div style="margin:5px;height:26px;clear:both;display:block;float:left;font-size:14px;">
+                <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-exitlogout',plain:true"
+                   onclick="mainlogOutFunc()" style="float:right;color:#287dd7">安全退出</a>
+            </div>
+
+        </div>
+    </div>
+    <!-- 天气信息 -->
+    <div class="right">
+        <div id="tp-weather-widget" style="margin-top:10px;"></div>
+        <script>(function (T, h, i, n, k, P, a, g, e) {
+            g = function () {
+                P = h.createElement(i);
+                a = h.getElementsByTagName(i)[0];
+                P.src = k;
+                P.charset = "utf-8";
+                P.async = 1;
+                a.parentNode.insertBefore(P, a)
+            };
+            T["ThinkPageWeatherWidgetObject"] = n;
+            T[n] || (T[n] = function () {
+                (T[n].q = T[n].q || []).push(arguments)
+            });
+            T[n].l = +new Date();
+            if (T.attachEvent) {
+                T.attachEvent("onload", g)
+            } else {
+                T.addEventListener("load", g, false)
+            }
+        }(window, document, "script", "tpwidget", "//widget.seniverse.com/widget/chameleon.js"))</script>
+        <script>tpwidget("init", {
+            "flavor": "slim",
+            "location": "WWGQDCW6TBW1",
+            "geolocation": "enabled",
+            "language": "zh-chs",
+            "unit": "c",
+            "theme": "chameleon",
+            "container": "tp-weather-widget",
+            "bubble": "enabled",
+            "alarmType": "badge",
+            "color": "#FFFFFF",
+            "uid": "U37E8327BB",
+            "hash": "ac3fb8b251440dd11ff217d5b42ed9e4"
+        });
+        tpwidget("show");</script>
+    </div>
+    <div class="navigation-up" style="overflow:hidden;">
+        <div class="navigation-inner">
+            <div class="navigation-v3" style="float:left;">
+                <ul>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="navigation-down">
+    </div>
+</div>
+<div data-options="region:'north',border:false" style="height:50px;position:relative;background:#fff"
+     id="mynorth"></div>
+<div data-options="region:'west',split:true,title:'全部站点'" id="mywest"
+     style="width:250px;">
+    <div style="margin:4px 0px 3px 3px;">
+        <label>项目类型：</label><input id="deviceProjectId" style="width:150px;height:26px;">
+        <!--	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'"  onclick="searchTreeStation()">查询</a>-->
+        <!--	<input class="easyui-textbox" id="manufacturer" data-options="onClickButton:function(){searchStationFunc()},buttonText:'查询',buttonIcon:'icon-search',prompt:'企业站点名称...'" style="width:224px;height:24px;margin:5px 3px 3px 10px">-->
+        <input class="easyui-textbox" id="manufacturer"
+               data-options="onClickButton:function(){searchManuFunc()},buttonText:'查询',buttonIcon:'icon-search',prompt:'企业名称...'"
+               style="width:224px;height:24px;margin:5px 3px 3px 10px">
+    </div>
+    <div style="margin:7px 1px;;">
+        <ul class="easyui-tree" id="mytree"></ul>
+    </div>
+    <div style="display:none;text-align:center;" id="promptInfo"></div>
+</div>
+<div data-options="region:'south',border:false" style="height:40px;" id="mysouth">
+    <div style="float:left;margin-top:8px;">
+        <div style="float:left;"><img src="../javascript/jquery-easyui-1.4.4/themes/icons/alarm.png" alt="712logo"
+                                      id="logoimg"/></div>
+        <span style="vertical-align:middle; line-height:24px">
+			     <span id="alarminfos"></span>
+			     <span id="morebtn" style="display:none;"><label style="color:white;font-weight:bold;">…[</label>
+			     <a href="#" onclick="getMoreAlarm()" style="color:#E2BF22;font-size:14px;">更多</a><label
+                             style="color:white;font-weight:bold;">]</label></span>
+			</span>
+    </div>
+    <audio id="myaudio" muted src="">
+        <source src="" type="audio/mpeg">
+    </audio>
+    <div id="playvioceid" style="float:right;margin-top:8px;margin-right:5px;">
+        <a href="#" class="easyui-linkbutton" data-options="plain:true" onclick="closeSound()">
+            <img id="myImage" src="./../javascript/jquery-easyui-1.4.4/themes/icons/voicestop.png"
+                 style="margin-top:6px;">
+        </a>
+    </div>
+</div>
+<div data-options="region:'center'">
+    <div id="mytab" class="easyui-tabs" data-options="fit:true"></div>
+</div>
+<div id="dialogModel"></div>
+<div id="historyDialog"></div>
+<div id="dialogModifyPWD"></div>
+<div id="dialogVideo"></div>
+<div id="dialogVideoBall"></div>
+<div id="dialogVideoDaHua"></div>
+<div id="panelModel" class="easyui-panel" data-options="tools:'#tt',style:{position:'absolute',right:0,top:52}"></div>
+<div id="tt" span style="float:left;margin:7px;">
+    <div style="float: left;margin-right: 10px;">
+        <a href="javascript:void(0);" onclick="openHistoryDialog()" style="width:16px;height:16px;" title="历史数据">
+            <img src="../javascript/jquery-easyui-1.4.4/themes/icons/things.png"/>
+        </a>
+    </div>
+    <div style="float:left;margin-right:10px;margin-top: -2px;">
+        <input class="easyui-combobox" name="mainCnCodeCombox" id="mainCnCodeCombox" style="width:90px;"/>
+    </div>
+    <div style="float:left;margin-right:10px;" class="panel-tool-a" id="vedioId">
+        <a href="#" onclick="openMedia()" style="width:24px;height:24px;" title="监控摄像">
+            <img src="./../images/camera.png" style="height:24px;margin-top:-3px;">
+        </a>
+    </div>
+    <div style="float:left;margin-right:10px;display:none;" class="panel-tool-a" id="devStatusPic">
+        <a href="#" onclick="getGapPath()" style="width:24px;height:24px;" title="气路状态">
+            <img src="./../images/gasPath.png" style="height:24px;margin-top:-3px;">
+        </a>
+    </div>
+    <div style="float:left;">
+        <input type="checkbox" id="mapzVauleChekbox" onclick="conversionSearchData()"
+               style="vertical-align:middle; margin-top:0;"/>
+        <span style="vertical-align:middle; margin-top:0;" class="vauleCheckTitle"></span>
+    </div>
+</div>
+<input id="seletedMapDeviceCode" style="display:none;" value=""/>
+<input id="myTimeRange" style="display:none;" value=""/>
+<div id="video" style=" text-align:left;">
+    <div class="closeCtrl">
+        <a type="button" class="closeBtn" onclick="closeVideo();">
+            ×
+        </a>
+        <h4 class="modal-title" id="videoName">摄像头名称</h4>
+        <input type="text" id="videoIp" hidden="">
+    </div>
+    <div>
+        <div id="videoDiv" class="plugin" style="background:#343434;width:500px;"></div>
+        <table width=500px style="background:#9b9b9b;">
+            <tbody>
+            <tr height="34px"
+                style="background-image:url('./../images/camera/toolbar.png'); background-repeat:repeat-x">
+
+                <td align="left">
+                    <table cellpadding="0" cellspacing="0">
+                        <tbody>
+                        <tr style="display:inline;">
+                            <td width="35" align="center" id="videoPlayer" style="display:inline;"><img
+                                    src="./../images/camera/RealPlayAll.png" id="play" onclick="clickStartRealPlay()"
+                                    title="开始预览" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelRealPlayAll.png'"
+                                    onmouseout="this.src = './../images/camera/RealPlayAll.png'"></td>
+                            <td width="35" align="center" id="videoStopAll" style="display:inline;"><img
+                                    src="./../images/camera/StopAll.png" id="stop" onclick="  clickStopRealPlay()"
+                                    title="停止预览" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelStopAll.png'"
+                                    onmouseout="this.src = './../images/camera/StopAll.png'"></td>
+
+                            <td width="35" align="center" id="videoReturnPlayer" style="display:none;"><img
+                                    src="./../images/camera/reversePlay.png" id="reversePlay" name="reversePlay"
+                                    onclick="clickReversePlaybackFunc()" title="倒放" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/reversePlaySel.png'"
+                                    onmouseout="this.src = './../images/camera/reversePlay.png'"></td>
+                            <td width="35" align="center" id="videoResume" style="display:none;"><img
+                                    src="./../images/camera/Playback_play.png" id="resumePlay" name="resumePlay"
+                                    onclick="clickResumeFunc()" title="恢复" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/Playback_play.png'"
+                                    onmouseout="this.src = './../images/camera/Playback_play.png'"></td>
+                            <td width="35" align="center" id="videoPaussePlayer" style="display:none;"><img
+                                    src="./../images/camera/Playback_Pause.png" id="paussePlay" name="paussePlay"
+                                    onclick="clickPauseFunc()" title="暂停" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/Playback_SelPause.png'"
+                                    onmouseout="this.src = './../images/camera/Playback_Pause.png'"></td>
+                            <td width="35" align="center" id="videoHistoyPlayer" style="display:none;"><img
+                                    src="./../images/camera/RealPlayAll.png" id="playHistroy"
+                                    onclick="clickStartPlaybackFunc()" title="开始回放" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelRealPlayAll.png'"
+                                    onmouseout="this.src = './../images/camera/RealPlayAll.png'"></td>
+
+                            <td width="35" align="center" id="videoStopHistoyPlayer" style="display:none;"><img
+                                    src="./../images/camera/StopAll.png" id="stopHistroy"
+                                    onclick="clickStopPlaybackFunc()" title="停止回放" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelStopAll.png'"
+                                    onmouseout="this.src = './../images/camera/StopAll.png'"></td>
+
+                            <td width="35" align="center" id="videoPlaySlow" style="display:none;"><img
+                                    src="./../images/camera/Playback_SelSlowlyForward.png" id="slowPlay"
+                                    name="paussePlay" onclick="clickPlaySlow()" title="慢放" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/Playback_SelSlowlyForward.png'"
+                                    onmouseout="this.src = './../images/camera/Playback_SlowlyForward.png'"></td>
+                            <td width="35" align="center" id="videoPlayFastr" style="display:none;"><img
+                                    src="./../images/camera/Playback_FastForward.png" id="fastrPlay" name="fastrPlay"
+                                    onclick="clickPlayFast()" title="快放" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/Playback_SelFastForward.png'"
+                                    onmouseout="this.src = './../images/camera/Playback_FastForward.png'"></td>
+                            <td width="35" align="center" id="videoFrame" style="display:none;"><img
+                                    src="./../images/camera/Playback_NextFrame.png" id="framePlay" name="framePlay"
+                                    onclick="clickFrameFunc()" title="单帧" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/Playback_SelNextFrame.png'"
+                                    onmouseout="this.src = './../images/camera/Playback_NextFrame.png'"></td>
+                            <td width="35" align="center" id="videoCapture" style="display:inline;"><img
+                                    src="./../images/camera/Capture.png" id="capture" name="capture"
+                                    onclick="clickCapturePic()" title="抓图" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelCapture.png'"
+                                    onmouseout="this.src = './../images/camera/Capture.png'"></td>
+
+                            <td width="35" align="center" id="videoRecord" style="display:inline;"><img
+                                    src="./../images/camera/RecordAll.png" id="record" onclick="clickRecord()"
+                                    title="开始录像" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelRecordAll.png'"
+                                    onmouseout="this.src = './../images/camera/RecordAll.png'"></td>
+                            <td width="35" align="center" id="videoStopRecord" style="display:none;"><img
+                                    src="./../../images/camera/StopRecordAll.png" id="recordStop4GId"
+                                    onclick="clickRecord()" title="停止录像" style="cursor:pointer"
+                                    onmouseover="this.src = './../../images/camera/SelStopRecordAll.png'"
+                                    onmouseout="this.src = './../../images/camera/StopRecordAll.png'"/></td>
+                            <!--	<td width="35" align="center" id="videoCloseSound" style="display:inline;"><img src="./../images/camera/CloseSound.png" id="opensound" onclick="clickSound()" title="打开声音" style="cursor:pointer" onmouseover="this.src = './../images/camera/SelCloseSound.png'" onmouseout="this.src = './../images/camera/CloseSound.png'"></td>-->
+                            <td width="35" align="center" id="videoFullScreen" style="display:inline;"><img
+                                    src="./../images/camera/FullScreen.png" id="fullscreen" onclick="clickFullScreen()"
+                                    title="全屏" style="cursor:pointer"
+                                    onmouseover="this.src = './../images/camera/SelFullScreen.png'"
+                                    onmouseout="this.src = './../images/camera/FullScreen.png'"></td>
+                            <td width="35" align="center" id="videoTypeTd"
+                                style="display:inline;float:right;margin-left:10px;margin-top:3px;"><input
+                                    id="videoTypeCombox" class="easyui-combobox" style="width:80px;"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <fieldset class="operate">
+            <legend>操作信息</legend>
+            <div id="opinfo" class="opinfo"></div>
+        </fieldset>
+        <!--<fieldset class="callback">
+            <legend>事件回调信息</legend>
+            <div id="cbinfo" class="cbinfo"></div>
+        </fieldset>-->
+        <div id="cbinfo" class="cbinfo" style="display:none;"></div>
+    </div>
+    <div>
+        <fieldset class="login">
+            <legend>登录</legend>
+            <table cellpadding="0" cellspacing="3" border="0">
+                <tr>
+                    <td class="tt">登录设备</td>
+                    <td>
+                        <select id="ip" class="sel" onchange="getChannelInfo();"></select>
+                    </td>
+                    <td class="tt">通道列表</td>
+                    <td>
+                        <select id="channels" class="sel"></select>
+                    </td>
+                    <td class="tt">窗口数</td>
+                    <td>
+                        <select class="sel2" onchange="changeWndNum(this.value);">
+                            <option value="1">1x1</option>
+                            <option value="2" selected>2x2</option>
+                            <option value="3">3x3</option>
+                            <option value="4">4x4</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset class="ptz">
+            <legend>云台控制</legend>
+            <table cellpadding="0" cellspacing="3" border="0" class="left" style="margin-top:-20px;margin-left:-10px;">
+                <tbody>
+                <tr>
+                    <td>
+                        <table cellspacing="0" cellpadding="0" border="0"
+                               style="background:url('./../images/camera/bgcircle1.png') no-repeat;height:180px;width:180px;">
+                            <tbody style="float:left;margin-left:13px;margin-top:30px;">
+                            <tr height="40px;" style="float:left;margin-left:18px;margin-bottom:15px;width:143px;">
+                                <td style="float:left;margin-top:15px;width:48px;">
+                                    <img src="./../images/camera/left_up.png" id="ptzLeftUp" style="cursor:pointer"
+                                         onmouseover="this.src='./../images/camera/left_up.png'"
+                                         onmouseout="this.src='./../images/camera/left_up.png'"
+                                         onmousedown="mouseDownPTZControl(5);" onmouseup="mouseUpPTZControl();"></td>
+                                <td style="float:left;margin-top:-8px;width:48px;margin-left:0px;"><img
+                                        src="./../images/camera/up.png" id="ptzUp" style="cursor:pointer"
+                                        onmouseover="this.src='./../images/camera/up.png'"
+                                        onmouseout="this.src='./../images/camera/up.png'"
+                                        onmousedown="mouseDownPTZControl(1);" onmouseup="mouseUpPTZControl();"></td>
+                                <td style="float:left;margin-top:18px;margin-left:4px;"><img
+                                        src="./../images/camera/right_up.png" id="ptzRightUp" style="cursor:pointer"
+                                        onmouseover="this.src='./../images/camera/right_up.png'"
+                                        onmouseout="this.src='./../images/camera/right_up.png'"
+                                        onmousedown="mouseDownPTZControl(7);" onmouseup="mouseUpPTZControl();"></td>
+                            </tr>
+
+                            <tr style="float:left;margin-left:7px;margin-bottom:20px;width:169px;">
+                                <td style="float:left;margin-top:1px;width:57px;margin-left:3px;">
+                                    <img src="./../images/camera/left.png" id="ptzLeft" style="cursor:pointer"
+                                         onmouseover="this.src='./../images/camera/left.png'"
+                                         onmouseout="this.src='./../images/camera/left.png'"
+                                         onmousedown="mouseDownPTZControl(3);" onmouseup="mouseUpPTZControl();"></td>
+                                <td style="float:left;margin-top:-22px;margin-left:-18px;width:58px;">
+                                    <a><img src="./../images/camera/autoplay.png" id="ptzAuto" style="cursor:pointer"
+                                            onmouseover="this.src='./../images/camera/autoplay.png'"
+                                            onmouseout="this.src='./../images/camera/autoplay.png'"
+                                            onclick="mouseDownPTZControl(9);"></a></td>
+                                <td style="float:left;margin-left:20px;">
+                                    <img src="./../images/camera/right.png" id="ptzRight" style="cursor:pointer"
+                                         onmouseover="this.src='./../images/camera/right.png'"
+                                         onmouseout="this.src='./../images/camera/right.png'"
+                                         onmousedown="mouseDownPTZControl(4);"
+                                         onmouseup="mouseUpPTZControl();">
+                                </td>
+                            </tr>
+
+                            <tr style="float:left;margin-left:18px;width:143px;margin-top:-15px;">
+                                <td style="float:left;width:48px;margin-top:-2px;">
+                                    <img src="./../images/camera/left_down.png" id="ptzLeftDown" style="cursor:pointer"
+                                         onmouseover="this.src='./../images/camera/left_down.png'"
+                                         onmouseout="this.src='./../images/camera/left_down.png'"
+                                         onmousedown="mouseDownPTZControl(6);" onmouseup="mouseUpPTZControl();">
+                                </td>
+                                <td style="float:left;margin-top:16px;width:48px;margin-left:0px;">
+                                    <img
+                                            src="./../images/camera/down.png" id="ptzDown" style="cursor:pointer"
+                                            onmouseover="this.src='./../images/camera/down.png'"
+                                            onmouseout="this.src='./../images/camera/down.png'"
+                                            onmousedown="mouseDownPTZControl(2);" onmouseup="mouseUpPTZControl();">
+                                </td>
+                                <td style="float:left;margin-top:-4px;margin-left:0px;margin-top:-5px;">
+                                    <img
+                                            src="./../images/camera/right_down.png" id="ptzRightDown"
+                                            style="cursor:pointer"
+                                            onmouseover="this.src='./../images/camera/right_down.png'"
+                                            onmouseout="this.src='./../images/camera/right_down.png'"
+                                            onmousedown="mouseDownPTZControl(8);" onmouseup="mouseUpPTZControl();">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+
+                    <td>
+                        <table cellpadding="0" cellspacing="3" border="0" class="left"
+                               style="margin:10px 0px 0px 10px;">
+                            <tbody>
+                            <tr>
+                                <td class="tt">码流类型</td>
+                                <td>
+                                    <select id="streamtype" class="sel">
+                                        <option value="1">主码流</option>
+                                        <option value="2">子码流</option>
+                                        <option value="3">第三码流</option>
+                                        <option value="4">转码码流</option>
+                                    </select>
+                                </td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="tt">音量</td>
+                                <td colspan="2">
+                                    <input type="text" id="volume" class="txt" value="50" maxlength="3"
+                                           style="width:40px;">
+                                    &nbsp;
+                                    <input type="button" class="btn1" value="设置" onclick="clickSetVolume();">
+                                    （范围：0~100）
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="tt">预置点号</td>
+                                <td><input id="preset" type="text" class="txt" value="1"></td>
+                                <td>
+                                    <input type="button" class="btn1" value="设置" onclick="clickSetPreset();">
+                                    <input type="button" class="btn1" value="调用" onclick="clickGoPreset();">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>变倍</td>
+                                <td class="tt">
+                                    <input type="button" class="btn2" value="+" onmousedown="PTZZoomIn()"
+                                           onmouseup="PTZZoomStop()">
+                                </td>
+                                <td>
+                                    <input type="button" class="btn2" value="-" onmousedown="PTZZoomout()"
+                                           onmouseup="PTZZoomStop()" style="margin-left:35px; ">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>变焦</td>
+                                <td class="tt">
+                                    <input type="button" class="btn2" value="+" onmousedown="PTZFocusIn()"
+                                           onmouseup="PTZFoucusStop()">
+                                </td>
+                                <td>
+                                    <input type="button" class="btn2" value="-" onmousedown="PTZFoucusOut()"
+                                           onmouseup="PTZFoucusStop()" style="margin-left:35px; ">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>光圈</td>
+                                <td class="tt">
+                                    <input type="button" class="btn2" value="+" onmousedown="PTZIrisIn()"
+                                           onmouseup="PTZIrisStop()">
+                                </td>
+                                <td>
+                                    <input type="button" class="btn2" value="-" onmousedown="PTZIrisOut()"
+                                           onmouseup="PTZIrisStop()" style="margin-left:35px; ">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <table cellpadding="0" cellspacing="3" border="0" class="left">
+                <tr>
+                    <td class="tt">云台速度</td>
+                    <td>
+                        <div style="margin:-50px 0 50px 0;"></div>
+                        <input class="easyui-slider" style="width:300px" data-options="showTip:true,min:1,max:7,step:1">
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset class="playback">
+            <legend>回放</legend>
+            <table width="100%" cellpadding="0" cellspacing="3" border="0">
+                <tr>
+                    <td class="tt">开始时间</td>
+                    <td>
+                        <input id="startTime" type="text" class="txt" value="2013-12-10 00:00:00"/>（时间格式：2013-11-11
+                        12:34:56）
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tt">结束时间</td>
+                    <td>
+                        <input id="endTimes" type="text" class="txt" value="2013-12-11 23:59:59"/>
+                        <input type="button" class="btn1" value="搜索" onclick="clickRecordSearch(0);"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="searchdiv">
+                            <table id="searchlist" class="searchlist" cellpadding="0" cellspacing="0"
+                                   border="0"></table>
+                        </div>
+                    </td>
+                </tr>
+                <!--	<tr>
+                        <td colspan="2">
+                            <input type="button" class="btn12" value="开始回放" onclick="clickStartPlayback();"/>
+                            <input type="button" class="btn12" value="停止回放" onclick="clickStopPlayback();"/>
+                            <input type="button" class="btn1" value="倒放" onclick="clickReversePlayback();"/>
+                            <input type="button" class="btn1" value="单帧" onclick="clickFrame();"/>
+                            <input type="button" class="btn1" value="恢复" onclick="clickResume();"/>
+                            &lt;!&ndash;	<input id="transstream" type="checkbox" class="vtop"/>&nbsp;启用转码码流&ndash;&gt;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="button" class="btn1" value="暂停" onclick="clickPause();"/>
+                            <input type="button" class="btn1" value="慢放" onclick="clickPlaySlow();"/>
+                            <input type="button" class="btn1" value="快放" onclick="clickPlayFast();"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="button" class="btn1" value="抓图" onclick="clickCapturePic();"/>
+                            <input type="button" class="btn12" value="开始剪辑" onclick="clickStartRecord();"/>
+                            <input type="button" class="btn12" value="停止剪辑" onclick="clickStopRecord();"/>
+                            <input type="button" class="btn12" value="OSD时间" onclick="clickGetOSDTime();"/>&nbsp;<input
+                                id="osdtime" type="text" class="txt" readonly/>
+                        </td>
+                    </tr>-->
+            </table>
+        </fieldset>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/jquery.min.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/datagridTooltip.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/dgnodataExtend.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/datagridExtend.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/datagridContextMenu.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/jquery-PlayBar.min.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/TimeCircles.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/ajaxfileupload.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/changeEasyuiTheme.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../javascript/jquery-easyui-1.4.4/plugins/laydate/laydate.js"></script>
+<script type="text/javascript" src="../javascript/MyChart/echarts.min.js"></script>
+<!--<script type="text/javascript" src="../javascript/util/js/apiv2.0.min.js"></script>-->
+<!--<script type="text/javascript" src="../javascript/util/map_load.js"></script>-->
+<script type="text/javascript" src="../javascript/util/config.js"></script>
+<script type="text/javascript" src="../javascript/util/extendValid.js"></script>
+<script type="text/javascript" src="../javascript/util/treeNode.js"></script>
+<script type="text/javascript" src="../javascript/util/ctrl.js"></script>
+<script type="text/javascript" src="../javascript/util/tab.js"></script>
+<script type="text/javascript" src="../javascript/util/map.js"></script>
+<script type="text/javascript" src="../javascript/util/initData.js"></script>
+<script type="text/javascript" src="../javascript/util/dataUtil.js"></script>
+<script type="text/javascript" src="../javascript/btzero_7_Director/bigscreen//util.js"></script>
+<script type="text/javascript" src="../javascript/video/webVideoCtrl.js"></script>
+<script type="text/javascript" src="../javascript/video/video.js"></script>
+<!--<script type="text/javascript" src="../javascript/video/player/cyberplayer.js"></script>-->
+<script type="text/javascript">
+    $.ajaxSetup({
+        contentType: "application/x-www-form-urlencoded;charset=utf-8",
+        complete: function (XMLHttpRequest, textStatus) {
+            if (textStatus == "mysuccess") {
+                return;
+            }
+            var sessionstatus = XMLHttpRequest
+                .getResponseHeader("sessionstatus"); //通过XMLHttpRequest取得响应头，sessionstatus，
+            if (sessionstatus == "timeout") {
+                //如果超时就处理 ，指定要跳转的页面
+                window.location.href = "../login.html";
+            }
+        }
+    });
+</script>
+<script type="text/javascript">
+    var videoTempdata = null;
+    var videoDahuaTempdata = null;
+    $('title').html(SYS_NAME);
+    setCheckTitle();
+    initVideo();
+    document.onkeydown = function (e) {
+        var ev = window.event || e;
+        var code = ev.keyCode || ev.which;
+        if (code == 116) {
+            ev.keyCode ? ev.keyCode = 0 : ev.which = 0;
+            return false;
+        }
+    } //禁止f5刷新
+    //document.oncontextmenu=function(){return false};//禁止右键
+
+    function btnPlayBackShow(flag) {
+        $("#videoHistoyPlayer").css("display", flag);
+        $("#videoStopHistoyPlayer").css("display", flag);
+        $("#videoReturnPlayer").css("display", flag);
+        $("#videoFrame").css("display", "none");
+        $("#videoResume").css("display", "none");
+        $("#videoPaussePlayer").css("display", "none");
+        $("#videoPlaySlow").css("display", "none");
+        $("#videoPlayFastr").css("display", "none");
+    }
+
+    //点击开始回放
+    function clickStartPlaybackFunc() {
+        clickStartPlayback();
+        $("#videoHistoyPlayer").css("display", "none");
+        $("#videoStopHistoyPlayer").css("display", "inline");
+        $("#videoReturnPlayer").css("display", "inline");
+        $("#videoFrame").css("display", "inline");
+        $("#videoResume").css("display", "none");
+        $("#videoPaussePlayer").css("display", "inline");
+        $("#videoPlaySlow").css("display", "inline");
+        $("#videoPlayFastr").css("display", "inline");
+    }
+
+    //点击关闭回放
+    function clickStopPlaybackFunc() {
+        clickStopPlayback();
+        $("#videoHistoyPlayer").css("display", "inline");
+        $("#videoStopHistoyPlayer").css("display", "inline");
+        $("#videoReturnPlayer").css("display", "inline");
+        $("#videoFrame").css("display", "none");
+        $("#videoResume").css("display", "none");
+        $("#videoPaussePlayer").css("display", "none");
+        $("#videoPlaySlow").css("display", "none");
+        $("#videoPlayFastr").css("display", "none");
+    }
+
+    //点击单帧
+    function clickFrameFunc() {
+        clickFrame();
+        $("#videoHistoyPlayer").css("display", "none");
+        $("#videoStopHistoyPlayer").css("display", "inline");
+        $("#videoReturnPlayer").css("display", "inline");
+        $("#videoFrame").css("display", "inline");
+        $("#videoResume").css("display", "inline");
+        $("#videoPaussePlayer").css("display", "none");
+        $("#videoPlaySlow").css("display", "none");
+        $("#videoPlayFastr").css("display", "none");
+    }
+
+    //点击倒放
+    function clickReversePlaybackFunc() {
+        clickReversePlayback();
+        $("#videoHistoyPlayer").css("display", "inline");
+        $("#videoStopHistoyPlayer").css("display", "inline");
+        $("#videoReturnPlayer").css("display", "none");
+        $("#videoFrame").css("display", "none");
+        $("#videoResume").css("display", "none");
+        $("#videoPaussePlayer").css("display", "inline");
+        $("#videoPlaySlow").css("display", "none");
+        $("#videoPlayFastr").css("display", "none");
+    }
+
+    //点击暂停
+    function clickPauseFunc() {
+        clickPause();
+        $("#videoHistoyPlayer").css("display", "inline");
+        $("#videoStopHistoyPlayer").css("display", "inline");
+        $("#videoReturnPlayer").css("display", "inline");
+        $("#videoFrame").css("display", "inline");
+        $("#videoResume").css("display", "inline");
+        $("#videoPaussePlayer").css("display", "none");
+        $("#videoPlaySlow").css("display", "inline");
+        $("#videoPlayFastr").css("display", "inline");
+    }
+
+    //点击恢复
+    function clickResumeFunc() {
+        clickResume();
+        $("#videoHistoyPlayer").css("display", "inline");
+        $("#videoStopHistoyPlayer").css("display", "inline");
+        $("#videoReturnPlayer").css("display", "inline");
+        $("#videoFrame").css("display", "inline");
+        $("#videoResume").css("display", "none");
+        $("#videoPaussePlayer").css("display", "inline");
+        $("#videoPlaySlow").css("display", "inline");
+        $("#videoPlayFastr").css("display", "inline");
+    }
+
+    function btnPreviewPlayShow(flag) {
+        $("#videoPlayer").css("display", flag);
+        $("#videoStopAll").css("display", flag);
+    }
+
+    function openMedia() {
+        var deviceCode = $("#seletedMapDeviceCode").val();
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            url: "../DeviceVideoController/queryDeviceVideo",
+            data: {"deviceCode": deviceCode},
+            success: function (result) {
+                if (result != null && result.rows != undefined && result.rows.length > 0) {
+                    var videoData = result.rows[0];
+                    if (videoData.videoBrand == "1") {
+                        if (videoData.videoType == "1") {
+                            vedioBall(videoData);
+                        } else {
+                            video4G(videoData);//做一些加载完成后需要执行的事
+                        }
+                    } else {
+                        if (videoData.videoType == "1") {
+                            vedioDaHuaBall(videoData);
+                        } else {
+                            videoDaHua4G(videoData);//做一些加载完成后需要执行的事
+                        }
+
+                    }
+
+                } else {
+                    $.messager.alert("提示", "摄像头异常", "warning");
+                }
+            },
+            error: function (result) {
+
+            }
+        });
+    }
+
+    /**
+     *半球摄像头
+     * */
+    function vedioBall(data) {
+        if (-1 == WebVideoCtrl.I_CheckPluginInstall()) {
+            alert("您还未安装过插件，双击开发包目录里的WebComponents.exe安装！");
+            return;
+        }
+
+        $('#videoTypeCombox').combobox({
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: "100",
+            data: [{
+                id: '0',
+                text: '实时监控'
+            }, {
+                id: '1',
+                text: '历史回放'
+            }],
+            onSelect: function (param) {
+                if (param != undefined) {
+                    if (param.id == 0) {
+                        btnPlayBackShow("none");
+                        btnPreviewPlayShow("inline");
+                    } else {
+                        btnPlayBackShow('inline');
+                        btnPreviewPlayShow("none");
+                    }
+                } else {
+                    btnPlayBackShow("none");
+                    btnPreviewPlayShow("inline");
+                }
+                clickStopRealPlay();
+                clickStopPlayback();
+            }
+        });
+        btnPlayBackShow("none");
+        btnPreviewPlayShow("inline");
+        $("#videoTypeCombox").combobox('setValue', 0);
+        $('#video').css("left", "10%");
+        $('#video').css("right", "10%");
+        $('#videoIp').val(data.videoIp);
+        $('#videoName').text(data.videoName);
+        data.videoPort = (data.videoPort == "" ? "data.videoPort" : data.videoPort);
+        clickLogin(data.videoIp, data.videoPort, data.userCode, data.userPassword);
+    }
+
+    //4G摄像头
+    function video4G(data) {
+        videoTempdata = null;
+        var videoName = "摄像头监控";
+        if (data.videoName != undefined && data.videoName != "") {
+            videoName = data.videoName;
+        }
+        $("#dialogVideo").dialog({
+            width: 950,
+            height: 495,
+            title: videoName + '<span style="color:blue;color:red">( * 录制的文件需要下载<a href="https://service.ys7.com/downloadInfoSite/admin" target="_blank">海康播放器</a>播放 * )</span>',
+            inline: true,
+            modal: true,
+            maximized: false,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            content: "<iframe id='4GVideoIframe' src='./../javascript/hikvision/hikvisionDetail.html' frameborder='no' border='0' marginwidth='0' marginheight='0' scrolling='no' allowtransparency='yes' style='width:100%;height:440px;'></iframe>",//etWindowInfo(data),
+        }, {
+            onClose: function () {
+                $(this).dialog('destroy');//销毁
+            }
+        }).dialog('center');
+        $.parser.parse("#dialogVideo");
+        $("#dialogVideo").dialog("open");
+        //var childWindow = $("#4GVideoIframe")[0].contentWindow; //表示获取了嵌入在iframe中的子页面的window对象。  []将JQuery对象转成DOM对象，用DOM对象的contentWindow获取子页面window对象。
+        videoTempdata = data;  //调用子页面中的subFunction方法。
+    }
+
+    //大华固定IP
+    function vedioDaHuaBall(data) {
+        videoDahuaTempdata = null;
+        var videoName = "大华摄像头监控";
+        if (data.videoName != undefined && data.videoName != "") {
+            videoName = data.videoName;
+        }
+        var token = data.videoToken;
+        var kitToken = data.kitToken;
+        var params = {
+            "token": token, // [String][Not Null]授权的管理员token(accessToken)
+            "deviceId": data.videoCode, // [String][Not Null]设备序列号
+            "channelId": "0",
+            "kitToken": kitToken,
+            "videoUrl": data.videoUrl
+        };
+        $("#dialogVideoDaHua").dialog({
+            width: 950,
+            height: 495,
+            title: videoName + '<span style="color:blue;color:red"></span>',
+            inline: true,
+            modal: true,
+            maximized: false,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            content: "<iframe id='daHua4GVideoIframe' src='./../javascript/daHuaCamera/daHuaFixedIP.html' frameborder='no' border='0' marginwidth='0' marginheight='0' scrolling='no' allowtransparency='yes' style='width:100%;height:440px;'></iframe>"
+            /* content: "<div id='dahuaVediao' style='width:90%;height:440px;'></div><div style='width:8%;'><input type='button' value='测试云台' onclick='test("+ JSON.stringify(params1)+")'></div>"*/
+        }, {
+            onClose: function () {
+                $(this).dialog('destroy');//销毁
+            }
+        }).dialog('center');
+        $.parser.parse("#dialogVideoDaHua");
+        $("#dialogVideoDaHua").dialog("open");
+        videoDahuaTempdata = params;
+    }
+
+    //大华4G摄像头
+    function videoDaHua4G(data) {
+        videoDahuaTempdata = null;
+        var videoName = "大华摄像头监控";
+        if (data.videoName != undefined && data.videoName != "") {
+            videoName = data.videoName;
+        }
+        var token = data.videoToken;
+        var kitToken = data.kitToken;
+        var params = {
+            "token": token, // [String][Not Null]授权的管理员token(accessToken)
+            "deviceId": data.videoCode, // [String][Not Null]设备序列号
+            "channelId": "0",
+            "kitToken": kitToken,
+            "videoUrl": data.videoUrl
+        };
+        $("#dialogVideoDaHua").dialog({
+            width: 950,
+            height: 495,
+            title: videoName + '<span style="color:blue;color:red"></span>',
+            inline: true,
+            modal: true,
+            maximized: false,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            content: "<iframe id='daHua4GVideoIframe' src='./../javascript/daHuaCamera/daHua4G.html' frameborder='no' border='0' marginwidth='0' marginheight='0' scrolling='no' allowtransparency='yes' style='width:100%;height:440px;'></iframe>"
+            /* content: "<div id='dahuaVediao' style='width:90%;height:440px;'></div><div style='width:8%;'><input type='button' value='测试云台' onclick='test("+ JSON.stringify(params1)+")'></div>"*/
+        }, {
+            onClose: function () {
+                $(this).dialog('destroy');//销毁
+            }
+        }).dialog('center');
+        $.parser.parse("#dialogVideoDaHua");
+        $("#dialogVideoDaHua").dialog("open");
+        videoDahuaTempdata = params;
+    }
+
+    //停止视屏
+    function closeVideo() {
+        clickLogout();
+        $('#video').css("left", "-1200px");
+        $('#video').css("right", "auto");
+        $("#opinfo").empty();
+        $("#cbinfo").empty();
+        $('#videoIp').val("");
+        $('#videoName').text("");
+        $("#videoPlayer").css('display', "inline");
+        $("#videoStopAll").css('display', "none");
+    }
+
+
+    //开始预览和停止预览显示和隐藏
+    function clickRealPlay() {
+        var title = $('#videoRecord img').attr('title');
+        if ($("#videoPlayer").css('display') != "none") {
+            $("#videoStopAll").css('display', "inline");
+            $("#videoPlayer").css('display', "none");
+            clickStartRealPlay();
+        } else {
+            $("#videoStopAll").css('display', "none");
+            $("#videoPlayer").css('display', "inline");
+            clickStopRealPlay();
+        }
+    }
+
+    //开始录制
+    function clickRecord() {
+        if ($("#videoRecord").css('display') != "none") {
+            clickStartRecord();
+            $("#videoStopRecord").css('display', "inline");
+            $("#videoRecord").css('display', "none");
+        } else {
+            clickStopRecord();
+            $("#videoStopRecord").css('display', "none");
+            $("#videoRecord").css('display', "inline");
+        }
+    }
+
+    //声音开关
+    function clickSound() {
+        var title = $('#videoCloseSound img').attr('title');
+        if (title == "打开声音") {
+            clickOpenSound();
+            title = "关闭声音"
+        } else {
+            clickCloseSound();
+            title = "打开声音";
+        }
+        $("#videoCloseSound img").attr({title: title})
+    }
+
+</script>
+</html>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IUserDao">
+
+	<resultMap type="com.tcb.env.pojo.User" id="userResultMap">
+		<id property="userId" column="user_id" />
+		<result property="userCode" column="user_code" />
+		<result property="userPassword" column="user_password" />
+		<result property="userName" column="user_name" />
+		<result property="statisticsTime" column="statistics_time" />
+		<result property="userTel" column="user_tel" />
+		<result property="userEmail" column="user_email" />
+		<result property="userDelete" column="user_delete" />
+		<result property="userRemark" column="user_remark" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联组织表 -->
+		<association property="oranization" javaType="com.tcb.env.pojo.Oranization"
+			resultMap="com.tcb.env.dao.IOranizationDao.orgResultMap"></association>
+	</resultMap>
+	<!-- 查询数据个数 -->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM tbl_user
+		LEFT JOIN tbl_oranization ON tbl_user.org_id = tbl_oranization.org_id
+		<where>
+			<if test="ignoredel == 0">
+				AND tbl_user.user_delete = #{user.userDelete}
+			</if>
+			<if test="user != null and user.userId != -1">
+				AND tbl_user.user_id = #{user.userId, jdbcType = INTEGER}
+			</if>
+			<if test="user != null and user.userCode != null and user.userCode != ''">
+				AND tbl_user.user_code = #{user.userCode,jdbcType = VARCHAR}
+			</if>
+			<if test="user != null and user.userPassword != null and user.userPassword != ''">
+				AND tbl_user.user_password = #{user.userPassword,jdbcType = VARCHAR}
+			</if>
+			<if test="user != null and user.userName != null and user.userName != ''">
+				AND tbl_user.user_name LIKE CONCAT('%',CONCAT(#{user.userName},'%'))
+			</if>
+		</where>
+	</select>
+	<!-- 查询User数据操作 -->
+	<select id="getUser" resultMap="userResultMap">
+		SELECT
+			tbl_user.user_id,
+			tbl_user.user_code,
+			tbl_user.user_password,
+			tbl_user.user_name,
+			tbl_user.statistics_time,
+			tbl_user.user_tel,
+			tbl_user.user_email,
+			tbl_user.user_delete,
+			tbl_user.user_remark,
+			tbl_user.opt_user,
+			tbl_user.opt_time,
+
+			tbl_oranization.org_id,
+			tbl_oranization.org_id_parent,
+			tbl_oranization.org_name,
+			tbl_oranization.level_type,
+			tbl_oranization.org_address,
+			tbl_oranization.org_path,
+			tbl_oranization.org_telephone,
+			tbl_oranization.org_fax,
+			tbl_oranization.org_liaison,
+			tbl_oranization.opt_user,
+			tbl_oranization.opt_time
+		FROM tbl_user
+		LEFT JOIN tbl_oranization ON tbl_user.org_id = tbl_oranization.org_id
+		<where>
+			<if test="ignoredel == 0">
+				AND tbl_user.user_delete = #{user.userDelete}
+			</if>
+			<if test="user != null and user.userId != -1">
+				AND tbl_user.user_id = #{user.userId, jdbcType = INTEGER}
+			</if>
+			<if test="user != null and user.userCode != null and user.userCode != ''">
+				AND tbl_user.user_code = #{user.userCode,jdbcType = VARCHAR}
+			</if>
+			<if test="user != null and user.userPassword != null and user.userPassword != ''">
+				AND tbl_user.user_password = #{user.userPassword,jdbcType = VARCHAR}
+			</if>
+			<if test="user != null and user.userName != null and user.userName != ''">
+				AND tbl_user.user_name LIKE CONCAT('%',CONCAT(#{user.userName},'%'))
+			</if>
+			<if test="user != null and user.rowCount != -1 and user.rowIndex != -1">
+				LIMIT #{user.rowIndex, jdbcType = INTEGER},#{user.rowCount,jdbcType = INTEGER}
+			</if>
+		</where>
+	</select>
+
+	<!-- 插入操作 -->
+	<insert id="insertUser" parameterType="java.util.List">
+		INSERT INTO tbl_user(user_code,
+		user_name,
+		user_password,
+		org_id,
+		statistics_time,
+		user_tel,
+		user_email,
+		user_delete,
+		user_remark,
+		opt_user)
+		VALUES
+		<foreach collection="listuser" item="item" index="index" separator=",">
+			(#{item.userCode},
+			#{item.userName},
+			#{item.userPassword},
+			#{item.oranization.orgId},
+			#{item.statisticsTime},
+			#{item.userTel},
+			#{item.userEmail},
+			#{item.userDelete},
+			#{item.userRemark},
+			#{item.optUser})
+		</foreach>
+	</insert>
+	
+	<!-- 更新操作 -->
+	<update id="updateUser" parameterType="java.util.List">
+		<foreach collection="listuser" item="item" index="index" separator=",">
+			UPDATE tbl_user SET 
+			tbl_user.opt_user = #{item.optUser}
+			,tbl_user.opt_time = #{item.optTime}
+			<if test="item.userCode != null and item.userCode != ''">
+				,tbl_user.user_code = #{item.userCode}
+			</if>
+			<if test="item.userName != null and item.userName != ''">
+				,tbl_user.user_name = #{item.userName}
+			</if>
+			<if test="item.userPassword != null and item.userPassword != ''">
+				,tbl_user.user_password = #{item.userPassword}
+			</if>
+			<if test="item.oranization.orgId != -1">
+				,tbl_user.org_id = #{item.oranization.orgId}
+			</if>
+			<if test="item.statisticsTime != -1">
+				,tbl_user.statistics_time = #{item.statisticsTime}
+			</if>
+			<if test="item.userTel != null and item.userTel != ''">
+				,tbl_user.user_tel = #{item.userTel}
+			</if>
+			<if test="item.userEmail != null and item.userEmail != ''">
+				,tbl_user.user_email = #{item.userEmail}
+			</if>
+			<if test="item.userRemark != null and item.userRemark != ''">
+				,tbl_user.user_remark = #{item.userRemark}
+			</if>
+			WHERE tbl_user.user_id = #{item.userId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+	
+	<!-- 物理删除操作 -->
+	<delete id="deleteUser" parameterType="java.util.List">
+		DELETE FROM tbl_user
+		WHERE
+		<choose>
+			<when test="idList != null and idList.size()>0">
+				user_id IN
+				<foreach collection="idList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				user_id = NULL
+			</otherwise>
+		</choose>
+	</delete>
+	
+	<!-- 更新用户删除标识 -->
+	<update id="updateUserDelete">
+		UPDATE tbl_user SET tbl_user.user_delete = #{userDelete}
+		WHERE tbl_user.user_id = #{userId}
+	</update>
+	
+	<!-- 查询用户名称 -->
+	<select id="getUserNameById" resultType="java.lang.String">
+		SELECT
+		tbl_user.user_name
+		FROM tbl_user
+		WHERE 1=1 
+		<if test="userid != -1">
+			AND tbl_user.user_id = #{userid, jdbcType = INTEGER}
+		</if>
+		<if test="usercode != null and usercode != ''">
+			AND tbl_user.user_code = #{usercode,jdbcType = VARCHAR}
+		</if>
+		LIMIT 0,1
+	</select>
+	
+	<!-- 查询用户编码 -->
+	<select id="getUserCodeById" resultType="java.lang.String">
+		SELECT
+			user_code
+		FROM tbl_user
+		WHERE user_id = #{userId}
+		LIMIT 0,1
+	</select>
+	
+	<!-- 查询是否存在用户，更新用 -->
+	<select id="getUserExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_user
+		WHERE tbl_user.user_code = #{usercode,jdbcType = VARCHAR}
+		<if test="userid != -1">
+			AND tbl_user.user_id != #{userid, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 更新密码操作 -->
+	<update id="updateUserPwd">
+		UPDATE tbl_user SET tbl_user.user_password = #{userpwd}
+		WHERE tbl_user.user_id = #{userid}
+	</update>
+	
+</mapper>

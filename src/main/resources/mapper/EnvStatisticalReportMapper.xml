@@ -1,0 +1,1313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IEnvStatisticalReportDao">
+
+	<resultMap type="com.tcb.env.model.EnvStatisticalReportModel" id="envStatisticalReportResultMap">
+		<result property="areaId" column="area_id" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="areaName" column="area_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceCode" column="device_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceMn" column="device_mn" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceName" column="device_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingCode" column="thing_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingName" column="thing_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="beginTime" column="begin_time" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="endTime" column="end_time" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingMax" column="thing_max" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingMin" column="thing_min" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingAvg" column="thing_avg" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsMax" column="thing_zsmax" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsMin" column="thing_zsmin" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsAvg" column="thing_zsavg" javaType="java.lang.String" jdbcType="VARCHAR" />
+
+	</resultMap>
+	
+	<!-- 查询时统计报表个数 -->
+	<select id="getEsrHourCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y-%m-%d %H') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y-%m-%d %H') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2061'
+				  AND DATE(begin_time) = DATE(#{selectTime})
+				  AND HOUR(begin_time) = HOUR(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2061'
+				  AND DATE(begin_time) = DATE(#{selectTime})
+				  AND HOUR(begin_time) = HOUR(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code,DATE(temp.begin_time),HOUR(begin_time)
+		) CTEMP
+	</select>
+	
+	<!-- 查询时统计报表 -->
+	<select id="getEsrHour" resultMap="envStatisticalReportResultMap">
+		SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y-%m-%d %H') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y-%m-%d %H') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_mn,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.begin_time,
+				tms.end_time,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_avg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.thing_zsavg
+			FROM
+				${dbOldName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE update_type='2061'
+			  AND DATE(begin_time) = DATE(#{selectTime})
+			  AND HOUR(begin_time) = HOUR(#{selectTime})
+			<if test="thingCodeList.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			UNION
+		</if>
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_mn,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.begin_time,
+				tms.end_time,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_avg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.thing_zsavg
+			FROM
+				${dbName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE update_type='2061'
+			  AND DATE(begin_time) = DATE(#{selectTime})
+			  AND HOUR(begin_time) = HOUR(#{selectTime})
+			<if test="thingCodeList.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code,DATE(temp.begin_time),HOUR(begin_time)
+		ORDER BY temp.area_id,temp.device_code,temp.thing_code,DATE(temp.begin_time),HOUR(begin_time)
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex,jdbcType = INTEGER},#{rowCount, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 查询日统计报表个数 -->
+	<select id="getEsrDayCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y-%m-%d') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y-%m-%d') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND DATE(begin_time) = DATE(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND DATE(begin_time) = DATE(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code,DATE(temp.begin_time)
+		) CTEMP
+	</select>
+	
+	<!-- 查询日统计报表 -->
+	<select id="getEsrDay" resultMap="envStatisticalReportResultMap">
+		SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y-%m-%d') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y-%m-%d') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_mn,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.begin_time,
+				tms.end_time,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_avg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.thing_zsavg
+			FROM
+				${dbOldName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE update_type='2031'
+			  AND DATE(begin_time) = DATE(#{selectTime})
+			<if test="thingCodeList.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			UNION
+		</if>
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_mn,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.begin_time,
+				tms.end_time,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_avg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.thing_zsavg
+			FROM
+				${dbName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE update_type='2031'
+			  AND DATE(begin_time) = DATE(#{selectTime})
+			<if test="thingCodeList.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code,DATE(temp.begin_time)
+		ORDER BY temp.area_id,temp.device_code,temp.thing_code,DATE(temp.begin_time)
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex,jdbcType = INTEGER},#{rowCount, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 查询月统计报表个数 -->
+	<select id="getEsrMonthCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y-%m') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y-%m') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				  AND MONTH(begin_time) = MONTH(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				  AND MONTH(begin_time) = MONTH(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code,YEAR(begin_time),MONTH(begin_time)
+		) CTEMP
+	</select>
+	
+	<!-- 查询月统计报表 -->
+	<select id="getEsrMonth" resultMap="envStatisticalReportResultMap">
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y-%m') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y-%m') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				  AND MONTH(begin_time) = MONTH(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				  AND MONTH(begin_time) = MONTH(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code,YEAR(begin_time),MONTH(begin_time)
+			ORDER BY temp.area_id,temp.device_code,temp.thing_code,YEAR(begin_time),MONTH(begin_time)
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex,jdbcType = INTEGER},#{rowCount, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 查询年统计报表个数 -->
+	<select id="getEsrYearCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code,YEAR(begin_time)
+		) CTEMP
+	</select>
+	
+	<!-- 查询年统计报表 -->
+	<select id="getEsrYear" resultMap="envStatisticalReportResultMap">
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(temp.begin_time,'%Y') AS begin_time,
+				DATE_FORMAT(temp.end_time,'%Y') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND YEAR(begin_time) = YEAR(#{selectTime})
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code,YEAR(begin_time)
+			ORDER BY temp.area_id,temp.device_code,temp.thing_code,YEAR(begin_time)
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex,jdbcType = INTEGER},#{rowCount, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 查询时间段统计报表个数 -->
+	<select id="getEsrTimesCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{beginTime},'%Y-%m-%d') AS begin_time,
+				DATE_FORMAT(#{endTime},'%Y-%m-%d') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbOldName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND DATE(begin_time) >= DATE(#{beginTime})
+				  AND DATE(#{endTime}) >= DATE(begin_time)
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				UNION
+			</if>
+				SELECT DISTINCT
+					ta.area_id,
+					ta.area_name,
+					td.device_code,
+					td.device_mn,
+					td.device_name,
+					tm.thing_code,
+					tm.thing_name,
+					tms.begin_time,
+					tms.end_time,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_avg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.thing_zsavg
+				FROM
+					${dbName}.${deviceCode} AS tms
+				INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+				INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+				INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+				WHERE update_type='2031'
+				  AND DATE(begin_time) >= DATE(#{beginTime})
+				  AND DATE(#{endTime}) >= DATE(begin_time)
+				<if test="thingCodeList.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+			) temp
+			GROUP BY temp.area_id,temp.device_code,temp.thing_code
+		) CTEMP
+	</select>
+	
+	<!-- 查询时间段统计报表 -->
+	<select id="getEsrTimes" resultMap="envStatisticalReportResultMap">
+		SELECT	DISTINCT
+				temp.area_id,
+				temp.area_name,
+				temp.device_code,
+				temp.device_mn,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{beginTime},'%Y-%m-%d') AS begin_time,
+				DATE_FORMAT(#{endTime},'%Y-%m-%d') AS end_time,
+				MAX(temp.thing_max) AS thing_max,
+				MIN(temp.thing_min) AS thing_min,
+				CONVERT(AVG(temp.thing_avg),decimal(14,3)) AS thing_avg,
+				MAX(temp.thing_zsmax) AS thing_zsmax,
+				MIN(temp.thing_zsmin) AS thing_zsmin,
+				CONVERT(AVG(temp.thing_zsavg),decimal(14,3)) AS thing_zsavg
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_mn,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.begin_time,
+				tms.end_time,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_avg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.thing_zsavg
+			FROM
+				${dbOldName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE update_type='2031'
+			  AND DATE(begin_time) >= DATE(#{beginTime})
+			  AND DATE(#{endTime}) >= DATE(begin_time)
+			<if test="thingCodeList.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			UNION
+		</if>
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_mn,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.begin_time,
+				tms.end_time,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_avg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.thing_zsavg
+			FROM
+				${dbName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE update_type='2031'
+			  AND DATE(begin_time) >= DATE(#{beginTime})
+			  AND DATE(#{endTime}) >= DATE(begin_time)
+			<if test="thingCodeList.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code
+		ORDER BY temp.area_id,temp.device_code,temp.thing_code
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex,jdbcType = INTEGER},#{rowCount, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取指定小时数据值 -->
+	<select id="getOlrHour" resultType="java.lang.String">
+		SELECT tms.thing_avg
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2061'
+		   AND DATE(tms.begin_time) = DATE(#{selectTime})
+		   AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定小时数据折算值 -->
+	<select id="getOlrZsHour" resultType="java.lang.String">
+		SELECT tms.thing_zsavg
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2061'
+		   AND DATE(tms.begin_time) = DATE(#{selectTime})
+		   AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定小时数据流量折算值 -->
+	<select id="getOlrZsHourFlow" resultType="java.lang.String">
+		SELECT tms.thing_zscou
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2061'
+		   AND DATE(tms.begin_time) = DATE(#{selectTime})
+		   AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定日数据值 -->
+	<select id="getOlrDay" resultType="java.lang.String">
+		SELECT tms.thing_avg
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2031'
+		   AND DATE(tms.begin_time) = DATE(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定日数据折算值 -->
+	<select id="getOlrZsDay" resultType="java.lang.String">
+		SELECT tms.thing_zsavg
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2031'
+		   AND DATE(tms.begin_time) = DATE(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定日数据流量折算值 -->
+	<select id="getOlrZsDayFlow" resultType="java.lang.String">
+		SELECT tms.thing_zscou
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2031'
+		   AND DATE(tms.begin_time) = DATE(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定月数据流量折算值 -->
+	<select id="getOlrZsMonthFlow" resultType="java.lang.String">
+		SELECT SUM(tms.thing_zscou)
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2031'
+		   AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+		   AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取指定月数据值 -->
+	<select id="getOlrMonth" resultType="java.lang.String">
+		SELECT tms.thing_avg
+		  FROM ${dbName}.${deviceCode} AS tms
+		 WHERE tms.update_type = '2031'
+		   AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+		   AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+		   AND tms.thing_code = #{thingCode}
+		 LIMIT 0,1
+	</select>
+	
+	<!-- 获取超标报警条数 -->
+	<select id="getOverAlarmDayCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tms.storage_id)
+		FROM
+			${dbName}.${deviceCode} tms
+		INNER JOIN tbl_device_alarmset tda ON tms.thing_code = tda.thing_code AND tda.device_code = #{deviceCode}
+		WHERE tms.update_type = #{updateType}
+		AND tda.level_no = #{levelNo}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsrtd
+						AND tda.min_value &lt;= tms.thing_zsrtd
+						)
+						AND tda.data_flag = 2
+						AND DATE(tms.rtd_time) = DATE(#{selectTime})
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_rtd
+						AND tda.min_value &lt;= tms.thing_rtd
+						)
+						AND tda.data_flag = 1
+						AND DATE(tms.rtd_time) = DATE(#{selectTime})
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsavg
+						AND tda.min_value &lt;= tms.thing_zsavg
+						)
+						AND tda.data_flag = 2
+						AND DATE(tms.begin_time) = DATE(#{selectTime})
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_avg
+						AND tda.min_value &lt;= tms.thing_avg
+						)
+						AND tda.data_flag = 1
+						AND DATE(tms.begin_time) = DATE(#{selectTime})
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 获取每日所有数据条数 -->
+	<select id="getAllDayCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tms.storage_id)
+		FROM
+			${dbName}.${deviceCode} tms
+		WHERE tms.update_type = #{updateType}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				AND DATE(tms.rtd_time) = DATE(#{selectTime})
+			</when>
+			<otherwise>
+				AND DATE(tms.begin_time) = DATE(#{selectTime})
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 获取超标报警月条数 -->
+	<select id="getOverAlarmMonthCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tms.storage_id)
+		FROM
+			${dbName}.${deviceCode} tms
+		INNER JOIN tbl_device_alarmset tda ON tms.thing_code = tda.thing_code AND tda.device_code = #{deviceCode}
+		WHERE tms.update_type = #{updateType}
+		AND tda.level_no = #{levelNo}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsrtd
+						AND tda.min_value &lt;= tms.thing_zsrtd
+						)
+						AND tda.data_flag = 2
+						AND MONTH(tms.rtd_time) = MONTH(#{selectTime})
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_rtd
+						AND tda.min_value &lt;= tms.thing_rtd
+						)
+						AND tda.data_flag = 1
+						AND MONTH(tms.rtd_time) = MONTH(#{selectTime})
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsavg
+						AND tda.min_value &lt;= tms.thing_zsavg
+						)
+						AND tda.data_flag = 2
+						AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_avg
+						AND tda.min_value &lt;= tms.thing_avg
+						)
+						AND tda.data_flag = 1
+						AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 获取每月所有数据条数 -->
+	<select id="getAllMonthCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tms.storage_id)
+		FROM
+			${dbName}.${deviceCode} tms
+		WHERE tms.update_type = #{updateType}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				AND MONTH(tms.rtd_time) = MONTH(#{selectTime})
+			</when>
+			<otherwise>
+				AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 获取超标报警年条数 -->
+	<select id="getOverAlarmYearCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tms.storage_id)
+		FROM
+			${dbName}.${deviceCode} tms
+		INNER JOIN tbl_device_alarmset tda ON tms.thing_code = tda.thing_code AND tda.device_code = #{deviceCode}
+		WHERE tms.update_type = #{updateType}
+		AND tda.level_no = #{levelNo}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsrtd
+						AND tda.min_value &lt;= tms.thing_zsrtd
+						)
+						AND tda.data_flag = 2
+						AND YEAR(tms.rtd_time) = YEAR(#{selectTime})
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_rtd
+						AND tda.min_value &lt;= tms.thing_rtd
+						)
+						AND tda.data_flag = 1
+						AND YEAR(tms.rtd_time) = YEAR(#{selectTime})
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsavg
+						AND tda.min_value &lt;= tms.thing_zsavg
+						)
+						AND tda.data_flag = 2
+						AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_avg
+						AND tda.min_value &lt;= tms.thing_avg
+						)
+						AND tda.data_flag = 1
+						AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 获取每年所有数据条数 -->
+	<select id="getAllYearCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tms.storage_id)
+		FROM
+			${dbName}.${deviceCode} tms
+		WHERE tms.update_type = #{updateType}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				AND YEAR(tms.rtd_time) = YEAR(#{selectTime})
+			</when>
+			<otherwise>
+				AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 获取超标报警时间段条数 -->
+	<select id="getOverAlarmTimesCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(DISTINCT tms.storage_id)
+		FROM
+		${dbName}.${deviceCode} tms
+		INNER JOIN tbl_device_alarmset tda ON tms.thing_code = tda.thing_code AND tda.device_code = #{deviceCode}
+		WHERE tms.update_type = #{updateType}
+		AND tda.level_no = #{levelNo}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsrtd
+						AND tda.min_value &lt;= tms.thing_zsrtd
+						)
+						AND tda.data_flag = 2
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_rtd
+						AND tda.min_value &lt;= tms.thing_rtd
+						)
+						AND tda.data_flag = 1
+					</otherwise>
+				</choose>
+				AND TIMESTAMPDIFF(SECOND,#{beginTime},tms.rtd_time)>=0
+				AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{endTime})>=0
+			</when>
+			<otherwise>
+				<choose>
+					<when test="convertType == 'zs'">
+						AND (
+						tda.max_value >= tms.thing_zsavg
+						AND tda.min_value &lt;= tms.thing_zsavg
+						)
+						AND tda.data_flag = 2
+					</when>
+					<otherwise>
+						AND (
+						tda.max_value >= tms.thing_avg
+						AND tda.min_value &lt;= tms.thing_avg
+						)
+						AND tda.data_flag = 1
+					</otherwise>
+				</choose>
+				AND TIMESTAMPDIFF(SECOND,#{beginTime},tms.begin_time)>=0
+				AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{endTime})>=0
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 获取时间段所有条数 -->
+	<select id="getAllTimesCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(DISTINCT tms.storage_id)
+		FROM
+		${dbName}.${deviceCode} tms
+		WHERE tms.update_type = #{updateType}
+		<if test="thingCode != null and thingCode != ''">
+			AND tms.thing_code = #{thingCode}
+		</if>
+		<choose>
+			<when test="updateType == '2011'">
+				AND TIMESTAMPDIFF(SECOND,#{beginTime},tms.rtd_time)>=0
+				AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{endTime})>=0
+			</when>
+			<otherwise>
+				AND TIMESTAMPDIFF(SECOND,#{beginTime},tms.begin_time)>=0
+				AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{endTime})>=0
+			</otherwise>
+		</choose>
+	</select>
+
+</mapper>

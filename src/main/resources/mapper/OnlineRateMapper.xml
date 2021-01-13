@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IOnlineRateDao">
+	<resultMap type="com.tcb.env.pojo.OnlineRate" id="onlineRateResultMap">
+		<id property="orId" column="or_id" />
+		<result property="onlineTime" column="online_time" />
+		<result property="onlineRate" column="online_rate" />
+		<result property="onlineInfo" column="online_info" />
+		<result property="allCount" column="all_count" />
+		<result property="orCount" column="or_count" />
+		<!-- 级联表 -->
+		<association property="device" column="device_code" javaType="com.tcb.env.pojo.Device"
+			resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+	</resultMap>
+	
+	<!-- 获取小时在线率个数 -->
+	<select id="getHourOnlineRateCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tor.or_id)
+		FROM
+			tbl_online_rate tor
+		INNER JOIN tbl_device td ON tor.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND tor.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY tor.online_time ASC,tor.online_rate DESC
+	</select>
+	
+	<!-- 获取小时在线率 -->
+	<select id="getHourOnlineRate" resultMap="onlineRateResultMap">
+		SELECT
+			DISTINCT
+			tor.or_id,
+			td.device_code,
+			td.device_name,
+			DATE_FORMAT(tor.online_time,'%Y-%m-%d %H') AS online_time,
+			tor.online_rate,
+			tor.online_info,
+			tor.all_count,
+			tor.or_count
+		FROM
+			tbl_online_rate tor
+		INNER JOIN tbl_device td ON tor.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND tor.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY tor.online_time ASC,tor.online_rate DESC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取日在线率个数 -->
+	<select id="getDayOnlineRateCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT
+				@rownum:=@rownum+1 as or_id,
+				SUM(tor.all_count) AS all_count,
+				SUM(tor.or_count) AS or_count,
+				td.device_code,
+				td.device_name,
+				DATE(tor.online_time) AS online_time
+			FROM
+				(SELECT @rownum:=0) r,tbl_online_rate tor
+			INNER JOIN tbl_device td ON tor.device_code = td.device_code
+			WHERE
+				TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+			AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+			<if test="deviceCodeList.size()>0">
+				AND tor.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY tor.device_code,DATE(tor.online_time)
+			ORDER BY tor.online_time ASC,tor.online_rate DESC,tor.device_code ASC
+		) AS TEMP
+	</select>
+	
+	<!-- 获取日在线率 -->
+	<select id="getDayOnlineRate" resultMap="onlineRateResultMap">
+		SELECT
+			@rownum:=@rownum+1 as or_id,
+			SUM(tor.all_count) AS all_count,
+			SUM(tor.or_count) AS or_count,
+			CASE WHEN SUM(tor.all_count) > 0 THEN SUM(tor.or_count)/SUM(tor.all_count) ELSE 0 END AS online_rate,
+			td.device_code,
+			td.device_name,
+			DATE(tor.online_time) AS online_time
+		FROM
+			(SELECT @rownum:=0) r,tbl_online_rate tor
+		INNER JOIN tbl_device td ON tor.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND tor.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY tor.device_code,DATE(tor.online_time)
+		ORDER BY tor.online_time ASC,tor.online_rate DESC,tor.device_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取月在线率个数 -->
+	<select id="getMonthOnlineRateCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT
+				@rownum:=@rownum+1 as or_id,
+				SUM(tor.all_count) AS all_count,
+				SUM(tor.or_count) AS or_count,
+				td.device_code,
+				td.device_name,
+				CONCAT(YEAR(tor.online_time),"-",LPAD(MONTH(tor.online_time),2,0)) AS online_time
+			FROM
+				(SELECT @rownum:=0) r,tbl_online_rate tor
+			INNER JOIN tbl_device td ON tor.device_code = td.device_code
+			WHERE
+				TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+			AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+			<if test="deviceCodeList.size()>0">
+				AND tor.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY tor.device_code,YEAR(tor.online_time),MONTH(tor.online_time)
+			ORDER BY tor.online_time ASC,tor.online_rate DESC,tor.device_code ASC
+		) AS TEMP
+	</select>
+	
+	<!-- 获取月在线率 -->
+	<select id="getMonthOnlineRate" resultMap="onlineRateResultMap">
+		SELECT
+			@rownum:=@rownum+1 as or_id,
+			SUM(tor.all_count) AS all_count,
+			SUM(tor.or_count) AS or_count,
+			CASE WHEN SUM(tor.all_count) > 0 THEN SUM(tor.or_count)/SUM(tor.all_count) ELSE 0 END AS online_rate,
+			td.device_code,
+			td.device_name,
+			CONCAT(YEAR(tor.online_time),"-",LPAD(MONTH(tor.online_time),2,0)) AS online_time
+		FROM
+			(SELECT @rownum:=0) r,tbl_online_rate tor
+		INNER JOIN tbl_device td ON tor.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND tor.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY tor.device_code,YEAR(tor.online_time),MONTH(tor.online_time)
+		ORDER BY tor.online_time ASC,tor.online_rate DESC,tor.device_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取年在线率个数 -->
+	<select id="getYearOnlineRateCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT
+				@rownum:=@rownum+1 as or_id,
+				SUM(tor.all_count) AS all_count,
+				SUM(tor.or_count) AS or_count,
+				td.device_code,
+				td.device_name,
+				YEAR(tor.online_time) AS online_time
+			FROM
+				(SELECT @rownum:=0) r,tbl_online_rate tor
+			INNER JOIN tbl_device td ON tor.device_code = td.device_code
+			WHERE
+				TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+			AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+			<if test="deviceCodeList.size()>0">
+				AND tor.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY tor.device_code,YEAR(tor.online_time)
+			ORDER BY tor.online_time ASC,tor.online_rate DESC,tor.device_code ASC
+		) AS TEMP
+	</select>
+	
+	<!-- 获取月在线率 -->
+	<select id="getYearOnlineRate" resultMap="onlineRateResultMap">
+		SELECT
+			@rownum:=@rownum+1 as or_id,
+			SUM(tor.all_count) AS all_count,
+			SUM(tor.or_count) AS or_count,
+			CASE WHEN SUM(tor.all_count) > 0 THEN SUM(tor.or_count)/SUM(tor.all_count) ELSE 0 END AS online_rate,
+			td.device_code,
+			td.device_name,
+			YEAR(tor.online_time) AS online_time
+		FROM
+			(SELECT @rownum:=0) r,tbl_online_rate tor
+		INNER JOIN tbl_device td ON tor.device_code = td.device_code
+		WHERE
+			TIMESTAMPDIFF(SECOND,#{beginTime,jdbcType = TIMESTAMP},tor.online_time)>=0
+		AND	TIMESTAMPDIFF(SECOND,tor.online_time,#{endTime,jdbcType = TIMESTAMP})>=0
+		<if test="deviceCodeList.size()>0">
+			AND tor.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY tor.device_code,YEAR(tor.online_time)
+		ORDER BY tor.online_time ASC,tor.online_rate DESC,tor.device_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+</mapper>

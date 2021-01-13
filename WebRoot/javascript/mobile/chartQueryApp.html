@@ -1,0 +1,337 @@
+<!--
+@author hiYuzu
+@description 数据图像化（趋势分析）页面（APP端）
+@version V1.0
+@date 2019/4/16 17:37
+-->
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          name='viewport'>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <link rel="stylesheet" href="css/bootstrap3.3.7/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/Ionicons/ionicons.min.css">
+    <!--<link rel="stylesheet" href="css/adminlte/AdminLTE.min.css">-->
+    <!--<link rel="stylesheet" href="css/skins/_all-skins.min.css">-->
+    <link rel="stylesheet" href="css/bootstrap-select.min.css" type="text/css"/>
+    <link rel="stylesheet" href="css/bootstrap-dataTables/bootstrap-table.min.css">
+    <link href="css/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"
+          rel="stylesheet"
+          media="screen">
+    <!-- Theme style -->
+    <link title="stylenew" rel="stylesheet" type="text/css" href="css/stylenew.css"/>
+    <!-- Google Font -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <style type="text/css">
+        body > .header .navbar {
+            margin-left: 0px;
+        }
+
+        @media screen and (min-width: 992px) {
+            .left-side {
+                top: 0px !important;
+            }
+        }
+
+        .icon-bar {
+            background: #fff !important;
+            display: block;
+            width: 22px;
+            height: 2px;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+        }
+
+        .panel-body {
+            padding: 10px;
+        }
+
+        .sidebar-toggle1 {
+            position: absolute;
+            background-color: #00ca6d;
+            background-image: none;
+            padding: 15px 15px;
+            font-family: fontAwesome;
+            border: 1px solid #fff;
+            top: 5px;
+            right: 5px;
+        }
+
+        .sidebar-toggle1:before {
+            content: "\f0c9";
+            color: #fff;
+        }
+
+        .sidebar-toggle1:hover {
+            background-color: #00a65a;
+            color: #00a65a;
+            border: 1px solid #00a65a;
+        }
+
+        .col-xs-4 {
+            padding: 0px 1px;
+        }
+
+        .info-box {
+            margin-bottom: 5px;
+        }
+
+        .modal-header {
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 5px;
+        }
+
+        .modal-dialog, .modal-content {
+            /*height: 99% !important;*/
+            width: 100% !important;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-menu > li > a {
+            padding: 10px 20px;
+        }
+
+        .bootstrap-select .dropdown-menu {
+            min-width: 100% !important;
+        }
+
+        .modal-body label {
+            color: #fff;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="skin-black">
+<div class="wrapper row-offcanvas row-offcanvas-left">
+<!--    <aside class="left-side sidebar-offcanvas ">
+        <section class="sidebar">
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="img/user1.png" class="img-circle" alt="User Image"/>
+                </div>
+                <div class="pull-left info">
+                    <p>欢迎，<label id="userName"></label></p>
+                </div>
+            </div>
+            <ul class="sidebar-menu" id="sideBarMenuChart">
+               &lt;!&ndash; <li><a href="indexWeb.html"> <i class="fa fa-home"></i> <span>首页</span></a></li>
+                <li><a href="mapMonitorWeb.html"> <i class="fa fa-map-marker"></i> <span>地图</span></a></li>
+                <li><a href="dataQueryWeb.html"><i class="fa fa-list"></i><span>数据</span> </a></li>
+                <li><a href="chartQueryWeb.html"><i class="fa fa-bar-chart"></i><span>趋势</span> </a></li>
+                <li><a href="#" onclick="mainlogOutFunc()"> <i class="fa fa fa-sign-out"></i> <span></span>注销</a></li>&ndash;&gt;
+            </ul>
+        </section>
+    </aside>-->
+    <aside class="right-side ">
+        <section>
+            <div class="row no-margin">
+                <!--<div class="container1">-->
+                <div class="row no-margin">
+                    <div class="col-xs-12 no-padding">
+                        <div style="background-color: #00ca6d;color: #fff;position: relative">
+                            <a href="#myModal" class="sidebar-toggle dropdown-toggle sidebar-toggle1"
+                               data-toggle="modal" id="myModalBtn">
+                                <span class="sr-only">切换导航</span>
+                            </a>
+                            <span class="info-box-number"
+                                  style="height: 20px;margin-left: 7px;position: relative;top: 5px;"
+                                  id="pointName"></span>
+                            <span class="info-box-number"
+                                  style="text-align: center;height: 70px;padding: 15px;font-size: 28px"
+                                  id="deviceName"></span>
+                            <div style="height: 20px;position: relative;bottom: 5px;">
+                                <span class="" style="float: left;margin-left: 7px" id="currUpdateType"></span>
+                                <span class="" style="float: right;margin-right: 7px" id="currThingName"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-margin">
+                    <div class="col-xs-12 no-padding  panel"
+                         style="/*border-bottom: 2px solid #a0a6ad;border-left: 2px solid #a0a6ad;border-right: 2px solid #a0a6ad;*/">
+                        <div class="box box-primary">
+                            <!--按屏幕百分比分配-->
+                            <!--
+                            <div class="box-body no-padding" style="height: auto;">
+                                <div id="lineChart"></div>
+                            </div>
+                            -->
+                            <div class="box-body no-padding" style="min-height: 300px; height: auto;">
+                                <div id="lineChart" style="min-height: 300px;margin:5px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-margin">
+                    <div class="col-xs-12 no-padding panel"
+                         style="/*border-bottom: 2px solid #a0a6ad;border-left: 2px solid #a0a6ad;border-right: 2px solid #a0a6ad;*/margin-top:-10px;">
+                        <div class="box box-primary">
+                            <!--按屏幕百分比分配-->
+                            <!--
+                            <div class="box-body no-padding" style="height: auto;">
+                                <div id="barChart"></div>
+                            </div>
+                            -->
+                            <div class="box-body no-padding" style="min-height: 300px; height: auto;">
+                                <div id="barChart" style="min-height: 300px;margin:5px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </aside>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog no-margin">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                        style="color: #fff">
+                    &times;
+                </button>
+                <h5 class="modal-title" id="myModalLabel" style="color: #fff">筛选条件</h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>区域：</label>
+                    <select class="selectpicker" data-style="btn-info" id="areaName">
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>地址：</label>
+                    <select class="selectpicker" data-style="btn-info" id="manufactor"></select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>设备：</label>
+                    <select class="selectpicker" data-style="btn-info" id="device"></select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>监测物质：</label>
+                    <select class="selectpicker" data-style="btn-info" id="thingName">
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>数据类型：</label>
+                    <select class="selectpicker" data-style="btn-info" id="updateType">
+                        <option>实时数据</option>
+                        <option>分钟数据</option>
+                        <option selected>小时数据</option>
+                        <option>每日数据</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>开始时间：</label>
+                    <input type="text" id="timePicker1" class="form_datetime form-control"
+                           style="height: 30px;" readonly required>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>结束时间：</label>
+                    <input type="text" id="timePicker2" class="form_datetime form-control"
+                           style="height: 30px;" readonly required>
+                </div>
+                <div style="margin-top: 10px;height: 40px">
+                    <button type="button" class="btn btn-primary" style="float: right;margin-right: 1px"
+                            onclick="btnClick();">确定
+                    </button>
+                    <button type="button" class="btn btn-default " style="float: right;margin-right: 8px"
+                            data-dismiss="modal">关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-select.min.js"></script>
+<script src="js/plugins/adminlte/adminlte.min.js"></script>
+<script src="js/defaults-zh_CN.min.js"></script>
+<script src="js/plugins/bootstrap-dataTables/bootstrap-table.min.js"></script>
+<script src="js/plugins/bootstrap-dataTables/bootstrap-table-zh-CN.js"></script>
+<script src="js/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+<script src="js/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="js/plugins/jQuery-flot/jquery.flot.js"></script>
+<script src="js/dataUtil.js"></script>
+<script src="../util/ctrl.js"></script>
+<script src="js/Director/app.js"></script>
+<script src="js/chartQuery.js"></script>
+<script>
+    $(".form_datetime").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language: 'zh-CN',
+        autoclose: true,
+        startView: 2,
+        minView: 2,
+        forceParse: false
+    });
+</script>
+
+<script type="text/javascript">
+  /*  //初始化左侧栏
+    initSidebarMenu("sideBarMenuChart");
+    //默认左侧导航栏折叠
+    $('.left-side').toggleClass("collapse-left");*/
+    $(".right-side").toggleClass("strech");
+    var loginname = "";
+    loginname = getCookieValue('EnvDustusername');
+    if (loginname != null && loginname != "") {
+        $("#userName").html(loginname);
+    } else {
+        $("#userName").html("");
+    }
+    $('input').on('ifChecked', function (event) {
+        $(this).parents('li').addClass("task-done");
+        console.log('ok');
+    });
+    $('input').on('ifUnchecked', function (event) {
+        $(this).parents('li').removeClass("task-done");
+        console.log('not');
+    });
+</script>
+
+<script type="text/javascript">
+    $.ajaxSetup({
+        contentType: "application/x-www-form-urlencoded;charset=utf-8",
+        complete: function (XMLHttpRequest, textStatus) {
+            var sessionstatus = XMLHttpRequest
+                .getResponseHeader("sessionstatus"); //通过XMLHttpRequest取得响应头，sessionstatus，
+            if (sessionstatus == "timeout") {
+                //如果超时就处理 ，指定要跳转的页面
+                window.location.href = "/loginPhone.html";
+            }
+        }
+    });
+    initLayout();
+</script>
+<!--按屏幕百分比分配-->
+<!--
+<script>
+    $(document).ready(function () {
+        $('#barChart').css('height', $(window).height() * 0.33); //高度为浏览器高度的33%
+        $('#lineChart').css('height', $(window).height() * 0.33); //高度为浏览器高度的33%
+    })
+</script>
+-->
+
+</html>

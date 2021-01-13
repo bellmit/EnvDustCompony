@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IMonitorSetDao">
+<!-- 类名和数据库中表的属性名一一对应 -->
+	<resultMap type="com.tcb.env.pojo.MonitorSet" id="monSetResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="monitorId" column="monitor_id" />
+		<result property="deviceCode" column="device_code" />
+		<result property="thingCode" column="thing_code" />
+		<result property="monitorMax" column="monitor_max" />
+		<result property="monitorMin" column="monitor_min" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="monitorReport" column="monitor_report" />
+		<result property="alarmCode" column="alarm_code" />		
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+	
+	
+</mapper>

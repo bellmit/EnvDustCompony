@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ISysLogDao">
+
+	<resultMap type="com.tcb.env.model.SysLogModel" id="sysLogModelResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="logId" column="log_id" />
+		<result property="logTitle" column="log_title" />
+		<result property="logContent" column="log_content" />
+		<result property="logMemo" column="log_memo" />
+		<result property="logTime" column="log_time" />
+		<result property="optUserName" column="opt_user_name" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+	
+	<!-- 获取系统日志个数 -->
+	<select id="getSysLogCount" resultMap="sysLogModelResultMap">
+		SELECT COUNT(DISTINCT tsl.log_id)
+		  FROM tbl_sys_log tsl
+		  LEFT JOIN tbl_user tu ON tsl.opt_user = tu.user_id
+		  <where>
+		  	<if test="sysLog.logTitle != null and sysLog.logTitle != ''">
+		  		AND tsl.log_title LIKE CONCAT('%',CONCAT(#{sysLog.logTitle},'%'))
+		  	</if>
+		  </where>
+	</select>
+	
+	<!-- 获取系统日志 -->
+	<select id="getSysLog" resultMap="sysLogModelResultMap">
+		SELECT DISTINCT 
+			   tsl.log_id,
+			   tsl.log_title,
+			   tsl.log_content,
+			   tsl.log_memo,
+			   tsl.log_time,
+			   tu.user_name AS opt_user_name,
+			   tsl.opt_time
+		  FROM tbl_sys_log tsl
+		  LEFT JOIN tbl_user tu ON tsl.opt_user = tu.user_id
+		  <where>
+		  	<if test="sysLog.logTitle != null and sysLog.logTitle != ''">
+		  		AND tsl.log_title LIKE CONCAT('%',CONCAT(#{sysLog.logTitle},'%'))
+		  	</if>
+		  </where>
+	</select>
+	
+	<!-- 新增系统日志 -->
+	<insert id="insertSysLog" parameterType="com.tcb.env.pojo.SysLog">
+		INSERT INTO tbl_sys_log(
+			log_title,
+			log_content,
+			log_memo,
+			log_time,
+			opt_user)
+		VALUES(
+			#{sysLog.logTitle},
+			#{sysLog.logContent},
+			#{sysLog.logMemo},
+			#{sysLog.logTime},
+			#{sysLog.optUser}
+		)
+	</insert>
+
+</mapper>

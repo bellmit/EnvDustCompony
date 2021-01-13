@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          name='viewport'>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="./css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/Ionicons/ionicons.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/bootstrap-select.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
+    <title>首页</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            background-color: #00ca6d;
+            background-image: none;
+            padding: 15px 15px;
+            font-family: fontAwesome;
+            border: 1px solid #fff;
+            top: 5px;
+            right: 5px;
+        }
+
+        .sidebar-toggle:before {
+            content: "\f0c9";
+            color: #fff;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: #00a65a;
+            color: #00a65a;
+            border: 1px solid #00a65a;
+        }
+
+        .col-xs-4 {
+            padding: 0px 5px;
+        }
+
+        .info-box {
+            margin-bottom: 5px;
+        }
+
+        .modal-header {
+            padding: 5px;
+        }
+
+        .label {
+            color: #fff;
+            width: 20%;
+            font-size: 14px;
+        }
+
+        .modal-body {
+            padding: 5px;
+        }
+
+        .modal-dialog, .modal-content {
+            /*height: 99% !important;*/
+            width: 100% !important;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-menu > li > a {
+            padding: 10px 20px;
+        }
+
+        .bootstrap-select .dropdown-menu {
+            min-width: 100% !important;
+        }
+        body{
+            background:#f1f2f7;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 no-padding">
+            <div style="background-color: #00ca6d;color: #fff;position: relative">
+                <a href="#myModal" class="sidebar-toggle dropdown-toggle" data-toggle="modal">
+                    <span class="sr-only">切换导航</span>
+                </a>
+                <input id="areaId" hidden>
+                <span class="info-box-number" style="height: 20px;margin-left: 7px;position: relative;top: 5px;"
+                      id="pointName"></span>
+                <span class="info-box-number" style="text-align: center;height: 70px;padding: 15px;font-size: 28px"
+                      id="thingValue"></span>
+                <div style="height: 20px;position: relative;bottom: 5px;padding: 0 5px">
+                    <span class="" style="float: left;width: 40%" id="thingLevel"></span>
+                    <span class="" style="float: left;width: 20%;text-align: center;" id="pointStatus"></span>
+                    <span class="" style="float: right;width: 40%;text-align: right"
+                          id="thingName"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row panel" style="/*border: 2px solid #a0a6ad;*/" id="resultContent">
+    </div>
+    <div class="row">
+        <div class="col-xs-12 no-padding panel"
+             style="/*border-bottom: 2px solid #a0a6ad;border-left: 2px solid #a0a6ad;border-right: 2px solid #a0a6ad;*/margin-top:-10px;">
+            <h4 style="margin-left:5px;">污染物占比</h4>
+            <div id="main" style="height:300px;"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 no-padding  panel"
+             style="/*border-bottom: 2px solid #a0a6ad;border-left: 2px solid #a0a6ad;border-right: 2px solid #a0a6ad;*/margin-top:-10px;">
+            <h4 style="margin-left:5px;">污染物排名</h4>
+            <div id="areaRateChart" style="height:260px;"></div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog no-margin">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: #fff">
+                    &times;
+                </button>
+                <h5 class="modal-title" id="myModalLabel" style="color: #fff">点位选择</h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label class="label">级别：</label>
+                    <select class="selectpicker" data-style="btn-info" id="manufactor">
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label class="label">区域：</label>
+                    <select class="selectpicker" data-style="btn-info" id="device"></select>
+                </div>
+                <div style="margin-top: 10px;" id="monitorThingDiv">
+                    <label class="label">物质：</label>
+                    <select class="selectpicker" data-style="btn-info" id="monitorThingIndex"></select>
+                </div>
+                <div style="margin-top: 10px;height: 40px">
+                    <button type="button" class="btn btn-primary" style="float: right;margin-right: 5px"
+                            onclick="search();">确定
+                    </button>
+                    <button type="button" class="btn btn-default " style="float: right;margin-right: 8px"
+                            data-dismiss="modal">关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/bootstrap-select.min.js"></script>
+<script src="./js/adminlte.min.js"></script>
+<script src="./js/defaults-zh_CN.min.js"></script>
+<script src="./js/plugins/echarts/echarts.min.js"></script>
+
+<script>
+    var chartSortArea = null;
+    var myChart = null;
+    $('#manufactor,#device,#monitorThingIndex').selectpicker({
+        'width': '80%'
+    });
+    window.onresize = function () {
+        if(myChart!=null){
+            myChart.resize();
+        }
+    };
+    loadManufactor();
+    loadThingMonitorIndex();
+    loadData($("#device").val());
+    loadAreaSubMonitorValueRanking($("#device").val(),$("#monitorThingIndex").val());
+
+    function search() {
+        var areaId = $("#device").val();
+        loadData(areaId);
+        loadAreaSubMonitorValueRanking($("#device").val(),$("#monitorThingIndex").val());
+        $("#myModal").modal('hide');
+    }
+
+    function loadData(areaId) {
+        $.ajax({
+            type: "post",
+            async: false,
+            url: "../../MobileController/getAreaRecentData",
+            data: {areaId: areaId},
+            dataType: "json",
+            success: function (result) {
+                if (result == null || result.areaId == null) {
+                    alert("该区域无数据");
+                } else {
+                    var data = [];
+                    var html = '<h4 style="margin-left:5px;">污染物详情</h4>\n';
+                    $("#areaId").val(result.areaId);
+                    $("#pointName").html( $("#device").find("option:selected").text());
+                    $("#thingName").html("污染物:" + $("#monitorThingIndex").find("option:selected").text());
+                    $("#pointStatus").html(result.pointStatusName);
+                    $("#thingLevel").html("污染等级:暂无");
+                    $("#thingValue").html("暂无");
+                    if(result.pointListData==null){
+                        $("#pointStatus").html("离线");
+                        $("#thingName").html( $("#monitorThingIndex").find("option:selected").text());
+                        $("#thingValue").html("暂无");
+                        html += '<div class="col-xs-12" style="text-align: center">暂无数据</div>';
+                    }else{
+                        for (var i = 0; i < result.pointListData.length; i++) {
+                            if($("#monitorThingIndex").val()== result.pointListData[i].thingCode){
+                                $("#thingValue").html(result.pointListData[i].thingValue);
+                                if (result.pointListData[i].thingLevelName == null || result.pointListData[i].thingLevelName == '') {
+                                    $("#thingLevel").html("污染等级:暂无");
+                                } else {
+                                    $("#thingLevel").html("污染等级:" + result.pointListData[i].thingLevelName);
+                                }
+                            }
+                            var thingUnit = result.pointListData[i].thingUnit;
+                            if (thingUnit == "mg/m3" || thingUnit == "μg/m3" || thingUnit == "ng/m3") {
+                                var json = {};
+                                if (thingUnit == "mg/m3") {
+                                    json.value = result.pointListData[i].thingValue * 1000 * 1000;
+                                } else if (thingUnit == "μg/m3") {
+                                    json.value = result.pointListData[i].thingValue * 1000;
+                                }
+                                else {
+                                    json.value = result.pointListData[i].thingValue;
+                                }
+                                json.name = result.pointListData[i].thingName;
+                                data.push(json);
+                            }
+                            var color = result.pointListData[i].thingLevelColor;
+                            if (color == null) {
+                                color = "green";
+                            }
+                            html += '<div class="col-xs-4 ">\n' +
+                                '            <div class="info-box " style="min-height: 40px!important;">\n' +
+                                '                <span class="info-box-text" style="margin-left: 1px">' + result.pointListData[i].thingName + '</span>\n' +
+                                '                <span class="info-box-text" style="margin-left: 1px;color: ' + color + '">' + result.pointListData[i].thingValue + '<span\n' +
+                                '                        style="float: right;margin-right: 5px;text-transform: lowercase;color:#808080">' + thingUnit + '</span></span>\n' +
+                                '                <div class="progress no-margin">\n' +
+                                '                    <div class="progress-bar" style="width: 100%;background-color:' + color + '"></div>\n' +
+                                '                </div>\n' +
+                                '            </div>\n' +
+                                '        </div>'
+                        }
+
+                    }
+                    $("#resultContent").html(html);
+                }
+            },
+            error: function () {
+                alert("图表请求数据失败!");
+            }
+        });
+    }
+
+    function loadManufactor() {
+        var id = -1;
+        $.ajax({
+            type: 'post',
+            async: false,
+            data: {id: -1},
+            url: '../../AreaController/queryAreaLevelDropDown',
+            dataType: "json",
+            success: function (data) {
+                $("#manufactor").empty();
+                if (data.total <= 0) {
+                    $("#manufactor").append("<option value='-1'>------无------</option>");
+                } else {
+                    for (var i = data.total-1; i >=0; i--) {
+                        if (i == data.total-1) {
+                            id = data.rows[i].id;
+                        }
+                        $("#manufactor").append("<option value='" + data.rows[i].id + "'>" + data.rows[i].name + "</option>");
+                    }
+                }
+                $("#manufactor").selectpicker("refresh");
+                $("#manufactor").selectpicker('val',id);
+                loadDevice(id);
+            }
+        });
+    }
+
+    function loadDevice(id) {
+        $.ajax({
+            type: 'post',
+            async: false,
+            url: '../../AreaController/queryAreaDropDownEqual',
+            data: {id: -1, levelFlag: id},
+            dataType: "json",
+            success: function (data) {
+                $("#device").empty();
+                if (data.total <= 0) {
+                    $("#device").append("<option value='-1'>------无------</option>");
+                } else {
+                    for (var i = 0; i < data.rows.length; i++) {
+                        $("#device").append("<option value='" + data.rows[i].id + "'>" + data.rows[i].name + "</option>");
+                    }
+                }
+                $("#device").selectpicker("refresh");
+            }
+        });
+    }
+
+    $("#manufactor").change(function () {
+        loadDevice($("#manufactor").val());
+    });
+    function loadThingMonitorIndex() {
+        $.ajax({
+            type: 'post',
+            async: false,
+            url: '../../MonitorStorageController/getAthorityMonitors',
+            dataType: "json",
+            success: function (data) {
+                $("#monitorThingIndex").empty();
+                if (data.total <= 0) {
+                    $("#monitorThingIndex").append("<option value='-1'>------无------</option>");
+                } else {
+                    for (var i = 0; i < data.length; i++) {
+                        $("#monitorThingIndex").append("<option value='" + data[i].code + "'>" + data[i].name + "</option>");
+                    }
+                }
+                $("#monitorThingIndex").selectpicker("refresh");
+            }
+        });
+    }
+
+    /**
+     * 污染物占比区域排行
+     * @param mapTreeList
+     * @param levelFlag
+     */
+    function loadAreaSubMonitorValueRanking(areaId,monitorCode,order){
+        var thingCode = monitorCode;
+        var dataType = '2011';//默认实时数据
+        var order = "desc";
+        var xAxisData = [];
+        var yAxisData = [];
+        var orderDataArry = [];
+        if(chartSortArea!=null){
+            echarts.dispose(document.getElementById("areaRateChart"));
+        }
+        $.ajax({
+            url : "../../GeneralMonitorController/getAreaSubMonitorValueRanking",
+            type : "post",
+            dataType : "json",
+            data : {
+                projectId: "",
+                list: [-1],
+                areaId:areaId,
+                thingCode: thingCode,
+                dataType: dataType,
+                order: 'desc',
+                limit: 15
+            },
+            error : function(json) {
+            },
+            success : function(json) {
+                var ybardata = [];
+                var xbardata = [];
+                var selectedList = {};
+                if(json.result){
+                    if(json.rows != null && json.rows.length>0){
+                        if(json.rows.length <=4){
+                            $("#areaRateChart").css("height","120px");
+                        }else if(json.rows.length >4 && json.rows.length<=6){
+                            $("#areaRateChart").css("height","200px");
+                        }else if(json.rows.length >6 && json.rows.length<=8){
+                            $("#areaRateChart").css("height","310px");
+                        }else{
+                            $("#areaRateChart").css("height","360px");
+                        }
+                        for(var i=0;i<json.rows.length;i++){
+                            var xData = json.rows[i]["thingValue"];
+                            var yData = json.rows[i]["deviceName"];
+                            if(xData!=null){
+                                xAxisData.push(xData);
+                                yAxisData.push(yData);
+                                orderDataArry.push(json.rows[i]["dataOrder"]);
+                                ybardata.push({"name":json.rows[i].deviceName,"value":json.rows[i].thingValue});
+                                xbardata[i] = yData;
+                                if(i<10){
+                                    selectedList[yData] = true ;
+                                }else{
+                                    selectedList[yData] = false ;
+                                }
+                            }
+                        }
+                    }
+                    initAreaRateBarChart(xbardata,ybardata,selectedList);
+                    initAreaRankChart(yAxisData,xAxisData,orderDataArry);
+                }
+            }
+        });
+    }
+
+    //区域占比饼形图
+    function initAreaRateBarChart(xdata,ydata,selectedList){
+        echarts.dispose(document.getElementById("main"));
+        myChart = echarts.init(document.getElementById('main'));
+        var option1= {
+            legend: {
+                x: 'left',
+                y: 'bottom',
+                bottom:"2%",
+                left:"1%",
+                right:"3%",
+                type: 'scroll',
+                orient: 'horizontal',
+                pageIconColor: '#6495ed', //翻页下一页的三角按钮颜色
+                pageIconInactiveColor: '#aaa', //翻页（即翻页到头时）
+                pageIconSize: 24, //翻页按钮大小
+                data:xdata,
+                selected:selectedList
+            },
+            calculable: true,
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['20%', '69%'],
+                    center: ['50%', '40%'],
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                position: 'inner',
+                                formatter: function (params) {
+                                    return (params.percent - 0).toFixed(0) + '%'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        }
+                    },
+                    data: ydata
+                }
+            ]
+        };
+        myChart.setOption(option1,true);
+    }
+
+    function initAreaRankChart(yAxisData,xAxisData,orderDataArry){
+        echarts.dispose(document.getElementById("areaRateChart"));
+        chartSortArea = echarts.init(document.getElementById("areaRateChart"));
+        var max = Math.max.apply(null,xAxisData);
+        var tempData = [];
+        for(var i=0;i<yAxisData.length;i++){
+            tempData.push({"name":"","value":max,"dataOrder":orderDataArry[i]});
+        }
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },formatter: function (params) {//提示框自定义
+                    return formatterTip(params);
+                },
+            },
+            grid:{
+                left:'7%',
+                right:'4%',
+                top:"4%",
+                bottom:"3%",
+                containLabel: false
+            },
+            xAxis: {
+                type: 'value',
+                show:false,
+                splitLine:{
+                    show:false
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: yAxisData,
+                inverse: true,
+                show:false,
+                splitLine:{
+                    show:false
+                }
+            },
+            series: [
+                {
+                    type: 'bar',
+                    itemStyle: {
+                        normal: {color: 'rgba(0,0,0,0.3)'}
+                    },
+                    barGap:'-100%',
+                    barCategoryGap:'60%',
+                    data: tempData,
+                    animation: false,
+                    label: {
+                        normal: {
+                            show: true,
+                            position:[1,-14],
+                            textStyle: { //数值样式
+                                color: '#000',
+                                fontSize:12
+                            },
+                            formatter: function(params) {
+                                var valueTxt = '';
+                                if (params.name.length > 14) {
+                                    valueTxt = params.name.substring(0, 14) + '...';
+                                }
+                                else {
+                                    valueTxt = params.name;
+                                }
+                                var index = params.data.dataOrder;
+
+                                return "NO." +index+" " + valueTxt ;
+                            }
+                        }
+                    },
+                },
+                {
+                    name: '区域污染占比排名',
+                    type: 'bar',
+                    barGap:'-100%',
+                    barCategoryGap:'80%',
+                    itemStyle: {
+                        normal: {
+                            color: "green"
+                        },
+                        emphasis: {
+                            color: new echarts.graphic.LinearGradient(
+                                0, 0, 0, 1,
+                                [
+                                    {offset: 0, color: '#2378f7'},
+                                    {offset: 0.7, color: '#2378f7'},
+                                    {offset: 1, color: '#83bff6'}
+                                ]
+                            )
+                        }
+                    },
+                    data: xAxisData
+                }
+            ]
+        };
+        chartSortArea.setOption(option,true);
+    }
+
+    /**
+     * 柱状图tootiple自定义
+     * @param params
+     * @returns {string}
+     */
+    function formatterTip(params) {
+        //移除重复的数据
+        for (var i = 0; i < params.length; i++) {
+            for (var j = params.length - 1; j > i; j--) {
+                if (params[j].data == params[i].data) {
+                    params.splice(j, 1);
+                    break;
+                }
+            }
+        }
+        var tip = '';
+        for (var i = 0; i < params.length; i++) {//这里是自己定义样式， params[i].marker 表示是否显示左边的那个小圆圈
+            if ( params[i].seriesName=="区域污染占比排名") {
+                var value = (params[i].value==undefined)?"暂无":params[i].value;
+                var icon  =" <div style='background: #73aae5;height: 8px;width: 8px;border-radius: 8px;margin-top:7px;margin-right: 4px;float: left;display: inline-block'></div>";
+                tip = tip + icon +  params[i].name + ' : ' + value + '<br/>';
+            }
+        }
+        return tip;
+    }
+</script>
+</html>

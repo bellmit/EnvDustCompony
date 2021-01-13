@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ISystemDao">
+
+	<resultMap type="com.tcb.env.model.SystemModel" id="systemModelResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="sysId" column="sys_id" />
+		<result property="sysCode" column="sys_code" />
+		<result property="sysNumber" column="sys_number" />
+		<result property="sysVersion" column="sys_version" />
+		<result property="sysUrl" column="sys_url" />
+		<result property="sysMemo" column="sys_memo" />
+	</resultMap>
+	
+	<!-- 获取最新系统版本参数 -->
+	<select id="getNewSystem" resultMap="systemModelResultMap">
+		SELECT
+			ts.sys_id,
+			ts.sys_code,
+			ts.sys_number,
+			ts.sys_version,
+			ts.sys_url,
+			ts.sys_memo
+		FROM
+			tbl_system ts
+		WHERE
+			ts.sys_code = #{sysCode}
+		ORDER BY
+			ts.sys_number DESC
+		LIMIT 0,1
+	</select>
+
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IUploadFileDao">
+
+	<resultMap type="com.tcb.env.pojo.UploadFile" id="uploadFileResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="fileId" column="file_id" />
+		<result property="fileType" column="file_type" />
+		<result property="fileName" column="file_name" />
+		<result property="filePath" column="file_path" />
+		<result property="uploadTime" column="upload_time" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+	
+	<!-- 查询上传文件个数 -->
+	<select id="getUploadFileCount" resultType="java.lang.Integer" >
+		SELECT
+			COUNT(DISTINCT tuf.file_id)
+		FROM
+			tbl_upload_file tuf
+		<where>
+			<if test="uploadFile.fileId != null">
+				AND tuf.file_id = #{uploadFile.fileId}
+			</if>
+			<if test="uploadFile.fileType != null and uploadFile.fileType != ''">
+				AND tuf.file_type = #{uploadFile.fileType, jdbcType = VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询上传文件明细 -->
+	<select id="getUploadFile" resultMap="uploadFileResultMap" >
+		SELECT
+			DISTINCT tuf.file_id,
+			tuf.file_type,
+			tuf.file_name,
+			tuf.file_path,
+			DATE_FORMAT(tuf.upload_time,'%Y-%m-%d %T') AS upload_time,
+			tuf.opt_user,
+			tuf.opt_time
+		FROM
+			tbl_upload_file tuf
+		<where>
+			<if test="uploadFile.fileId != null">
+				AND tuf.file_id = #{uploadFile.fileId}
+			</if>
+			<if test="uploadFile.fileType != null and uploadFile.fileType != ''">
+				AND tuf.file_type = #{uploadFile.fileType, jdbcType = VARCHAR}
+			</if>
+			<if test="uploadFile.rowCount != -1 and uploadFile.rowIndex != -1">
+				LIMIT #{uploadFile.rowIndex, jdbcType = INTEGER},#{uploadFile.rowCount,jdbcType = INTEGER}
+			</if>
+		</where>
+		ORDER BY upload_time DESC
+	</select>
+
+	<!-- 新增上传文件 -->
+	<insert id="insertUploadFile">
+		INSERT INTO tbl_upload_file (
+			file_type,
+			file_name,
+			file_path,
+			upload_time,
+			opt_user
+		)
+		VALUES(
+			#{uploadFile.fileType},
+			#{uploadFile.fileName},
+			#{uploadFile.filePath},
+			#{uploadFile.uploadTime},
+			#{uploadFile.optUser}
+		)
+	</insert>
+	
+	<!-- 删除上传文件 -->
+	<delete id="deleteUploadFile">
+		DELETE FROM tbl_upload_file WHERE file_id = #{fileId}
+	</delete>
+	
+	<!-- 删除上传文件 -->
+	<delete id="deleteUploadFileByItem">
+		DELETE FROM tbl_upload_file WHERE file_type = #{fileType} AND file_name = #{fileName}
+	</delete>
+	
+	<!-- 通过ID获取上传文件 -->
+	<select id="getUploadFileById" resultMap="uploadFileResultMap" >
+		SELECT
+			DISTINCT tuf.file_id,
+			tuf.file_type,
+			tuf.file_name,
+			tuf.file_path,
+			DATE_FORMAT(tuf.upload_time,'%Y-%m-%d %T') AS upload_time,
+			tuf.opt_user,
+			tuf.opt_time
+		FROM
+			tbl_upload_file tuf
+		WHERE tuf.file_id = #{fileId}
+		LIMIT 0,1
+	</select>
+	
+		<!-- 查询上传文件个数 -->
+	<select id="existUploadFileCount" resultType="java.lang.Integer" >
+		SELECT
+			COUNT(DISTINCT tuf.file_id)
+		FROM
+			tbl_upload_file tuf
+		WHERE tuf.file_type = #{fileType}
+		  AND tuf.file_name = #{fileName}
+
+	</select>
+    
+</mapper>

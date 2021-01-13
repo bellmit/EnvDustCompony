@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<head>
+    <title>大华固定IP摄像头</title>
+    <link id="easyuiTheme" rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/blue/easyui.css">
+    <link rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/color.css">
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/jquery.min.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/jquery.easyui.min.js"></script>
+    <script src="./../jquery-easyui-1.4.4/plugins/laydate/laydate.js"></script>
+    <script type="text/javascript" src="./../MyChart/echarts.min.js"></script>
+    <script src="./../jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/datagridTooltip.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/dgnodataExtend.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/datagridExtend.js"></script>
+    <script type="text/javascript" src="./../util/ctrl.js"></script>
+    <meta http-equiv="Expires" content="0" />
+    <link href="./fixedIPDaHua/css/jquery-ui.css" rel="stylesheet">
+    <script>
+        document.write("<link type='text/css' href='./fixedIPDaHua/css/demo.css?version=" + new Date().getTime() + "' rel='stylesheet' />");
+    </script>
+    <script src="./fixedIPDaHua/lib/jquery.js"></script>
+    <script src="./fixedIPDaHua/lib/jquery-ui.js"></script>
+    <script src="./fixedIPDaHua/lib/jquery.ui.core.js"></script>
+    <script src="./fixedIPDaHua/lib/json2.js"></script>
+</head>
+
+    <style>
+        * {
+            touch-action: none;
+        }
+        .ptz .btn2 {
+            width: 60px;
+            height: 22px;
+            line-height: 18px;
+        }
+        .ui-widget-content{
+            border:none;
+        }
+        .ui-widget.ui-widget-content{
+            border:1px solid #fff;
+        }
+    </style>
+
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" style="overflow:hidden;">
+    <div data-options="region:'center',iconCls:'icon-ok'" style="overflow:hidden;">
+        <div id="daHua4GCamera" style="width:100%; height: 435px;background: #000000;overflow:hidden;">
+        </div>
+       <!-- <div style="margin:10px 0px 5px 10px;">
+            <label>回放时间范围：</label>
+            <input type="text" class="layui-input" id="myDate" placeholder="请选择日期"  style="width:88px;"/>
+            <input type="text" class="layui-input" id="myDateTime" placeholder="请选择时间范围" style="width:140px;"/>
+            <span style="margin-left:15px;"><a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="returnPlay()">开始回放</a></span>
+            <span style="margin-left:5px;"><a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="stopreturnPlay()">停止回放</a></span>
+        </div>-->
+    </div>
+
+    <div data-options="region:'east',split:true" title="云台控制" style="width:370px;font-size:12px;">
+        <div id="left-tabs">
+            <ul>
+                <li><a href="#loginField">登录</a></li>
+                <li><a href="#WndField">窗口分割</a></li>
+                <li><a href="#audioVideoControl">音频控制</a></li>
+                <li><a href="#playbackField">本地回放</a></li>
+            </ul>
+            <fieldset class="login" id="loginField">
+                <table cellpadding="0" cellspacing="2" border="0">
+                    <tr>
+                        <td class="tt">IP地址</td>
+                        <td><input id="loginip" type="text" class="txt" value="192.168.1.250" /></td>
+                    </tr>
+                    <tr>
+                        <td class="tt">端口号</td>
+                        <td><input id="port" type="text" class="txt" value="80" /></td>
+                    </tr>
+                    <tr>
+                        <td class="tt">协议类型</td>
+                        <td colspan="2">
+                            <select id="protocolType" class="sel">
+                                <option value="0">TCP</option>
+                                <option value="4">UDP</option>
+                                <option value="3">组播</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">用户名</td>
+                        <td><input id="username" type="text" class="txt" value="admin" /></td>
+                    </tr>
+                    <tr>
+                        <td class="tt">密码</td>
+                        <td><input id="password" type="password" class="txt" value="tcb712hb" /></td>
+                    </tr>
+                    <tr>
+                        <td class="tt">RTSP端口</td>
+                        <td colspan="2"><input id="rtspport" type="text" class="txt" value="554" /></td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" class="btnBig" value="登录" onclick="clickLogin();" />
+                        </td>
+                        <td>
+                            <input type="button" class="btnBig" value="退出" onclick="clickLogout();" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">通道列表</td>
+                        <td>
+                            <select id="channels" class="sel">
+                            </select>
+                            <input type="button" class="btnBig" value="获取通道" onclick="getAllChannelInfo();" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt" colspan="1">码流类型</td>
+                        <td colspan="1">
+                            <select id="streamtype" class="sel" onchange="changeStreamType(this.value);">
+                                <option value="1">主码流</option>
+                                <option value="2">子码流</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">窗口列表</td>
+                        <td>
+                            <select id="winIDs" class="sel">
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt"><input type="button" class="btnBig" value="开始预览" onclick="clickStartRealPlayEx();" /></td>
+                        <td><input type="button" class="btnBig" value="停止预览" onclick="clickStopRealPlay();" /></td>
+                    </tr>
+                    </tr>
+                    <tr>
+                        <td class="tt" colspan="4">
+                            <label>(备注：指定窗口号播放视频)</label>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+            <fieldset class="login" id="WndField">
+                <table cellpadding="0" cellspacing="2" border="0">
+                    <tr>
+                        <td class="tt"  >窗口分割数</td>
+                        <td>
+                            <select id="wndNum" class="sel2" onchange="changeWndNum(this.value);">
+                                <option value="1" selected>1x1</option>
+                                <option value="4">2x2</option>
+                                <option value="9">3x3</option>
+                                <option value="16">4x4</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">
+                            <input type="button" class="btn2" value="自定义窗口分割" width=100px onclick="setCustomWndPos();" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">
+                            <input type="button" class="btn" value="全屏" onclick="clickFullScreen();" />
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+            <fieldset class="login" id="audioVideoControl" disabled="true">
+                <table cellpadding="0" cellspacing="3" border="0">
+                    <tr>
+                        <td class="tt">录像文件保存路径</td>
+                        <td colspan="3"><input id="LiveRecord" value ="C:\RecordDownload\" type="text" class="txt" />&nbsp;<input type="button" class="btn" value="浏览" onclick="clickOpenFileDlg(2);" /></td>
+                    </tr>
+                    <tr>
+                        <td class="tt">抓图保存路径</td>
+                        <td colspan="3"><input id="LiveSnapshot"  value ="C:\RecordDownload\" type="text" class="txt" />&nbsp;<input type="button" class="btn" value="浏览" onclick="clickOpenFileDlg(1);" /></td>
+                    </tr>
+                    <tr>
+                        <td class="tt">
+                            <input type="button" class="btnBig" value="抓图" onclick="clickCapturePic();" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">
+                            <input type="button" class="btnBig" value="开始录像" onclick="clickStartRecord();" />
+                        </td>
+                        <td>
+                            <input type="button" class="btnBig" value="停止录像" onclick="clickStopRecord();" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tt">
+                            <input type="button" class="btnBig" value="打开声音" onclick="clickOpenSound();" />
+                        </td>
+                        <td >
+                            <input type="button" class="btnBig" value="关闭声音" onclick="clickCloseSound();" />
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+            <fieldset class="playback" id="playbackField" disabled="true;">
+                <input type="button" class="btn2" value="回放模式" onclick="switchToPlayback();" />（请先设置模式）
+                <div id="playbacktabs">
+                    <table width="100%" cellpadding="0" cellspacing="3" border="0">
+                        <tr>
+                            <td class="tt">通道号</td>
+                            <td>
+                                <input type="text" id="playbackByTime_channel" value="0" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tt" colspan="1">码流类型</td>
+                            <td colspan="1">
+                                <select class="sel" id="playbackByTime_streamType">
+                                    <option value="1">主码流</option>
+                                    <option value="2">子码流</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tt">窗口号</td>
+                            <td>
+                                <input type="text" id="playbackByTime_winID" value="0" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tt">开始时间</td>
+                            <td>
+                                <input type="text" id="playbackByTime_startTime" value="2020-04-17 00:00:00" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tt">结束时间</td>
+                            <td>
+                                <input type="text" id="playbackByTime_endTime" value="2020-04-17 23:10:00" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="3" border="0">
+                    <tr>
+                        <td colspan="2" class="tt">
+                            <input id="startPlay" type="button" class="btn2" value="开始回放" onclick="clickStartPlayback();" />
+                            <input id="stopPlay" type="button" class="btn2" value="停止回放" onclick="clickStopPlayback();" />
+                            <label>播放时间：</label>
+                            <input type="text" id="playtime" disabled="true" value="00:00:00" style="width:100px;" />
+                        </td>
+                    </tr>
+                  <!--  <tr>
+                        <td colspan="2" class="tt">
+                            <input id="pause" type="button" class="btn" value="暂停" onclick="clickPause();" />
+                            <input id="resume" type="button" class="btn" value="恢复" onclick="clickResume();" />
+                            <label>(备注:请选中上方搜索列表中的某个文件进行回放)</label>
+                        </td>
+                    </tr>-->
+                    <tr>
+                        <td class="tt">倍速播放</td>
+                        <td>
+                            <select id="playspeed" onchange="changePlaySpeed(this.value);">
+                                <option value="0">1/16</option>
+                                <option value="1">1/8</option>
+                                <option value="2">1/4</option>
+                                <option value="3">1/2</option>
+                                <option value="4" selected>X1</option>
+                                <option value="5">X2</option>
+                                <option value="6">X4</option>
+                                <option value="7">X8</option>
+                                <option value="8">X16</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+
+        </div>
+    </div>
+</div>
+<input id="myDateHidden" style="display:none;" value=""/>
+<input id="myDateTimeHidden" style="display:none;" value="00:00:00 - 23:59:59"/>
+<img  id="picture" style="display:none;">
+<script src="./fixedIPDaHua/module/foundation.js"></script>
+<script src="./fixedIPDaHua/module/WebVideoCtrl.js"></script>
+<script src="./fixedIPDaHua/module/modifyUI.js"></script>
+<script src="./fixedIPDaHua/module/demo.js"></script>
+</body>
+</html>
+<script type="text/javascript">
+    $(function(){
+        /*laydate.render({
+            elem: '#myDate', //指定元素
+            trigger: 'click',
+            max: Date.parse(new Date()),
+            done: function(value, date, endDate) {
+                $("#myDateHidden").val(value);
+            }
+        });
+        laydate.render({
+            elem: '#myDateTime',
+            type: 'time',
+            range: true,
+            trigger: 'click',
+            value:"00:00:00 - 23:59:59",
+            done: function(value, date, endDate) {
+                $("#myDateTimeHidden").val(value);
+            }
+        });*/
+    });
+</script>

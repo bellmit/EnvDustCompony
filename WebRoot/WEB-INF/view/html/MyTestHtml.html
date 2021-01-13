@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>My JSP 'MyTestJsp.jsp' starting page</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="This is my page">
+<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+<script language="javascript"
+	src="../javascript/jquery-easyui-1.4.4/jquery.min.js"></script>
+
+<script language="javascript">
+	function ajaxTest() {
+		var data1 = {
+			"id" : "1",
+			"name" : "2erw"
+		};
+		$.ajax({
+			data : data1,
+			type : "post",
+			dataType : "json",
+			url : "/EnvDust/TestController/toTest",
+			error : function(data) {
+				alert("出错了！！:" + data.msg);
+			},
+			success : function(data) {
+				$.each(data, function(n, value) {
+					alert("Data Saved: " + value.id + "--" + value.name);
+				});
+			}
+		});
+	}
+
+	function testajax() {
+		$.ajax({
+			data : {
+				"strTest1" : "123",
+				"strTest2" : "123",
+			},
+			type : "post",
+			url : "/EnvDust/TestController/toGson",
+			dataType : "json",
+			error : function(data) {
+				alert("出错了！！:" + data);
+			},
+			success : function(data) {
+				/*
+				for (i = 0; i < data.length; i++) {
+					alert("id:" + data[i].id + ",name:"
+							+ data[i].name + "");
+				}
+				 */
+				$.each(data, function(n, value) {
+					alert("Data Saved: " + value.id + "--" + value.name);
+				});
+
+			}
+		});
+	}
+
+	function login() {
+		$.ajax({
+			data : {
+				"userCode" : "123",
+				"userPassword" : "123",
+			},
+			type : "post",
+			url : "/EnvDust/UserController/validateUser",
+			dataType : "json",
+			error : function(data) {
+				alert("出错了！！:" + data);
+			},
+			success : function(data) {
+				/*
+				for (i = 0; i < data.length; i++) {
+					alert("id:" + data[i].id + ",name:"
+							+ data[i].name + "");
+				}
+				 */
+				alert(data);
+
+			}
+		});
+	}
+	
+	function ajaxPro() {
+		$.ajax({
+			type : "post",
+			url : "../ExportController/exportSheets",
+			dataType : "json",
+			error : function() {
+				alert("出错了！！");
+			},
+			success : function() {
+				/*
+				for (i = 0; i < data.length; i++) {
+					alert("id:" + data[i].id + ",name:"
+							+ data[i].name + "");
+				}
+				 */
+				 /*
+				console.info(data);
+				alert(data);
+				*/
+				alter("导出成功");
+			}
+		});
+	}
+	function testExport(){
+		 //location.href = "../ExportController/exportSheets";  
+		 alert("测试");
+	}
+</script>
+</head>
+
+<body>
+	<h1>从服务器返回springmvc字符串->${message}</h1>
+	<button id="testajax" onclick="testajax()">测试AJAX接收</button>
+	<button id="testajax1" onclick="ajaxTest()">测试AJAX传递参数</button>
+	<button id="login" onclick="login()">登录</button>
+	<button id="testajax2" onclick="ajaxPro()">测试AJAX存储过程</button>
+	<a href="../ExportController/exportSheets?devicecode=dianxintable&thingcode=PM10,PM2.5&starttime=2014-6-9&endtime=2017-9-1&freque=perhour">下载</a>
+	<form id="subform" name="subform" method="post" action="../ExportController/exportSheets" onsubmit="return testExport(this)">
+	<a class="zhuce" href="javascript:void(0)" name="submit" onclick="document.getElementById('subform').submit();" >导出</a>
+	</form>
+</body>
+</html>

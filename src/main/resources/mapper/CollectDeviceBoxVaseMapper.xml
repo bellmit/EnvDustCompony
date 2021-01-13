@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ICollectDeviceBoxVaseDao">
+
+	<resultMap type="com.tcb.env.pojo.CollectDeviceBoxVase" id="collectDeviceBoxVaseResultMap">
+		<id property="vaseId" column="vase_id" />
+		<result property="vaseNo" column="vase_no" />
+		<result property="vaseTime" column="vase_time" />
+		<result property="vaseQn" column="vase_qn" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联采样设备箱子表 -->
+		<association property="collectDeviceBox" column="box_id" javaType="com.tcb.env.pojo.CollectDeviceBox"
+			resultMap="com.tcb.env.dao.ICollectDeviceBoxDao.collectDeviceBoxResultMap"></association>
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.VaseDataModel" id="vaseDataModelResultMap">
+		<id property="sampleId" column="sample_id" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_Name" />
+		<result property="thingValue" column="thing_value" />
+		<result property="thingLimit" column="thing_limit" />
+		<result property="thingFlag" column="thing_flag" />
+		<result property="vaseNo" column="vase_no" />
+		<result property="simpleMode" column="simple_mode" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 获取超标采样记录个数 -->
+	<select id="getCollectDeviceBoxVaseCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(tcdbv.vase_id)
+		FROM
+			tbl_collect_device_box_vase tcdbv
+		INNER JOIN tbl_collect_device_box tcdb ON tcdbv.box_id = tcdb.box_id
+		<where>
+			<if test="collectDeviceBoxVase.collectDeviceBox != null and collectDeviceBoxVase.collectDeviceBox.boxId != ''
+					and collectDeviceBoxVase.collectDeviceBox.boxId != null">
+				tcdb.box_id = #{collectDeviceBoxVase.collectDeviceBox.boxId}
+			</if>
+			<if test="collectDeviceBoxVase.collectDeviceBox != null and collectDeviceBoxVase.collectDeviceBox.boxNo != ''
+					and collectDeviceBoxVase.collectDeviceBox.boxNo != null">
+				AND tcdb.box_no = #{collectDeviceBoxVase.collectDeviceBox.boxNo}
+			</if>
+			<if test="collectDeviceBoxVase.vaseNo != null and collectDeviceBoxVase.vaseNo != ''">
+				AND tcdbv.vase_no LIKE CONCAT('%',CONCAT(#{collectDeviceBoxVase.vaseNo},'%'))
+			</if>
+		</where>
+	</select>
+
+	<!-- 获取超标采样记录信息 -->
+	<select id="getCollectDeviceBoxVase" resultMap="collectDeviceBoxVaseResultMap">
+		SELECT
+			tcdbv.vase_id,
+			tcdbv.vase_no,
+			tcdbv.vase_time,
+			tcdbv.vase_qn,
+			tcdb.box_id,
+			tcdb.box_no,
+			tcdb.box_name,
+			tcdb.box_status,
+			tcdb.cd_id,
+			tcdbv.opt_user,
+			tcdbv.opt_time
+		FROM
+			tbl_collect_device_box_vase tcdbv
+		INNER JOIN tbl_collect_device_box tcdb ON tcdbv.box_id = tcdb.box_id
+		<where>
+			<if test="collectDeviceBoxVase.collectDeviceBox != null and collectDeviceBoxVase.collectDeviceBox.boxId != ''
+					and collectDeviceBoxVase.collectDeviceBox.boxId != null">
+				tcdb.box_id = #{collectDeviceBoxVase.collectDeviceBox.boxId}
+			</if>
+			<if test="collectDeviceBoxVase.collectDeviceBox != null and collectDeviceBoxVase.collectDeviceBox.boxNo != ''
+					and collectDeviceBoxVase.collectDeviceBox.boxNo != null">
+				AND tcdb.box_no = #{collectDeviceBoxVase.collectDeviceBox.boxNo}
+			</if>
+			<if test="collectDeviceBoxVase.vaseNo != null and collectDeviceBoxVase.vaseNo != ''">
+				AND tcdbv.vase_no LIKE CONCAT('%',CONCAT(#{collectDeviceBoxVase.vaseNo},'%'))
+			</if>
+		</where>
+		<if test="collectDeviceBoxVase.rowCount != -1 and collectDeviceBoxVase.rowIndex != -1">
+			LIMIT #{collectDeviceBoxVase.rowIndex, jdbcType = INTEGER},#{collectDeviceBoxVase.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取采样详细数据 -->
+	<select id="getVaseDataModel" resultMap="vaseDataModelResultMap">
+		SELECT DISTINCT
+			vt.sample_id,
+			vt.thing_code,
+			tm.thing_name,
+			vt.thing_value,
+			vt.thing_limit,
+			vt.thing_flag,
+			vt.vase_no,
+			vt.simple_mode,
+			vt.opt_user,
+			vt.opt_time
+		FROM
+			${deviceCode} vt
+		INNER JOIN tbl_monitor tm ON vt.thing_code = tm.thing_code
+		WHERE
+			vt.vase_no = #{vaseNo}
+	</select>
+
+</mapper>

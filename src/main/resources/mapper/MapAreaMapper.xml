@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IMapAreaDao" >
+	<resultMap type="com.tcb.env.pojo.MapArea" id="mapArea">
+		<id property="maId" column="ma_id" />
+		<result property="maVisible" column="ma_visible" javaType="boolean" jdbcType="TINYINT" />
+		<result property="maName" column="ma_name" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<collection property="pointList" ofType="com.tcb.env.pojo.MapAreaPoint" resultMap="mapAreaPoint" ></collection>
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.pojo.MapAreaPoint" id="mapAreaPoint">
+		<id property="pointId" column="point_id" />
+		<result property="lat" column="lat" />
+		<result property="lng" column="lng" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 查询覆盖区域信息  -->
+	<select id="getMapArea" resultMap="mapArea">
+		SELECT 
+		 ma_id,
+		 ma_visible,
+		 ma_name
+		FROM 
+		 tbl_map_area
+		<where>
+			<if test="addMapArea != null">
+				1 = 1
+				<if test="addMapArea.maId != null and addMapArea.maId > 0">
+				AND	ma_id = #{addMapArea.maId}
+				</if>
+				<if test="addMapArea.maName != null and addMapArea.maName != ''">
+				AND ma_name = #{addMapArea.maName}
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询所有覆盖区域的信息 -->
+	<select id="getAllMapAreaPoint" resultMap="mapArea" >
+		SELECT 
+		 area.ma_id,
+		 area.ma_name,
+		 point.point_id,
+		 point.lat,
+		 point.lng
+		FROM 
+		 tbl_map_area AS area
+		LEFT JOIN tbl_map_area_point AS point
+		ON area.ma_id = point.ma_id
+		WHERE
+		 area.ma_visible = 1	
+	</select>
+	
+	<!-- 获取某覆盖区域的坐标点的数量 -->
+	<select id="getMapAreaPointCount" resultType="Integer">
+		SELECT 
+		 COUNT(*)
+		FROM 
+		 tbl_map_area_point
+		WHERE
+		 ma_id = #{maId}
+		
+	</select>
+	
+	<!-- 获取覆盖区域 -->
+	<select id="getMapAreaPoint" resultMap="mapAreaPoint">
+		SELECT
+		 point_id,
+		 ma_id,
+		 lat,
+		 lng
+		FROM
+		 tbl_map_area_point
+		where ma_id = #{mapArea.maId}
+		<if test="mapArea.rowIndex >=0 and mapArea.rowCount >= 0">
+			limit #{mapArea.rowIndex},#{mapArea.rowCount}
+		</if>
+	</select>
+	
+	<!-- 添加覆盖区域 -->
+	<insert id="addMapArea" useGeneratedKeys="true" keyProperty="addMapArea.maId" keyColumn="ma_id" parameterType="com.tcb.env.pojo.MapArea" >
+		INSERT INTO
+		   tbl_map_area(ma_visible,ma_name,opt_user,opt_time) 
+		VALUES(#{addMapArea.maVisible},#{addMapArea.maName},#{addMapArea.optUser},#{addMapArea.optTime})
+	</insert>
+	
+	<!-- 修改覆盖区域属性 -->
+	<update id="editMapArea">
+		UPDATE tbl_map_area
+		<set>
+			<if test=' mapArea != null and mapArea.maName != null and mapArea.maName != "" '>
+		  		ma_name = #{mapArea.maName},
+			</if>
+			<if test=' mapArea != null and mapArea.maVisible != null'>
+		  		ma_visible = #{mapArea.maVisible}
+			</if>
+		</set>
+		<if test=" mapArea != null and mapArea.maId > 0 ">
+		  	WHERE ma_id = #{mapArea.maId}
+		</if>
+	</update>
+	
+	<!-- 删除覆盖区域,   怎么关联与其相关的坐标点全部删除    -->
+	<delete id="deleteArea">
+		DELETE 
+		FROM tbl_map_area
+		<where>
+			<if test="maId > 0">
+				ma_id = #{maId}
+			</if>
+		</where>
+	</delete>
+	
+	<!-- 添加某覆盖区域的坐标 -->
+	<insert id="addMapAreaPoint">
+		INSERT INTO 
+			tbl_map_area_point(ma_id,lat,lng,opt_user,opt_time)
+		VALUES(#{mapAreaPoint.maId},#{mapAreaPoint.lat},#{mapAreaPoint.lng},#{mapAreaPoint.optUser},#{mapAreaPoint.optTime});
+	</insert>
+	
+	<!-- 批量添加特定某个区域的坐标 -->
+	<insert id="addBatchMapAreaPoint" parameterType="java.util.List">
+		INSERT INTO 
+			tbl_map_area_point(ma_id,lat,lng,opt_user,opt_time)
+		VALUES 
+			<foreach collection="mapAreaPointList" item="point" index="index" separator=","  >
+				(#{point.maId},#{point.lat},#{point.lng},#{point.optUser},#{point.optTime})
+			</foreach>
+	</insert>
+	
+	<!-- 删除某覆盖区域的坐标 -->
+	<delete id="deleteMapAreaPoint">
+		DELETE 
+		FROM tbl_map_area_point
+		<where>
+			<if test="pointId">
+				tbl_map_area_point = #{pointId}
+			</if>
+		</where>
+	</delete>
+</mapper>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<head>
+    <link id="easyuiTheme" rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/blue/easyui.css">
+    <link rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/color.css">
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/jquery.min.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/jquery.easyui.min.js"></script>
+    <script src="./../jquery-easyui-1.4.4/plugins/laydate/laydate.js"></script>
+    <script type="text/javascript" src="./../MyChart/echarts.min.js"></script>
+    <script src="./../jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/datagridTooltip.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/dgnodataExtend.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/datagridExtend.js"></script>
+    <script type="text/javascript" src="./../hikvision/ezuikit.js"></script>
+<style>
+    .layui-input, .layui-select, .layui-textarea {
+        height: 33px;
+        line-height: 1.3;
+        line-height: 38px\9;
+        border-width: 1px;
+        border-style: solid;
+        background-color: #fff;
+        border-radius: 2px;
+        width:270px;
+        padding-left:10px;
+    }
+    .ptz .btn2 {
+        width: 60px;
+        height: 22px;
+        line-height: 18px;
+    }
+</style>
+</head>
+<body>
+    <div class="easyui-layout" data-options="fit:true" style="overflow:hidden;">
+        <div data-options="region:'center',iconCls:'icon-ok'" style="overflow:hidden;">
+            <div id="playWind" style="width:100%; height: 350px;background-color: #4C4B4B;overflow:hidden;">
+            </div>
+            <table width="100%" style="background:#9b9b9b;">
+                <tbody>
+                <tr height="34px" style="background-image:url('./../../images/camera/toolbar.png'); background-repeat:repeat-x">
+                    <td align="left">
+                        <table cellpadding="0" cellspacing="0">
+                            <tbody>
+                            <tr>
+                                <td width="35" align="center" id="video4GPlayer" style="display:inline;"><img src="./../../images/camera/RealPlayAll.png" id="play" onclick="clickVideo4GPlay()" title="开始预览" style="cursor:pointer" onmouseover="this.src = './../../images/camera/SelRealPlayAll.png'" onmouseout="this.src = './../../images/camera/RealPlayAll.png'" /></td>
+                                <td width="35" align="center" id="video4GStopAll" style="display:none;"><img src="./../../images/camera/StopAll.png" id="stop" onclick="clickVideo4GPlay()" title="停止预览" style="cursor:pointer" onmouseover="this.src = './../../images/camera/SelStopAll.png'" onmouseout="this.src = './../../images/camera/StopAll.png'" /></td>
+                                <td width="35" align="center" id="videoCapture"><img src="./../../images/camera/Capture.png" id="capture" name="capture" onclick="capturePicture4G()" title="抓图" style="cursor:pointer" onmouseover="this.src = './../../images/camera/SelCapture.png'" onmouseout="this.src ='./../../images/camera/Capture.png'" /></td>
+                                <td width="35" align="center" id="videoRecord" style="display:inline;"><img src="./../../images/camera/RecordAll.png" id="record4GId" onclick="record4G()" title="开始录像" style="cursor:pointer" onmouseover="this.src = './../../images/camera/SelRecordAll.png'" onmouseout="this.src = './../../images/camera/RecordAll.png'" /></td>
+                                <td width="35" align="center" id="videoStopRecord" style="display:none;"><img src="./../../images/camera/StopRecordAll.png" id="recordStop4GId" onclick="record4G()" title="停止录像" style="cursor:pointer" onmouseover="this.src = './../../images/camera/SelStopRecordAll.png'" onmouseout="this.src = './../../images/camera/StopRecordAll.png'" /></td>
+                               <!-- <td width="35" align="center" id="videoFullScreen"><img src="./../../images/camera/FullScreen.png" id="fullscreen" onclick="clickFullScreen()" title="全屏" style="cursor:pointer" onmouseover="this.src = './../../images/camera/SelFullScreen.png'" onmouseout="this.src = './../../images/camera/FullScreen.png'" /></td>-->
+                            </tr>
+                            </tbody>
+                        </table></td>
+                    </tr>
+                    </tbody>
+            </table>
+            <div style="margin:10px 0px 5px 10px;">
+                <label>回放时间范围：</label>
+                <input type="text" class="layui-input" id="myDate" placeholder="请选择日期"  style="width:88px;"/>
+                <input type="text" class="layui-input" id="myDateTime" placeholder="请选择时间范围" style="width:140px;"/>
+                <span style="margin-left:15px;"><a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="returnPlay()">开始回放</a></span>
+                <span style="margin-left:5px;"><a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="stopreturnPlay()">停止回放</a></span>
+            </div>
+        </div>
+
+        <div data-options="region:'east',split:true" title="云台控制" style="width:290px;font-size:12px;">
+            <table cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;background:url(./../../images/camera/bgcircle1.png) no-repeat;height:180px;width:180px;">
+                <tbody style="float:left;margin-left:13px;margin-top:35px;">
+                <tr height="40px;" style="float:left;margin-left:18px;margin-bottom:15px;width:143px;">
+                    <td style="float:left;margin-top:15px;width:48px;"><img src="./../../images/camera/left_up.png" id="ptzLeftUp" style="cursor:pointer" onmouseover="this.src='./../../images/camera/left_up.png'" onmouseout="this.src='./../../images/camera/left_up.png'" onmousedown="mycontrol(4);" onmouseup="mystop();" /></td>
+                    <td style="float:left;margin-top:-8px;width:48px;margin-left:0px;"><img src="./../../images/camera/up.png" id="ptzUp" style="cursor:pointer" onmouseover="this.src='./../../images/camera/up.png'" onmouseout="this.src='./../../images/camera/up.png'" onmousedown="mycontrol(0);" onmouseup="mystop();" /></td>
+                    <td style="float:left;margin-top:18px;margin-left:4px;"><img src="./../../images/camera/right_up.png" id="ptzRightUp" style="cursor:pointer" onmouseover="this.src='./../../images/camera/right_up.png'" onmouseout="this.src='./../../images/camera/right_up.png'" onmousedown="mouseDownPTZControl(6);" onmouseup="mystop();" /></td>
+                </tr>
+                <tr style="float:left;margin-left:10px;margin-bottom:20px;width:169px;">
+                    <td style="float:left;margin-top:1px;width:57px;margin-left:3px;"><img src="./../../images/camera/left.png" id="ptzLeft" style="cursor:pointer" onmouseover="this.src='./../../images/camera/left.png'" onmouseout="this.src='./../../images/camera/left.png'" onmousedown="mycontrol(2);" onmouseup="mystop();" /></td>
+                    <td style="float:left;margin-top:-22px;margin-left:-18px;width:58px;"><a><img src="./../../images/camera/autoplay.png" id="ptzAuto" style="cursor:pointer" onmouseover="this.src='./../../images/camera/autoplay.png'" onmouseout="this.src='./../../images/camera/autoplay.png'" onclick="mycontrol(2);" /></a></td>
+                    <td style="float:left;margin-left:20px;"><img src="./../../images/camera/right.png" id="ptzRight" style="cursor:pointer" onmouseover="this.src='./../../images/camera/right.png'" onmouseout="this.src='./../../images/camera/right.png'" onmousedown="mycontrol(3);" onmouseup="mystop();" /></td>
+                </tr>
+                <tr style="float:left;margin-left:18px;width:143px;margin-top:-15px;">
+                    <td style="float:left;width:48px;margin-top:-2px;"><img src="./../../images/camera/left_down.png" id="ptzLeftDown" style="cursor:pointer" onmouseover="this.src='./../../images/camera/left_down.png'" onmouseout="this.src='./../../images/camera/left_down.png'" onmousedown="mycontrol(5);" onmouseup="mystop();" /></td>
+                    <td style="float:left;margin-top:16px;width:48px;margin-left:0px;"><img src="./../../images/camera/down.png" id="ptzDown" style="cursor:pointer" onmouseover="this.src='./../../images/camera/down.png'" onmouseout="this.src='./../../images/camera/down.png'" onmousedown="mycontrol(1);" onmouseup="mystop();" /></td>
+                    <td style="float:left;margin-top:-4px;margin-left:0px;margin-top:-5px;"><img src="./../../images/camera/right_down.png" id="ptzRightDown" style="cursor:pointer" onmouseover="this.src='./../../images/camera/right_down.png'" onmouseout="this.src='./../../images/camera/right_down.png'" onmousedown="mycontrol(7);" onmouseup="mystop();" /></td>
+                </tr>
+                </tbody>
+            </table>
+            <table cellpadding="0" cellspacing="3" border="0" class="left" style="margin:10px 0px 0px 10px;">
+                <tbody>
+                <tr height="30px;">
+                    <td class="tt">预置点号</td>
+                    <td><input id="preset" type="text" class="txt" value="1" style="width:50px;" /></td>
+                    <td> <input type="button" class="btn1" value="设置" onclick="clickSetPreset();" style="width:55px;" /> <input type="button" class="btn1" value="调用" onclick="clickGoPreset();" style="width:55px;" /> </td>
+                </tr>
+                <tr height="30px;">
+                    <td>变倍</td>
+                    <td class="tt"><input type="button" class="btn2" value="+" onmousedown="mycontrol(8)" onmouseup="mystop()" style="width:55px;" /></td>
+                    <td><input type="button" class="btn2" value="-" onmousedown="mycontrol(9)" onmouseup="mystop()" style="margin-left:60px;width:55px; " /></td>
+                </tr>
+                <tr height="30px;">
+                    <td>变焦</td>
+                    <td class="tt"><input type="button" class="btn2" value="+" onmousedown="mycontrol(10)" onmouseup="mystop()" style="width:55px;" /></td>
+                    <td><input type="button" class="btn2" value="-" onmousedown="mycontrol(11)" onmouseup="mystop()" style="margin-left:60px;width:55px; " /></td>
+                </tr>
+                <tr height="30px;">
+                    <td>打开麦克风</td>
+                    <td class="tt"><input type="button" class="btn2" value="+" onmousedown="mysound(10)" onmouseup="mysoundstop()" style="width:55px;" /></td>
+                    <td><input type="button" class="btn2" value="-" onmousedown="mysound(11)" onmouseup="mysoundstop()" style="margin-left:60px;width:55px; " /></td>
+                </tr>
+              <!--  <tr height="30px;">
+                    <td>光圈</td>
+                    <td class="tt"><input type="button" class="btn2" value="+" onmousedown="PTZIrisIn()" onmouseup="PTZIrisStop()" style="width:55px;" /></td>
+                    <td><input type="button" class="btn2" value="-" onmousedown="PTZIrisOut()" onmouseup="PTZIrisStop()" style="margin-left:60px;width:55px;" /></td>
+                </tr>-->
+                </tbody>
+            </table>
+            <table cellpadding="0" cellspacing="3" border="0" class="left" style="margin:5px 0px 0px 10px;">
+                <tbody>
+                <tr>
+                    <td class="tt" style="padding-right:8px;">云台速度</td>
+                    <td>
+                        <div style="margin:-50px 0 50px 0;"></div>
+                        <input class="easyui-slider" id="yunCtrlspeed" style="width:180px;margin-left:6px;" data-options="showTip:true,min:1,max:7,step:1">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <input id="myDateHidden" style="display:none;" value=""/>
+    <input id="myDateTimeHidden" style="display:none;" value="00:00:00 - 23:59:59"/>
+</body>
+</html>
+<script type="text/javascript">
+    $(function(){
+        laydate.render({
+            elem: '#myDate', //指定元素
+            trigger: 'click',
+            max: Date.parse(new Date()),
+            done: function(value, date, endDate) {
+                $("#myDateHidden").val(value);
+            }
+        });
+        laydate.render({
+            elem: '#myDateTime',
+            type: 'time',
+            range: true,
+            trigger: 'click',
+            value:"00:00:00 - 23:59:59",
+            done: function(value, date, endDate) {
+                $("#myDateTimeHidden").val(value);
+            }
+        });
+    });
+
+    var decoder = null;
+
+    function clickVideo4GPlay(){
+        if( $("#video4GPlayer").css('display')!="none"){
+            $("#video4GStopAll").css('display',"inline");
+            $("#video4GPlayer").css('display',"none");
+            video4GPlay();
+        }else{
+            $("#video4GStopAll").css('display',"none");
+            $("#video4GPlayer").css('display',"inline");
+            video4GStop();
+        }
+    }
+
+    /**
+     * 摄像头播放
+     */
+    function video4GPlay(){
+        if(decoder!=null){
+            video4GStop();
+        }
+        decoder = null;
+        var url = window.parent.videoTempdata.videoUrl;
+        var accessToken = window.parent.videoTempdata.videoToken;
+        var decoderPath = '..//..//hikvision';
+        initDecoder(url,accessToken,decoderPath);
+        $("#start").click(function () {
+            function handleError(e) {
+                console.log('handleError', e)
+            }
+
+            function handleSuccess() {
+                console.log('handleSuccess')
+            }
+
+            decoder.play({
+                handleError: handleError,
+            });
+        });
+        $("#pause").click(function () {
+            decoder.pause();
+        })
+
+        $("#play").click(function () {
+            decoder.play();
+        });
+    }
+
+    /**
+     * 摄像头关闭
+     */
+    function video4GStop(){
+        decoder.stop();
+    }
+
+    /**
+     * 摄像头截图
+     */
+    function capturePicture4G(){
+        decoder.capturePicture(0,'default');
+    }
+
+    /**
+     * 录像控制
+     * */
+    function record4G(){
+        if( $("#videoRecord").css('display')!="none"){
+            if( $("#video4GPlayer").css('display')=="none"){
+                $("#videoStopRecord").css('display',"inline");
+                $("#videoRecord").css('display',"none");
+                startVideo4G();
+            }
+        }else{
+            $("#videoStopRecord").css('display',"none");
+            $("#videoRecord").css('display',"inline");
+            stopVideo4G();
+        }
+    }
+
+    /**
+     * 开始录像
+     */
+    function startVideo4G(){
+        decoder.startSave(0, (new Date().getTime() + 'video'));
+    }
+
+    /**
+     *停止录像
+     */
+    function stopVideo4G(){
+        decoder.stopSave(0);
+    }
+
+    //开始控制
+    var mycontrol=function (direction) {
+        var speed = $('#yunCtrlspeed').slider('getValue');
+        var accessToken = window.parent.videoTempdata.videoToken;
+        var deviceSerial = window.parent.videoTempdata.videoCode;
+        $.ajax({
+            type:"post",
+            url:"https://open.ys7.com/api/lapp/device/ptz/start",
+            dataType:"json",
+            data:{
+                accessToken: accessToken,
+                deviceSerial:deviceSerial,
+                channelNo:'1',
+                direction:direction,//控制方式
+                speed:speed//转动速度
+            },
+            success:function(res){
+                if(res.code==200){
+
+                }else{
+                    alert(res.msg);
+                }
+            },error:function(res){
+                console.info("云台开始控制失败"+res);
+            }
+        });
+
+    }
+
+    //停止转动
+    var mystop=function () {
+        var accessToken = window.parent.videoTempdata.videoToken;
+        var deviceSerial = window.parent.videoTempdata.videoCode;
+        $.ajax({
+            type:"post",
+            url:'https://open.ys7.com/api/lapp/device/ptz/stop',
+            dataType:"json",
+            data:{
+                accessToken: accessToken,
+                deviceSerial:deviceSerial,
+                channelNo:'1'
+            },
+            success:function(res){
+                if(res.code==200){
+                    console.info(res.msg);
+                }else{
+                    alert(res.msg);
+                }
+            },error:function(res){
+                console.info("添加预置点号失败"+res);
+            }
+        });
+    }
+
+    var mysound = function(){
+        var accessToken = window.parent.videoTempdata.videoToken;
+        var deviceSerial = window.parent.videoTempdata.videoCode;
+        $.ajax({
+            type:"post",
+            url:"https://open.ys7.com/api/lapp/camera/video/sound/set",
+            dataType:"json",
+            data:{
+                accessToken: accessToken,
+                deviceSerial:deviceSerial,
+                channelNo:'1',
+                enable:1
+            },
+            success:function(res){
+                if(res.code==200){
+                    console.info(res.msg);
+                }else{
+                    alert(res.msg);
+                }
+            },error:function(res){
+                console.info("添加预置点号失败"+res);
+            }
+        });
+
+    }
+    /**
+     * 添加预置点号
+     */
+    var clickSetPreset = function(){
+        var accessToken = window.parent.videoTempdata.videoToken;
+        var deviceSerial = window.parent.videoTempdata.videoCode;
+        $.ajax({
+            type:"post",
+            url:"https://open.ys7.com/api/lapp/device/preset/add",
+            dataType:"json",
+            data:{
+                accessToken: accessToken,
+                deviceSerial:deviceSerial,
+                channelNo:'1'
+            },
+            success:function(res){
+                if(res.code==200){
+
+                }else{
+                    alert(res.msg);
+                }
+            },error:function(res){
+                console.info("添加预置点号失败"+res);
+            }
+        });
+    }
+
+    /**
+     * 调用预置点号
+     * */
+    var clickGoPreset = function(){
+        var accessToken = window.parent.videoTempdata.videoToken;
+        var deviceSerial = window.parent.videoTempdata.videoCode;
+        $.ajax({
+            type:"post",
+            url:"https://open.ys7.com/api/lapp/device/preset/move",
+            dataType:"json",
+            data:{
+                accessToken: accessToken,
+                deviceSerial:deviceSerial,
+                channelNo:'1'
+            },
+            success:function(res){
+                if(res.code==200){
+
+                }else{
+                    alert(res.msg);
+                }
+            },error:function(res){
+                console.info("应用预置点号失败"+res);
+            }
+        });
+    }
+    /**
+     * 初始化摄像头信息,开启摄像头
+     * @param url
+     * @param accessToken
+     * @param decoderPath
+     */
+    function initDecoder(ezopenUrl,accessToken,decoderPath){
+        decoder = null;
+        var url = ezopenUrl;//data.videoUrl"ezopen://open.ys7.com/561961439/1.hd.live";
+        var accessToken = accessToken;//"at.afec1fh3cklad2wl4ez8f1cj0ub1ai18-5mlntasc0w-0fej1qe-ruym7fde6";
+        var decoderPath = decoderPath;
+        decoder = new EZUIKit.EZUIPlayer({
+            id: 'playWind',
+            autoplay: true,
+            url: url,
+            accessToken: accessToken,
+            decoderPath: decoderPath,
+            width: 642,
+            height: 350,
+            handleError: handleError,
+            handleSuccess: handleSuccess,
+        });
+        // 这里是打印日志，本例抛出到播放页面
+        decoder.on('log', log);
+        return decoder;
+    }
+
+    /**
+     * 回放
+     * @param url
+     * @param accessToken
+     * @param decoderPath
+     */
+    function returnPlay (){
+        var data = window.parent.videoTempdata;
+        var ezopenUrl = "";
+        var dateTimeStr =  $("#myDateTimeHidden").val();
+        var dateStr = $("#myDateHidden").val();
+        if(dateStr=="" || dateStr==undefined){
+            $.messager.alert('提示','请选择日期!','error');
+            return false;
+        }
+        if(dateTimeStr!="" && dateTimeStr!=undefined){
+            var arr = dateTimeStr.split(" - ");
+            var startStr = arr[0].replace(/[\. ,:-]+/g, "");
+            var endStr = arr[1].replace(/[\. ,:-]+/g, "");
+            var dateArr = "";
+            if(dateStr!="" && dateStr!=undefined){
+                dateArr = dateStr.replace(/[\. ,:-]+/g, "");
+            }else{
+                return false;
+            }
+            ezopenUrl = data.videoRec+"?begin="+dateArr+startStr+"&end="+dateArr+endStr;
+            var accessToken = data.videoToken;
+            var decoderPath = '..//..//hikvision';
+            $("#video4GStopAll").css('display',"inline");
+            $("#video4GPlayer").css('display',"none");
+            if(decoder!=null){
+                video4GStop();
+            }
+            initDecoder(ezopenUrl,accessToken,decoderPath);
+            decoder.play({
+                handleError: handleError,
+            });
+           // console.info(ezopenUrl);
+        }else{
+            $.messager.alert('提示','请选择时间范围!','error');
+        }
+    }
+
+    /**
+     * 停止回放
+     */
+    function stopreturnPlay(){
+        $("#video4GStopAll").css('display',"none");
+        $("#video4GPlayer").css('display',"inline");
+        if(decoder!=null){
+            video4GStop();
+        }
+    }
+    function handleError(e){
+        console.log('捕获到错误',e)
+        // log(JSON.stringify(e),'error');
+        //alert(e)
+    }
+    function handleSuccess(){
+        console.log("播放成功回调函数，此处可执行播放成功后续动作");
+    }
+
+    function log(str,className) {
+        var div = document.createElement('DIV');
+        div.className=className || 'normal';
+        div.innerHTML = (new Date()).Format('yyyy-MM-dd hh:mm:ss.S') + JSON.stringify(str);
+        document.body.appendChild(div);
+    }
+</script>

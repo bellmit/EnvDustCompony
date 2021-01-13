@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BackGround pversion="1.0">
+    <DeDev-Config>
+        <Port>8806</Port>
+        <ReceiveBufferSize>8192</ReceiveBufferSize>
+        <ReaderIdleTime>6</ReaderIdleTime>
+        <ExecutorThreadNum>2</ExecutorThreadNum>
+        <GateWayName>DeDev</GateWayName>
+        <SessionCount>100</SessionCount>
+        <VideoFlag>0</VideoFlag><!-- 0:无视频；1：VPN直连；2：代理 -->
+        <ProxyUrl>RTSP://172.17.80.217:554/EasyRelayModule?name=live</ProxyUrl>
+        <RootUser>admin</RootUser>
+        <RootAuthority>admin</RootAuthority>
+        <SysUrl>http://114.115.217.241/</SysUrl>
+        <ExternalApiUrl>http://60.29.164.70:8000/ServiceCoreBase.asmx/GetLoginUserBySid</ExternalApiUrl>
+        <MailPath>D:\MyEnvEmail\</MailPath>
+    </DeDev-Config>
+    <DataBase-Config>
+        <DbName>envdust</DbName>
+        <DbOldName>envdust_old</DbOldName>
+    </DataBase-Config>
+</BackGround>

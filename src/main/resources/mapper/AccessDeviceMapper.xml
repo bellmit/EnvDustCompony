@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IAccessDeviceDao">
+	
+	<!-- 查询没在权限用户中的设备个数 -->
+	<select id="getAhrDeviceCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM tbl_device
+		LEFT JOIN tbl_oranization ON  tbl_device.oversight_unit = tbl_oranization.org_id
+		LEFT JOIN tbl_manufacturer ON tbl_device.mfr_code = tbl_manufacturer.mfr_code
+		LEFT JOIN tbl_status ON       tbl_device.status_code = tbl_status.status_code
+		LEFT JOIN tbl_area ON         tbl_device.area_id = tbl_area.area_id
+		LEFT JOIN tbl_user ON         tbl_device.device_principal = tbl_user.user_id
+		WHERE tbl_device.device_type = '1'
+		<if test="flag == 1">
+			AND tbl_device.device_code NOT IN (
+			SELECT
+				device_code
+			FROM
+				tbl_access_device
+			WHERE
+				authority_code = #{ahrCode,jdbcType = VARCHAR}
+			)
+		</if>
+		<if test="flag == 2">
+			AND tbl_device.device_code IN (
+			SELECT
+				device_code
+			FROM
+				tbl_access_device
+			WHERE
+				authority_code = #{ahrCode,jdbcType = VARCHAR}
+			)
+		</if>
+		<if test="flag != 1 and flag != 2">
+			AND tbl_device.device_code IS NULL
+		</if>
+		<if test="device.area != null and device.area.areaId != null and device.area.areaId > 0">
+			AND tbl_area.area_id = #{device.area.areaId}
+		</if>
+		<if test="device.deviceId != -1">
+			AND tbl_device.device_id = #{device.deviceId, jdbcType =
+			INTEGER}
+		</if>
+		<if test="device.deviceCode != null and device.deviceCode != ''">
+			AND tbl_device.device_code = #{device.deviceCode,jdbcType
+			=
+			VARCHAR}
+		</if>
+		<if test="device.deviceMn != null and device.deviceMn != ''">
+			OR tbl_device.device_mn = #{device.deviceMn,jdbcType
+			=
+			VARCHAR}
+		</if>
+		<if test="device.deviceName != null and device.deviceName != ''">
+			AND tbl_device.device_name LIKE
+			CONCAT('%',CONCAT(#{device.deviceName},'%'))
+		</if>
+		<if test="device.manufacturer != null and device.manufacturer.mfrCode != null and device.manufacturer.mfrCode != ''">
+			AND tbl_manufacturer.mfr_code  = #{device.manufacturer.mfrCode,jdbcType = VARCHAR}
+		</if>
+	</select>
+	
+	<!-- 查询没在权限用户中的设备 -->
+	<select id="getAhrDevice" resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap">
+		SELECT
+			tbl_device.device_id,
+			tbl_device.device_code,
+			tbl_device.device_mn,
+			tbl_device.device_name,
+			tbl_device.device_ip,
+			tbl_device.device_port,
+			tbl_device.device_pwd,
+			tbl_device.device_x,
+			tbl_device.device_y,
+			tbl_device.system_version,
+			tbl_device.inspect_time,
+			tbl_device.build_firm,
+			tbl_device.device_address,
+			tbl_device.device_km,
+			tbl_device.opt_user,
+			tbl_device.opt_time,
+	
+			tbl_manufacturer.mfr_id,
+			tbl_manufacturer.mfr_code,
+			tbl_manufacturer.mfr_name,
+			tbl_manufacturer.mfr_address,
+			tbl_manufacturer.mfr_remark,
+			tbl_manufacturer.opt_user,
+			tbl_manufacturer.opt_time,
+	
+			tbl_status.status_id,
+			tbl_status.status_code,
+			tbl_status.status_name,
+	
+			tbl_area.area_id,
+			tbl_area.area_name,
+			tbl_area.parent_id,
+			tbl_area.level_id,
+			tbl_area.area_path,
+			tbl_area.opt_user,
+			tbl_area.opt_time,
+	
+			tbl_user.user_id,
+			tbl_user.user_code,
+			tbl_user.user_password,
+			tbl_user.user_name,
+			tbl_user.user_tel,
+			tbl_user.user_email,
+			tbl_user.user_delete,
+			tbl_user.user_remark,
+			tbl_user.opt_user,
+			tbl_user.opt_time,
+	
+			tbl_oranization.org_id,
+			tbl_oranization.org_id_parent,
+			tbl_oranization.org_name,
+			tbl_oranization.level_type,
+			tbl_oranization.org_address,
+			tbl_oranization.org_path,
+			tbl_oranization.org_telephone,
+			tbl_oranization.org_fax,
+			tbl_oranization.org_liaison,
+			tbl_oranization.opt_user,
+			tbl_oranization.opt_time,
+			#{flag} AS have_ahr
+		FROM tbl_device
+		LEFT JOIN tbl_oranization ON  tbl_device.oversight_unit = tbl_oranization.org_id
+		LEFT JOIN tbl_manufacturer ON tbl_device.mfr_code = tbl_manufacturer.mfr_code
+		LEFT JOIN tbl_status ON       tbl_device.status_code = tbl_status.status_code
+		LEFT JOIN tbl_area ON         tbl_device.area_id = tbl_area.area_id
+		LEFT JOIN tbl_user ON         tbl_device.device_principal = tbl_user.user_id
+		WHERE tbl_device.device_type = '1'
+		<if test="flag == 1">
+			AND tbl_device.device_code NOT IN (
+			SELECT
+				device_code
+			FROM
+				tbl_access_device
+			WHERE
+				authority_code = #{ahrCode,jdbcType = VARCHAR}
+			)
+		</if>
+		<if test="flag == 2">
+			AND tbl_device.device_code IN (
+			SELECT
+				device_code
+			FROM
+				tbl_access_device
+			WHERE
+				authority_code = #{ahrCode,jdbcType = VARCHAR}
+			)
+		</if>
+		<if test="flag != 1 and flag != 2">
+			AND tbl_device.device_code IS NULL
+		</if>
+		<if test="device.area != null and device.area.areaId != null and device.area.areaId > 0">
+			AND tbl_area.area_id = #{device.area.areaId}
+		</if>
+		<if test="device.deviceId != -1">
+			AND tbl_device.device_id = #{device.deviceId, jdbcType =
+			INTEGER}
+		</if>
+		<if test="device.deviceCode != null and device.deviceCode != ''">
+			AND tbl_device.device_code = #{device.deviceCode,jdbcType
+			=
+			VARCHAR}
+		</if>
+		<if test="device.deviceMn != null and device.deviceMn != ''">
+			AND tbl_device.device_mn = #{device.deviceMn,jdbcType
+			=
+			VARCHAR}
+		</if>
+		<if test="device.deviceName != null and device.deviceName != ''">
+			AND tbl_device.device_name LIKE
+			CONCAT('%',CONCAT(#{device.deviceName},'%'))
+		</if>
+		<if test="device.manufacturer != null and device.manufacturer.mfrCode != null and device.manufacturer.mfrCode != ''">
+			AND tbl_manufacturer.mfr_code  = #{device.manufacturer.mfrCode,jdbcType
+			=
+			VARCHAR}
+		</if>
+		<if test="device.rowCount != -1 and device.rowIndex != -1">
+			LIMIT #{device.rowIndex, jdbcType =
+			INTEGER},#{device.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 添加权限组设备 -->
+	<insert id="insertAccessDevice" parameterType="java.lang.Integer">
+		INSERT INTO tbl_access_device(
+			authority_code,
+			device_code,
+			opt_user)
+		VALUES
+		<foreach collection="listDevCode" item="item" index="index" separator=",">
+			(#{ahrCode},
+			#{item},
+			#{optUser})
+		</foreach>
+	</insert>
+
+	<!-- 删除权限设备 -->
+	<delete id="deleteAccessDevice">
+		DELETE FROM tbl_access_device
+		WHERE tbl_access_device.authority_code IN
+		<foreach collection="listAhrCode" item="item"  open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!-- 删除权限设备 -->
+	<delete id="deleteAccessDeviceSingle">
+		DELETE FROM tbl_access_device
+		WHERE 
+			tbl_access_device.authority_code = #{ahrCode,jdbcType = VARCHAR}
+		AND tbl_access_device.device_code IN
+		<foreach collection="listDevCode" item="item"  open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+</mapper>

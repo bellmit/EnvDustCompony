@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ISmsDao">
+
+	<resultMap type="com.tcb.env.pojo.Sms" id="smsResultMap">
+		<id property="smsId" column="sms_id" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="beginTime" column="begin_time" />
+		<result property="endTime" column="end_time" />
+		<result property="effectiveFlag" column="effective_flag" />
+		<result property="receiveFlag" column="receive_flag" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联表 -->
+		<association property="device" column="device_id" javaType="com.tcb.env.pojo.Device"
+			resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+		<association property="area" column="area_id" javaType="com.tcb.env.pojo.Area"
+			resultMap="com.tcb.env.dao.IAreaDao.areaResultMap"></association>
+		<association property="status" column="status_code" javaType="com.tcb.env.pojo.Status"
+			resultMap="com.tcb.env.dao.IStatusDao.statusResultMap"></association>
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.pojo.SmsUser" id="smsUserResultMap">
+		<id property="smsuId" column="smsu_id" />
+		<!-- 级联表 -->
+		<association property="sms" column="sms_id" javaType="com.tcb.env.pojo.Sms"
+			resultMap="smsResultMap"></association>
+		<association property="user" column="user_id" javaType="com.tcb.env.pojo.User"
+			resultMap="com.tcb.env.dao.IUserDao.userResultMap"></association>
+	</resultMap>
+	
+	<!-- 获取短信设置记录个数 -->
+	<select id="getSmsCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT ts.sms_id)
+		FROM
+			tbl_sms ts
+		INNER JOIN tbl_device td ON ts.device_id = td.device_id
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		INNER JOIN tbl_status tss ON ts.status_code = tss.status_code
+		LEFT JOIN tbl_monitor tm ON ts.thing_code = tm.thing_code
+		<where>
+			<if test="sms.device != null and sms.device.deviceName != null and sms.device.deviceName != ''">
+				td.device_name LIKE CONCAT('%',CONCAT(#{sms.device.deviceName},'%'))
+			</if>
+			<if test="sms.status != null and sms.status.statusCode != null and sms.status.statusCode != ''">
+				AND tss.status_code = #{sms.status.statusCode}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 获取短信设置记录 -->
+	<select id="getSms" resultMap="smsResultMap">
+		SELECT DISTINCT
+			ts.sms_id,
+			td.device_id,
+			td.device_code,
+			td.device_name,
+			ta.area_id,
+			ta.area_name,
+			tss.status_id,
+			tss.status_code,
+			tss.status_name,
+			tm.thing_code,
+			tm.thing_name,
+			ts.begin_time,
+			ts.end_time,
+			ts.effective_flag,
+			ts.receive_flag,
+			ts.opt_user,
+			ts.opt_time
+		FROM
+			tbl_sms ts
+		INNER JOIN tbl_device td ON ts.device_id = td.device_id
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		INNER JOIN tbl_status tss ON ts.status_code = tss.status_code
+		LEFT JOIN tbl_monitor tm ON ts.thing_code = tm.thing_code
+		<where>
+			<if test="sms.device != null and sms.device.deviceName != null and sms.device.deviceName != ''">
+				td.device_name LIKE CONCAT('%',CONCAT(#{sms.device.deviceName},'%'))
+			</if>
+			<if test="sms.status != null and sms.status.statusCode != null and sms.status.statusCode != ''">
+				AND tss.status_code = #{sms.status.statusCode}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 插入短信设置 -->
+	<insert id="insertSms" parameterType="com.tcb.env.pojo.Sms" useGeneratedKeys="true" keyProperty="sms.smsId">
+		INSERT INTO tbl_sms
+		(
+			device_id,
+			status_code,
+			<if test="sms.status != null and sms.status.statusCode != null and sms.status.statusCode != ''">
+				thing_code,
+			</if>
+			begin_time,
+			end_time,
+			effective_flag,
+			receive_flag,
+			opt_user
+		)
+		VALUES
+		(
+			#{sms.device.deviceId},
+			#{sms.status.statusCode},
+			<if test="sms.status != null and sms.status.statusCode != null and sms.status.statusCode != ''">
+				#{sms.thingCode},
+			</if>
+			#{sms.beginTime},
+			#{sms.endTime},
+			#{sms.effectiveFlag},
+			#{sms.receiveFlag},
+			#{sms.optUser}
+		)
+	</insert>
+	
+	<!-- 更新短信设置 -->
+	<update id="updateSms" parameterType="com.tcb.env.pojo.Sms">
+		UPDATE tbl_sms
+		   SET device_id = #{sms.device.deviceId},
+		   	   status_code = #{sms.status.statusCode},
+	   		   <if test="sms.status != null and sms.status.statusCode != null and sms.status.statusCode != ''">
+			   	thing_code = #{sms.thingCode},
+			   </if>
+			   begin_time = #{sms.beginTime},
+			   end_time = #{sms.endTime},
+			   effective_flag = #{sms.effectiveFlag},
+			   receive_flag = #{sms.receiveFlag},
+			   opt_time = #{sms.optTime}
+		 WHERE 	sms_id = #{sms.smsId}
+	</update>
+	
+	<!-- 删除短信用户 -->
+	<delete id="deleteSms" parameterType="java.util.List">
+		DELETE FROM tbl_sms
+		WHERE
+		<choose>
+			<when test="idList != null and idList.size()>0">
+				sms_id IN
+				<foreach collection="idList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				sms_id = NULL
+			</otherwise>
+		</choose>
+	</delete>
+	
+	<!-- 获取短信用户记录 -->
+	<select id="getSmsUser" resultMap="smsUserResultMap">
+		SELECT DISTINCT
+			tsu.smsu_id,
+			ts.sms_id,
+			ts.device_id,
+			ts.begin_time,
+			ts.end_time,
+			tu.user_id,
+			tu.user_code,
+			tu.user_name,
+			tsu.opt_user,
+			tsu.opt_time
+		FROM
+			tbl_sms_user tsu
+		INNER JOIN tbl_sms ts ON tsu.sms_id = ts.sms_id
+		INNER JOIN tbl_user tu ON tsu.user_id = tu.user_id
+		<where>
+			<if test="smsUser.smsuId != null and smsUser.smsuId > 0">
+				tsu.smsu_id = #{smsUser.smsuId}
+			</if>
+			<if test="smsUser.sms.smsId != null and smsUser.sms.smsId > 0">
+				AND tsu.sms_id = #{smsUser.sms.smsId}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 插入短信用户 -->
+	<insert id="insertSmsUser" parameterType="java.util.List">
+		INSERT INTO tbl_sms_user
+		(
+			sms_id,
+			user_id,
+			opt_user
+		)
+		VALUES
+		<foreach collection="smsUserList" item="item" index="index" separator=",">
+			(
+				#{item.sms.smsId},
+				#{item.user.userId},
+				#{item.optUser}
+			)
+		</foreach>
+	</insert>
+	
+	<!-- 删除短信用户 -->
+	<delete id="deleteSmsUser" parameterType="java.util.List">
+		DELETE FROM tbl_sms_user
+		WHERE sms_id = #{smsId}
+	</delete>
+	
+		
+	<!-- 获取设备短信设置数量 -->
+	<select id="getSmsExist" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT ts.sms_id)
+		FROM
+			tbl_sms ts
+		INNER JOIN tbl_device td ON ts.device_id = td.device_id
+		WHERE td.device_id = #{deviceId}
+		AND ts.status_code = #{statusCode}
+		<if test="thingCode != null and thingCode != ''">
+			AND ts.thing_code = #{thingCode}
+		</if>
+	</select>
+	
+</mapper>

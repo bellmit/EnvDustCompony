@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IManufacturerDao">
+	<!-- 类名和数据库中表的属性名一一对应 -->
+	<resultMap type="com.tcb.env.pojo.Manufacturer" id="mfrResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="mfrId" column="mfr_id" />
+		<result property="mfrCode" column="mfr_code" />
+		<result property="mfrName" column="mfr_name" />
+		<result property="mfrAddress" column="mfr_address" />
+		<result property="mfrRemark" column="mfr_remark" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 查询数据个数 COUNT(0)表示忽略所有lie -->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM
+		tbl_manufacturer
+		WHERE
+		1 = 1
+		<if test="manufacturer.mfrId != -1">
+			AND tbl_manufacturer.mfr_id = #{manufacturer.mfrId,
+			jdbcType = INTEGER}
+		</if>
+		<if test="manufacturer.mfrCode != null and manufacturer.mfrCode != ''">
+			AND tbl_manufacturer.mfr_code = #{manufacturer.mfrCode,
+			jdbcType = VARCHAR}
+		</if>
+		<if
+			test="isLike == true and manufacturer.mfrName != null and manufacturer.mfrName != ''">
+			AND tbl_manufacturer.mfr_name LIKE
+			CONCAT('%',CONCAT(#{manufacturer.mfrName},'%'))
+		</if>
+	</select>
+	<!-- 查询数据库 -->
+	<select id="getManufacturer" parameterType="com.tcb.env.pojo.Manufacturer"
+		resultMap="mfrResultMap">
+		SELECT
+		tbl_manufacturer.mfr_id,
+		tbl_manufacturer.mfr_code,
+		tbl_manufacturer.mfr_name,
+		tbl_manufacturer.mfr_address,
+		tbl_manufacturer.mfr_remark,
+		tbl_manufacturer.opt_user,
+		tbl_manufacturer.opt_time
+		FROM
+		tbl_manufacturer
+		WHERE<!-- 表示条件：如果此字段不为空则以此字段作为条件，来取出整行， 如果此字段为空，则不做为条件，也就是没有取出条件，不取出 
+			哪个不空取哪个 -->
+		1 = 1
+		<if test="manufacturer.mfrId != -1">
+			AND tbl_manufacturer.mfr_id = #{manufacturer.mfrId,
+			jdbcType = INTEGER}
+		</if>
+		<if test="manufacturer.mfrName != null and manufacturer.mfrName != ''">
+			AND tbl_manufacturer.mfr_name LIKE
+			CONCAT('%',CONCAT(#{manufacturer.mfrName},'%'))
+		</if>
+		<if test="manufacturer.rowCount != -1 and manufacturer.rowIndex != -1">
+			LIMIT #{manufacturer.rowIndex, jdbcType =
+			INTEGER},#{manufacturer.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	<!-- 插入语句 valuse为要传入的参数 数据库自动生成主键值 插入成功会将返回1 useGeneratedKeys="true" keyProperty="orgId" -->
+	<insert id="insertManufacturer" parameterType="java.util.List">
+		insert
+		into tbl_manufacturer
+		(mfr_code,
+		mfr_name,
+		mfr_address,
+		mfr_remark,
+		opt_user
+		)
+		values
+		<foreach collection="listmanufacturer" item="item" index="index"
+			separator=",">
+			(#{item.mfrCode},
+			#{item.mfrName},
+			#{item.mfrAddress},
+			#{item.mfrRemark},
+			#{item.optUser})
+		</foreach>
+	</insert>
+	<!-- 删除语句 成功返回1，不成功返回0 -->
+	<delete id="deleteManufacturer" parameterType="java.util.List">
+		DELETE FROM tbl_manufacturer
+		WHERE
+		tbl_manufacturer.mfr_id IN
+		<foreach collection="manufacturerid" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<!-- 更新操作 -->
+	<update id="updateManufacturer" parameterType="java.util.List">
+		<!-- SET列名称，新值，具体哪一行看where -->
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			UPDATE tbl_manufacturer
+			SET
+			tbl_manufacturer.opt_time = #{item.optTime}
+			<if test="item.mfrCode != null and item.mfrCode != ''">
+				,tbl_manufacturer.mfr_code = #{item.mfrCode}
+			</if>
+			<if test="item.mfrName != null and item.mfrName != ''">
+				,tbl_manufacturer.mfr_name = #{item.mfrName}
+			</if>
+			<if test="item.mfrAddress != null and item.mfrAddress != ''">
+				,tbl_manufacturer.mfr_address = #{item.mfrAddress}
+			</if>
+			<if test="item.mfrRemark != null and item.mfrRemark != ''">
+				,tbl_manufacturer.mfr_remark = #{item.mfrRemark}
+			</if>
+			<if test="item.optUser != -1">
+				,tbl_manufacturer.opt_user = #{item.optUser}
+			</if>
+			<!-- where列名称，某值，修改某行的标识 -->
+			WHERE
+			tbl_manufacturer.mfr_id = #{item.mfrId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+	<!-- 更新时查询是否存在厂商编号 -->
+	<select id="getManufacturerExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_manufacturer
+		WHERE 1=1
+		<if test="manufacturerid != -1">
+			AND tbl_manufacturer.mfr_id != #{manufacturerid, jdbcType
+			= INTEGER}
+		</if>
+		<if test="manufacturercode != null and manufacturercode != ''">
+			AND tbl_manufacturer.mfr_code = #{manufacturercode,
+			jdbcType = VARCHAR}
+		</if>
+	</select>
+
+</mapper>

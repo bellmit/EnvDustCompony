@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IAuthorityDetailDao">
+
+	<resultMap type="com.tcb.env.pojo.AuthorityDetail" id="ahrDetailResultMap">
+		<id property="authorityDetailId" column="authority_detail_id" />
+		<result property="controlId" column="control_id" />
+		<result property="controlName" column="control_name" />
+		<result property="levelId" column="level_id" />
+		<result property="dealType" column="deal_type" />
+		<result property="checkStatus" column="check_status"/>
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联权限表 -->
+		<association property="authority" javaType="com.tcb.env.pojo.Authority"
+			resultMap="com.tcb.env.dao.IAuthorityDao.authorityResultMap"></association>
+	</resultMap>
+
+	<!-- 查询权限明细控件数据 -->
+	<select id="getAuthorityDetail" resultMap="ahrDetailResultMap">
+		SELECT
+			tad.authority_detail_id,
+			ta.authority_id,
+			ta.authority_code,
+			ta.authority_name,
+			tad.control_id,
+			tm.module_name AS control_name,
+			tad.deal_type,
+			tad.level_id,
+			tad.check_status,
+			tad.opt_user,
+			tad.opt_time
+		FROM
+			tbl_authority_detail tad
+		INNER JOIN tbl_authority ta ON tad.authority_code = ta.authority_code
+		INNER JOIN tbl_module tm ON tad.control_id = tm.module_id
+		AND tad.level_id = 1
+		WHERE tad.authority_code=#{ahrCode,jdbcType = INTEGER}
+		UNION
+		SELECT
+			tad.authority_detail_id,
+			ta.authority_id,
+			ta.authority_code,
+			ta.authority_name,
+			tad.control_id,
+			tp.page_name AS control_name,
+			tad.deal_type,
+			tad.level_id,
+			tad.check_status,
+			tad.opt_user,
+			tad.opt_time
+		FROM
+			tbl_authority_detail tad
+		INNER JOIN tbl_authority ta ON tad.authority_code = ta.authority_code
+		INNER JOIN tbl_page tp ON tad.control_id = tp.page_id
+		AND tad.level_id = 2
+		WHERE tad.authority_code=#{ahrCode,jdbcType = INTEGER}
+	</select>
+	
+	<!-- 新添权限明细控件数据 -->
+	<insert id="insertAuthorityDetail" parameterType="java.util.List">
+		INSERT INTO tbl_authority_detail(
+			authority_code,
+			control_id,
+			level_id,
+			deal_type,
+			check_status,
+			opt_user)
+		VALUES
+		<foreach collection="listAhrDetail" item="item" index="index" separator=",">
+			(#{item.authority.authorityCode},
+			#{item.controlId},
+			#{item.levelId},
+			#{item.dealType},
+			#{item.checkStatus},
+			#{item.optUser})
+		</foreach>
+	</insert>
+	
+	<!-- 删除权限明细控件数据 -->
+	<delete id="deleteAuthorityDetail" parameterType="java.util.List">
+		DELETE FROM tbl_authority_detail
+		WHERE tbl_authority_detail.authority_code IN
+		<foreach collection="listAhrCode" item="item"  open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

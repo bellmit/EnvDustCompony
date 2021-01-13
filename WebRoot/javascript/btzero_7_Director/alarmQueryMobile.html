@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>移动在线监测系统</title>
+<meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+	name='viewport'>
+<meta name="description" content="Developed By M Abdur Rokib Promy">
+<meta name="keywords" content="Admin, Bootstrap 3, Template, Theme, Responsive">
+<!-- bootstrap 3.0.2 -->
+<link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<!-- font Awesome -->
+<link href="./css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+<!-- Ionicons -->
+<link href="./css/ionicons.min.css" rel="stylesheet" type="text/css" />
+<!-- Date Picker -->
+<link href="./css/bootstrap-datepicker-1.6.4/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+<link href="./css/iCheck/all.css" rel="stylesheet" type="text/css" />
+<!-- Theme style -->
+<link title="stylenew" rel="stylesheet" type="text/css" href="./css/stylenew.css"/>
+
+
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+          <![endif]-->
+
+<style type="text/css">
+.table-responsive>.table>thead>tr>th, .table-responsive>.table>tbody>tr>th, 
+.table-responsive>.table>tfoot>tr>th, .table-responsive>.table>thead>tr>td,
+.table-responsive>.table>tbody>tr>td, .table-responsive>.table>tfoot>tr>td {
+     white-space:normal;
+}
+body > .header .navbar{
+	margin-left:0px;
+}
+.pagination ul li{
+	list-style: none;
+}
+.pagination {
+    display: inline;
+    padding-left: -10px;
+    margin: 20px -35px;
+    border-radius: 4px;
+}
+.pageli.active{
+	background:#eee;
+}
+.pageli {
+    float:left;
+}
+
+.pagination .pageli > a, .pagination .pageli > span{
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.428571429;
+    text-decoration: none;
+    border: 1px solid #dddddd;
+}
+.icon-bar{
+	background: #fff!important;
+	display: block;
+    width: 22px;
+    height: 2px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+</style>
+</head>
+ <body class="skin-black">
+        <!-- header logo: style can be found in header.less -->
+      
+        <div class="wrapper row-offcanvas row-offcanvas-left">
+            <aside class="right-side">
+		        <section class="content">
+		            <div class="row">
+		                <div class="col-md-12">
+		                    <div class="panel">
+			                 
+			                    <div class="panel-body table-responsive">
+			                    	 <div class="box-tools m-b-15" style="padding-left:-13px;">
+						                <label for="dtp_input2" class="control-label" style="margin-top:7px;float:left;margin-bottom:5px;">报警时间：</label>
+						                <div id="mydatepicker" class="input-group date form_date" data-date="" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" data-link-format="yyyy-mm-dd" style="float:left;width:200px;margin-right:10px;margin-bottom:5px;">
+						                    <input class="form-control" size="14" type="text" value="" readonly style="background:#eee;">
+											<span class="input-group-addon" style="background:#27c24c;"><span class="glyphicon glyphicon-calendar" style="color:#fff;"></span></span>
+						                </div>
+						             
+										<span class="input-group" style="width:270px;">
+				                            <input type="text" name="stationNamePhone" id="stationNamePhone" class="form-control" placeholder="名称..." style="background-color"/>
+				                            <span class="input-group-btn">
+				                                <button type='submit' name='seach' id='search-btn' class="btn btn-flat btn-success" onclick="queryAlarmInfo()"><i class="fa fa-search"></i></button>
+				                            </span>
+				                        </span>
+										<input type="hidden" id="dtp_input2" value="" />
+                                      </div>
+				                     <table class="table table-hover" style="word-break:break-all; word-wrap:break-all;">
+				                        	<thead>
+					                            <tr>
+					                              <th style="width:10px;">#</th>
+					                              <th style="min-width:55px;">名称</th>
+					                              <th style="min-width:50px;">类型</th>
+					                              <th style="min-width:60px;">信息</th>
+					                              <th style="min-width:89px;">报警时间</th>
+					                            </tr>
+				                      	 	</thead>
+				                    		  <tbody id="alarmGrid">
+							                  </tbody>
+				              			</table>
+			              			 <div class="table-foot">
+                          				<div id="mypaginator" style="float:left;"></div>
+                                 	 </div>
+	          		        	</div>
+			          		</div>
+		      			</div>
+		  			</div><!--end col-6 -->
+		        </section><!-- /.content -->
+		    </aside>
+
+		</div><!-- ./wrapper -->
+
+
+        <!-- jQuery 2.0.2 -->
+        <script src="./js/jquery.min.js" type="text/javascript"></script>
+
+        <!-- jQuery UI 1.10.3 -->
+        <script src="./js/jquery-ui-1.10.3.min.js" type="text/javascript"></script>
+        <!-- Bootstrap -->
+        <script src="./js/bootstrap.min.js" type="text/javascript"></script>
+        <!-- daterangepicker -->
+        <script src="./js/plugins/bootstrap-datepicker-1.6.4/bootstrap-datetimepicker.js" type="text/javascript"></script>
+        <script type="text/javascript" src="./js/plugins/bootstrap-datepicker-1.6.4/locales/bootstrap-datetimepicker.fr.js" charset="UTF-8"></script>
+         <script src="./js/plugins/bootstrap-paginator/bootstrap-paginator.js" type="text/javascript"></script>
+        <!-- iCheck -->
+        <script src="./js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>
+		<script src="./js/util.js" type="text/javascript"></script>
+        <!-- Director App -->
+        <script src="./js/Director/app.js" type="text/javascript"></script>
+ 		<script src="./../util/ctrl.js" type="text/javascript"></script>
+
+        <!-- Director for demo purposes -->
+        <script type="text/javascript">
+	        //默认左侧导航栏折叠
+	        $(".right-side").toggleClass("strech");
+            $('input').on('ifChecked', function(event) {
+                $(this).parents('li').addClass("task-done");
+                console.log('ok');
+            });
+            $('input').on('ifUnchecked', function(event) {
+                $(this).parents('li').removeClass("task-done");
+                console.log('not');
+            });
+            
+			$('#mydatepicker').datetimepicker({
+		        language:  'zh_TW',
+		        weekStart: 1,
+		        todayBtn:  1,
+				autoclose: 1,
+				todayHighlight: 1,
+				startView: 2,
+				minView: 2,
+				forceParse: 0
+	    	});
+	    	$('#mydatepicker').find("input").val(formatterDate(new Date()));
+        </script>
+        <script>
+            $('#noti-box').slimScroll({
+                height: '400px',
+                size: '5px',
+                BorderRadius: '5px'
+            });
+
+            $('input[type="checkbox"].flat-grey, input[type="radio"].flat-grey').iCheck({
+                checkboxClass: 'icheckbox_flat-grey',
+                radioClass: 'iradio_flat-grey'
+            });
+</script>
+<script type="text/javascript">
+var currentPage = 1;
+var options;
+queryAlarmInfo();
+function queryAlarmInfo(){
+	currentPage = 1;
+	var beginAlarmTime = ($("#mydatepicker").find("input").val()==""?"":$("#mydatepicker").find("input").val()) + " 00:00:00";
+	var endAlarmTime = ($("#mydatepicker").find("input").val()==""?"":$("#mydatepicker").find("input").val()) + " 23:59:59";
+	var stationNamePhone = $("#stationNamePhone").val();
+	loading();
+	$.ajax({
+	url : "../../../AlarmController/queryAlarms",
+	type : "post",
+	dataType : "json",
+	async : true,
+	data:{	"beginAlarmTime" : beginAlarmTime,
+			"endAlarmTime" : endAlarmTime,
+			"deviceName":stationNamePhone,
+			"page":currentPage,
+			"rows":10},
+	success : function(json) {
+		if(json!=null&&json.rows!=null ){
+			var htmlArr = "";
+			$("#alarmGrid").html("");
+			$("#mypaginator").html("");
+			if(json.rows.length>0){
+				htmlarr = createDateTable(json.rows);
+				$("#alarmGrid").append(htmlarr);
+				initPage(json.total);
+			}else{
+				//alert("没有查询到相应的报警数据！");
+				htmlarr = createDateTable(json.rows);
+				$("#alarmGrid").append(htmlarr);
+			}
+		}
+		endLoading();
+	}
+	});
+}
+
+function initPage(totals){
+	$("#mypaginator").html("");
+	var totalPages = 0;
+	if(totals%10==0){
+		totalPages = totals/10
+	}else{
+		totalPages = totals/10+1;
+	}
+	 options = {
+            currentPage: currentPage,//当前页
+            totalPages: totalPages,//总页数
+            numberofPages: 1,//显示的页数
+            itemTexts: function(type, page, current) { //修改显示文字
+                switch (type) {
+                case "first":
+                    return "<<";
+                case "prev":
+                    return "<";
+                case "next":
+                    return ">";
+                case "last":
+                    return ">>";
+                case "page":
+                    return page;
+                }
+            }, onPageClicked: function (event, originalEvent, type,page) { //异步换页
+	            currentPage = page;
+	            loading();
+	            var beginAlarmTime = ($("#mydatepicker").find("input").val()==""?"":$("#mydatepicker").find("input").val()) + " 00:00:00";
+				var endAlarmTime = ($("#mydatepicker").find("input").val()==""?"":$("#mydatepicker").find("input").val()) + " 23:59:59";
+				var stationNamePhone = $("#stationNamePhone").val();
+	            	$.ajax({
+						url : "../../../AlarmController/queryAlarms",
+						type : "post",
+						dataType : "json",
+						async : true,
+						data:{	"beginAlarmTime" : beginAlarmTime,
+								"endAlarmTime" : endAlarmTime,
+								"deviceName":stationNamePhone,
+								"page":currentPage,
+								"rows":10},
+						success : function(json) {
+							if(json!=null&&json.rows!=null ){
+								var htmlArr = "";
+								$("#alarmGrid").html("");
+								htmlarr = createDateTable(json.rows);
+								$("#alarmGrid").append(htmlarr);
+								if(json.rows.length==0){
+									 $("#mypaginator").html('');
+								}
+							}
+							endLoading();
+						}
+					});
+			}
+    	};
+        $("#mypaginator").bootstrapPaginator(options);
+}
+
+function createDateTable(data){
+	var htmlArr = [];
+	if(data.length>0){
+		for(var i=0;i<data.length;i++){
+			htmlArr.push("<tr>");
+			if(data[i].alarmStatus=="1"){
+				htmlArr.push("<td style='width:10px;'><span class='label label-danger'>"+(i+1)+"</span></td>");
+			}else{
+				htmlArr.push("<td style='width:10px;'><span class='label label-success'>"+(i+1)+"</span></td>");
+			}
+			
+			htmlArr.push("<td>"+data[i].deviceName+"</td>");
+			htmlArr.push("<td>"+data[i].alarmTypeName+"</td>");
+			htmlArr.push("<td>"+data[i].alarmInfo+"</td>");
+			htmlArr.push("<td>"+data[i].alarmTime+"</td>");
+			htmlArr.push("<td>"+data[i].areaName+"</td>");
+			htmlArr.push("</tr>");					         
+		}
+	}else{
+		htmlArr.push("<tr>");
+		htmlArr.push("<td colspan='6' align=center>没有查询到相应的数据</td>");
+		htmlArr.push("</tr>");	
+	}
+			
+	return htmlArr.join("");	             
+}
+</script>
+<script type="text/javascript">
+	$.ajaxSetup({
+		contentType : "application/x-www-form-urlencoded;charset=utf-8",
+		complete : function(XMLHttpRequest, textStatus) {
+			var sessionstatus = XMLHttpRequest
+					.getResponseHeader("sessionstatus"); //通过XMLHttpRequest取得响应头，sessionstatus，  
+			if (sessionstatus == "timeout") {
+				//如果超时就处理 ，指定要跳转的页面 
+				window.location.href = "/loginPhone.html";
+			}
+		}
+	});
+</script>
+</body>
+</html>

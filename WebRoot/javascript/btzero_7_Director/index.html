@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>大屏监控</title>
+<meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+	name='viewport'>
+<meta name="description" content="Developed By M Abdur Rokib Promy">
+<meta name="keywords" content="Admin, Bootstrap 3, Template, Theme, Responsive">
+<!-- bootstrap 3.0.2 -->
+<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<!-- font Awesome -->
+<link href="css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+<!-- Ionicons -->
+<link href="css/ionicons.min.css" rel="stylesheet" type="text/css" />
+<!-- Morris chart -->
+<link href="css/morris/morris.css" rel="stylesheet" type="text/css" />
+<!-- jvectormap -->
+<link href="css/jvectormap/jquery-jvectormap-1.2.2.css" rel="stylesheet" type="text/css" />
+<!-- Date Picker -->
+<link href="css/datepicker/datepicker3.css" rel="stylesheet" type="text/css" />
+<!-- fullCalendar -->
+<!-- <link href="css/fullcalendar/fullcalendar.css" rel="stylesheet" type="text/css" /> -->
+<!-- Daterange picker -->
+<link href="css/daterangepicker/daterangepicker-bs3.css" rel="stylesheet" type="text/css" />
+<!-- iCheck for checkboxes and radio inputs -->
+<link href="css/iCheck/all.css" rel="stylesheet" type="text/css" />
+<!-- bootstrap wysihtml5 - text editor -->
+<!-- <link href="css/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" type="text/css" /> -->
+<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+<!-- Theme style -->
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+
+
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+          <![endif]-->
+
+<style type="text/css">
+</style>
+</head>
+<body class="skin-black">
+	<!-- header logo: style can be found in header.less -->
+	<header class="header">
+		<a href="index.html" id="index_label" class="logo">监控站点-全部 </a>
+		<!-- Header Navbar: style can be found in header.less -->
+		<nav class="navbar navbar-static-top" role="navigation">
+			<!-- Sidebar toggle button-->
+			<a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button"> <span
+				class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</a>
+			<div class="navbar-right">
+				<ul class="nav navbar-nav">
+					<!-- Messages: style can be found in dropdown.less-->
+					<li class="dropdown messages-menu">
+						<a href="#" class="dropdown-toggle" onclick="launchFullscreen(document.documentElement);"> 
+							<i class="fa fa-tasks"></i> <span class="label label-success">开</span>
+						</a>
+					</li>
+					<li class="dropdown tasks-menu">
+						<a href="#" class="dropdown-toggle" onclick="exitFullscreen();">
+							<i class="fa fa-tasks"></i> <span class="label label-danger">关</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+	</header>
+	<div class="wrapper row-offcanvas row-offcanvas-left">
+		<!-- Left side column. contains the logo and sidebar -->
+		<aside class="left-side sidebar-offcanvas">
+			<!-- sidebar: style can be found in sidebar.less -->
+			<section class="sidebar">
+				<!-- Sidebar user panel -->
+				<div class="user-panel">
+					<div class="pull-left image">
+						<img src="img/photo23.jpg" class="img-circle" alt="User Image" />
+					</div>
+					<div class="pull-left info">
+						<p>欢迎使用大屏监控</p>
+						<a href="#"><i class="fa fa-circle text-success"></i>监控中</a>
+					</div>
+				</div>
+				<!-- search form -->
+				<form action="#" method="get" class="sidebar-form">
+					<div class="input-group">
+						<input type="text" name="q" class="form-control" placeholder="Search..." /> <span
+							class="input-group-btn">
+							<button type='submit' name='seach' id='search-btn' class="btn btn-flat">
+								<i class="fa fa-search"></i>
+							</button>
+						</span>
+					</div>
+				</form>
+				<!-- /.search form -->
+				<!-- sidebar menu: : style can be found in sidebar.less -->
+				<ul class="sidebar-menu">
+					<!-- 
+					<li class="active"><a href="index.html"> <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+					</a></li>
+					<li><a href="general.html"> <i class="fa fa-gavel"></i> <span>General</span>
+					</a></li>
+
+					<li><a href="basic_form.html"> <i class="fa fa-globe"></i> <span>Basic Elements</span>
+					</a></li>
+
+					<li><a href="simple.html"> <i class="fa fa-glass"></i> <span>Simple tables</span>
+					</a></li>
+					 -->
+ 					<li><a href=""> <i class="fa fa-dashboard"></i> <span>重置页面</span>
+					</a></li>
+					<li><a href=""> <i class="fa fa-gavel"></i> <span>关闭网页</span>
+					</a></li>
+				</ul>
+			</section>
+			<!-- /.sidebar -->
+		</aside>
+		
+		<div class="copyrights">
+			Collect from <a href="http://www.cssmoban.com/">免费网站模板</a>
+		</div>
+
+		<aside class="right-side">
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="row" style="margin-bottom:5px;">
+					<div class="col-md-2">
+						<div class="sm-st clearfix">
+							<span class="sm-st-icon st-blue"><i class="fa fa-th-large"></i></span>
+							<div class="sm-st-info">
+								<span>4567</span> 全部
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="sm-st clearfix">
+							<span class="sm-st-icon st-green"><i class="fa fa-check-square-o"></i></span>
+							<div class="sm-st-info">
+								<span>4567</span> 正常
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="sm-st clearfix">
+							<span class="sm-st-icon st-red"><i class="fa fa-exclamation-triangle"></i></span>
+							<div class="sm-st-info">
+								<span>3200</span> 超标
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="sm-st clearfix">
+							<span class="sm-st-icon st-red"><i class="fa fa-chain-broken"></i></span>
+							<div class="sm-st-info">
+								<span>2200</span> 断连
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="sm-st clearfix">
+							<span class="sm-st-icon st-gray"><i class="fa fa-list"></i></span>
+							<div class="sm-st-info">
+								<span>10320</span> 无数据
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="sm-st clearfix">
+							<span class="sm-st-icon st-orange"><i class="fa fa-paperclip"></i></span>
+							<div class="sm-st-info">
+								<span>4567</span> 其他
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Main row -->
+				<div class="row">
+					<div class="col-md-8">
+						<!--earning graph start-->
+						<section class="panel">
+							<header class="panel-heading"> 地图显示 </header>
+							<!--<div >
+								<canvas id="linechart" width="600" height="330"></canvas>
+
+							</div>-->
+							<div style="width:100%;height:550px;" id="map_canvas">
+							</div>
+						</section>
+						<!--earning graph end-->
+					</div>
+					<div class="col-lg-4">
+						<!--chat start-->
+						<section class="panel">
+							<header class="panel-heading"> 报警信息(最新10条) </header>
+							<div class="panel-body" id="noti-box">
+
+								<div class="alert alert-block alert-danger">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Oh snap!</strong> Change a few things up and try submitting again.
+								</div>
+								<div class="alert alert-success">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Well done!</strong> You successfully read this important alert message.
+								</div>
+								<div class="alert alert-info">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Heads up!</strong> This alert needs your attention, but it's not super important.
+								</div>
+								<div class="alert alert-warning">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Warning!</strong> Best check yo self, you're not looking too good.
+								</div>
+
+
+								<div class="alert alert-block alert-danger">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Oh snap!</strong> Change a few things up and try submitting again.
+								</div>
+								<div class="alert alert-success">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Well done!</strong> You successfully read this important alert message.
+								</div>
+								<div class="alert alert-info">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Heads up!</strong> This alert needs your attention, but it's not super important.
+								</div>
+								<div class="alert alert-warning">
+									<button data-dismiss="alert" class="close close-sm" type="button">
+										<i class="fa fa-times"></i>
+									</button>
+									<strong>Warning!</strong> Best check yo self, you're not looking too good.
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<section class="panel">
+							<header class="panel-heading"> 监控状态 </header>
+							<div class="panel-body table-responsive">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>#</th>
+											<th>站点MN号</th>
+											<th>站点名称</th>
+											<th>监测物质</th>
+											<th>更新时间</th>
+											<th>数值</th>
+											<th>状态</th>
+											<th>超标比</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>1</td>
+											<td>Facebook</td>
+											<td>Mark</td>
+											<td>Steve</td>
+											<td>10/10/2014</td>
+											<td>1500</td>
+											<td><span class="label label-danger">in progress</span></td>
+											<td><span class="badge badge-info">50%</span></td>
+										</tr>
+										<tr>
+											<td>2</td>
+											<td>Twitter</td>
+											<td>Evan</td>
+											<td>Darren</td>
+											<td>10/8/2014</td>
+											<td>1500</td>
+											<td><span class="label label-success">completed</span></td>
+											<td><span class="badge badge-success">0%</span></td>
+										</tr>
+										<tr>
+											<td>3</td>
+											<td>Google</td>
+											<td>Larry</td>
+											<td>Nick</td>
+											<td>10/12/2014</td>
+											<td>2000</td>
+											<td><span class="label label-warning">in progress</span></td>
+											<td><span class="badge badge-warning">20%</span></td>
+										</tr>
+										<tr>
+											<td>4</td>
+											<td>LinkedIn</td>
+											<td>Allen</td>
+											<td>Rock</td>
+											<td>10/01/2015</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-info">65%</span></td>
+										</tr>
+										<tr>
+											<td>5</td>
+											<td>Tumblr</td>
+											<td>David</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-warning">in progress</span></td>
+											<td><span class="badge badge-danger">95%</span></td>
+										</tr>
+										<tr>
+											<td>6</td>
+											<td>Tesla</td>
+											<td>Musk</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>7</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>8</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>9</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>10</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>11</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>12</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+										<tr>
+											<td>13</td>
+											<td>Ghost</td>
+											<td>XXX</td>
+											<td>HHH</td>
+											<td>01/11/2014</td>
+											<td>$2000</td>
+											<td><span class="label label-info">in progress</span></td>
+											<td><span class="badge badge-success">95%</span></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</section>
+					</div>
+				</div>
+				
+				
+				<!-- row end -->
+			</section>
+			
+			<!-- /.content --> 
+			<div class="footer-main">
+				Copyright &copy Director, 2018. EnvDust <a href="http://114.115.217.241/"
+					target="_blank" title="监控平台">监控平台</a>
+			</div>
+			 
+		</aside>
+		<!-- /.right-side -->
+
+	</div>
+	<!-- ./wrapper -->
+
+
+	<!-- jQuery 2.0.2 -->
+	<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script> -->
+	<script src="js/jquery.min.js" type="text/javascript"></script>
+
+	<!-- jQuery UI 1.10.3 -->
+	<script src="js/jquery-ui-1.10.3.min.js" type="text/javascript"></script>
+	<!-- Bootstrap -->
+	<script src="js/bootstrap.min.js" type="text/javascript"></script>
+	<!-- daterangepicker -->
+	<script src="js/plugins/daterangepicker/daterangepicker.js" type="text/javascript"></script>
+
+	<script src="js/plugins/chart.js" type="text/javascript"></script>
+
+	<!-- datepicker
+        <script src="js/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>-->
+	<!-- Bootstrap WYSIHTML5
+        <script src="js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js" type="text/javascript"></script>-->
+	<!-- iCheck -->
+	<script src="js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>
+	<!-- calendar -->
+	<script src="js/plugins/fullcalendar/fullcalendar.js" type="text/javascript"></script>
+
+	<!-- Director App -->
+	<script src="js/Director/app.js" type="text/javascript"></script>
+
+	<!-- Director dashboard demo (This is only for demo purposes) -->
+	<script src="js/Director/dashboard.js" type="text/javascript"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=BFUNsobNP2ugfU0ExUnPVwvt&callback=initMap"></script>
+	<!-- Director for demo purposes -->
+	<script type="text/javascript">
+		//默认左侧导航栏折叠
+	 	$('.left-side').toggleClass("collapse-left");
+        $(".right-side").toggleClass("strech");
+        
+		$('input').on('ifChecked', function(event) {
+			// var element = $(this).parent().find('input:checkbox:first');
+			// element.parent().parent().parent().addClass('highlight');
+			$(this).parents('li').addClass("task-done");
+			console.log('ok');
+		});
+		$('input').on('ifUnchecked', function(event) {
+			// var element = $(this).parent().find('input:checkbox:first');
+			// element.parent().parent().parent().removeClass('highlight');
+			$(this).parents('li').removeClass("task-done");
+			console.log('not');
+		});
+	</script>
+	<script>
+		$('#noti-box').slimScroll({
+			height : '550px',
+			size : '5px',
+			BorderRadius : '5px'
+		});
+
+		$('input[type="checkbox"].flat-grey, input[type="radio"].flat-grey')
+				.iCheck({
+					checkboxClass : 'icheckbox_flat-grey',
+					radioClass : 'iradio_flat-grey'
+				});
+	</script>
+	<script type="text/javascript">
+		
+		function launchFullscreen(element) {
+		  if(element.requestFullscreen) {
+		    element.requestFullscreen();
+		  } else if(element.mozRequestFullScreen) {
+		    element.mozRequestFullScreen();
+		  } else if(element.webkitRequestFullscreen) {
+		    element.webkitRequestFullscreen();
+		  } else if(element.msRequestFullscreen) {
+		    element.msRequestFullscreen();
+		  }
+		}
+		
+		function exitFullscreen() {
+			if (document.exitFullscreen) { 
+			document.exitFullscreen(); 
+			} 
+			else if (document.mozCancelFullScreen) { 
+			document.mozCancelFullScreen(); 
+			} 
+			else if (document.webkitCancelFullScreen) { 
+			document.webkitCancelFullScreen(); 
+			} 
+			else if (document.msExitFullscreen) { 
+			document.msExitFullscreen(); 
+			}
+		}
+		function initMap(){
+			var map = new BMap.Map("map_canvas");          // 创建地图实例  
+			var point = new BMap.Point(116.404, 39.915);  // 创建点坐标  
+			map.centerAndZoom(point, 15);                 // 初始化地图，设置中心点坐标和地图级别
+			map.enableScrollWheelZoom(true);   //开启鼠标滚轮缩放
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          name='viewport'>
+    <link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="./css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/ionicons.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/bootstrap-select.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
+    <title>查询</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 no-padding">
+            <span>类型：</span>
+            <div class="btn-group">
+                <label><input type="radio" class="btn btn-default" name="type" value="min">分钟</label>
+                <label><input type="radio" class="btn btn-default" name="type" value="hour">小时</label>
+                <label> <input type="radio" class="btn btn-default" name="type" value="day">每日</label>
+            </div>
+            <br>
+            <span>指标：</span>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default">CO</button>
+                <button type="button" class="btn btn-default">O3</button>
+                <button type="button" class="btn btn-default">SO2</button>
+                <button type="button" class="btn btn-default">NO2</button>
+                <button type="button" class="btn btn-default">PM2.5</button>
+                <button type="button" class="btn btn-default">PM10</button>
+            </div>
+        </div>
+        <div class="col-xs-12" style="border-top: 5px solid #a0a6ad;">
+            <div id="main" style="height:400px;"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/bootstrap-select.min.js"></script>
+<script src="./js/adminlte.min.js"></script>
+<script src="./js/defaults-zh_CN.min.js"></script>
+<script src="./js/plugins/echarts/echarts.min.js"></script>
+
+<script>
+    option = {
+        legend: {
+            x: 'left',
+            y: 'bottom'
+        },
+        calculable: true,
+        series: [
+            {
+                name: '检测值',
+                type: 'pie',
+                radius: ['30%', '70%'],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            position: 'inner',
+                            formatter: function (params) {
+                                return (params.percent - 0).toFixed(0) + '%'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        }
+                    },
+                    emphasis: {
+                        label: {
+                            show: false,
+                            position: 'center',
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    }
+                },
+                data: []
+            }
+        ]
+    };
+    var myChart = echarts.init(document.getElementById('main'));
+    myChart.setOption(option);
+    window.onresize = function () {
+        myChart.resize();
+    };
+
+    function loadData() {
+        $.ajax({
+            type: "post",
+            async: false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+            url: "",
+            data: {},
+            dataType: "json",
+            success: function (result) {
+                if (result) {
+                    for (var i = 0; i < result.length; i++) {
+                        names.push(result[i].name);    //挨个取出类别并填入类别数组
+                    }
+                    myChart.hideLoading();    //隐藏加载动画
+                    myChart.setOption({        //加载数据图表
+                        series: [{
+                            data: [{value: 333, name: "电动"}, {value: 111, name: '电的'}]
+                        }]
+                    });
+
+                }
+
+            },
+            error: function (errorMsg) {
+                alert("图表请求数据失败!");
+                myChart.hideLoading();
+            }
+        });
+    }
+</script>
+</html>

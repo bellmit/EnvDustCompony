@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<head>
+    <title>大华4G摄像头</title>
+    <link id="easyuiTheme" rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/blue/easyui.css">
+    <link rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="./../jquery-easyui-1.4.4/themes/color.css">
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/jquery.min.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/jquery.easyui.min.js"></script>
+    <script src="./../jquery-easyui-1.4.4/plugins/laydate/laydate.js"></script>
+    <script type="text/javascript" src="./../MyChart/echarts.min.js"></script>
+    <script src="./../jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/datagridTooltip.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/dgnodataExtend.js"></script>
+    <script type="text/javascript" src="./../jquery-easyui-1.4.4/datagridExtend.js"></script>
+    <script type="text/javascript" src="./../util/ctrl.js"></script>
+   <!-- <script type="text/javascript" src="./../daHuaCamera/player/cyberplayer.js"></script>-->
+    <script type="text/javascript" src="./imouPlayer/imouplayer.js"></script>
+    <style>
+        * {
+            touch-action: none;
+        }
+        .ptz .btn2 {
+            width: 60px;
+            height: 22px;
+            line-height: 18px;
+        }
+    </style>
+
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" style="overflow:hidden;">
+    <div data-options="region:'center',iconCls:'icon-ok'" style="overflow:hidden;">
+        <div id="daHua4GCamera" style="width:100%; height: 350px;background: #000000;overflow:hidden;">
+        </div>
+        <div style="margin:10px 0px 5px 10px;">
+            <label>回放时间范围：</label>
+            <input type="text" class="layui-input" id="myDate" placeholder="请选择日期"  style="width:88px;"/>
+            <input type="text" class="layui-input" id="myDateTime" placeholder="请选择时间范围" style="width:140px;"/>
+            <span style="margin-left:15px;"><a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="returnPlay()">开始回放</a></span>
+            <span style="margin-left:5px;"><a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="stopreturnPlay()">停止回放</a></span>
+        </div>
+    </div>
+
+    <div data-options="region:'east',split:true" title="云台控制" style="width:270px;font-size:12px;">
+        <table cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;background:url(./../../images/camera/bgcircle2.png) no-repeat;height:180px;width:180px;">
+            <tbody style="float:left;margin-left:13px;margin-top:35px;">
+            <tr height="40px;" style="float:left;margin-left:18px;margin-bottom:15px;width:143px;">
+                <td style="float:left;margin-top:15px;width:48px;"><img src="./../../images/camera/left_up.png" id="ptzLeftUp" style="cursor:pointer" onmouseover="this.src='./../../images/camera/left_up.png'" onmouseout="this.src='./../../images/camera/left_up.png'" onclick="controlPTZDaHua(4);" /></td>
+                <td style="float:left;margin-top:-8px;width:48px;margin-left:0px;"><img src="./../../images/camera/up.png" id="ptzUp" style="cursor:pointer" onmouseover="this.src='./../../images/camera/up.png'" onmouseout="this.src='./../../images/camera/up.png'" onclick="controlPTZDaHua(0);"  /></td>
+                <td style="float:left;margin-top:18px;margin-left:4px;"><img src="./../../images/camera/right_up.png" id="ptzRightUp" style="cursor:pointer" onmouseover="this.src='./../../images/camera/right_up.png'" onmouseout="this.src='./../../images/camera/right_up.png'" onclick="controlPTZDaHua(6);" /></td>
+            </tr>
+            <tr style="float:left;margin-left:10px;margin-bottom:20px;width:169px;">
+                <td style="float:left;margin-top:1px;width:57px;margin-left:3px;"><img src="./../../images/camera/left.png" id="ptzLeft" style="cursor:pointer" onmouseover="this.src='./../../images/camera/left.png'" onmouseout="this.src='./../../images/camera/left.png'" onclick="controlPTZDaHua(2);"/></td>
+                <td style="float:left;margin-top:-22px;margin-left:-18px;width:58px;"><a><img src="./../../images/camera/autoplay.png" id="ptzAuto" style="cursor:pointer" onmouseover="this.src='./../../images/camera/autoplay.png'" onmouseout="this.src='./../../images/camera/autoplay.png'" /></a></td>
+                <td style="float:left;margin-left:20px;"><img src="./../../images/camera/right.png" id="ptzRight" style="cursor:pointer" onmouseover="this.src='./../../images/camera/right.png'" onmouseout="this.src='./../../images/camera/right.png'" onclick="controlPTZDaHua(3);" /></td>
+            </tr>
+            <tr style="float:left;margin-left:18px;width:143px;margin-top:-15px;">
+                <td style="float:left;width:48px;margin-top:-2px;"><img src="./../../images/camera/left_down.png" id="ptzLeftDown" style="cursor:pointer" onmouseover="this.src='./../../images/camera/left_down.png'" onmouseout="this.src='./../../images/camera/left_down.png'" onclick="controlPTZDaHua(5);" /></td>
+                <td style="float:left;margin-top:16px;width:48px;margin-left:0px;"><img src="./../../images/camera/down.png" id="ptzDown" style="cursor:pointer" onmouseover="this.src='./../../images/camera/down.png'" onmouseout="this.src='./../../images/camera/down.png'" onclick="controlPTZDaHua(1);" /></td>
+                <td style="float:left;margin-top:-4px;margin-left:0px;margin-top:-5px;"><img src="./../../images/camera/right_down.png" id="ptzRightDown" style="cursor:pointer" onmouseover="this.src='./../../images/camera/right_down.png'" onmouseout="this.src='./../../images/camera/right_down.png'" onclick="controlPTZDaHua(7);"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <table cellpadding="0" cellspacing="3" border="0" class="left" style="margin:5px 0px 0px 10px;">
+            <tbody>
+            <tr>
+                <td class="tt" style="padding-right:8px;">移动持续时间</td>
+                <td>
+                    <input class="easyui-numberspinner" value="500" increment="100" data-options="min:100,max:2000" style="width:120px;" id="duration">
+                </td>
+                <td>(ms)</td>
+            </tr>
+            </tbody>
+        </table>
+        <table cellpadding="0" cellspacing="3" border="0" class="left" style="margin:10px 0px 0px 10px;">
+            <tbody>
+            <tr height="30px;">
+                <td style="padding-right:8px;">截取视频图片</td>
+                <td class="tt"><input type="button" class="btn2" value="抓图" onclick="capturePicture4GDaHua()" style="width:55px;"/></td>
+            </tr>
+            <tr height="30px;">
+                <td style="padding-right:8px;">变倍</td>
+                <td class="tt"><input type="button" class="btn2" value="+" onclick="controlPTZDaHua(8)" style="width:55px;" /></td>
+                <td><input type="button" class="btn2" value="-" onclick="controlPTZDaHua(9)" onmouseup="mystop()" style="margin-left:20px;width:55px; " /></td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<input id="myDateHidden" style="display:none;" value=""/>
+<input id="myDateTimeHidden" style="display:none;" value="00:00:00 - 23:59:59"/>
+<img  id="picture" style="display:none;">
+</body>
+</html>
+<script type="text/javascript">
+    $(function(){
+        laydate.render({
+            elem: '#myDate', //指定元素
+            trigger: 'click',
+            max: Date.parse(new Date()),
+            done: function(value, date, endDate) {
+                $("#myDateHidden").val(value);
+            }
+        });
+        laydate.render({
+            elem: '#myDateTime',
+            type: 'time',
+            range: true,
+            trigger: 'click',
+            value:"00:00:00 - 23:59:59",
+            done: function(value, date, endDate) {
+                $("#myDateTimeHidden").val(value);
+            }
+        });
+    });
+    imouPlayer4GPlay();
+    function imouPlayer4GPlay(){
+        // 添加DOM容器
+        var player = new ImouPlayer('#daHua4GCamera');
+        var params = window.parent.videoDahuaTempdata;
+        // 播放器初始化
+        player.setup({
+            src: [
+                {
+                    url: params.videoUrl, // url拼接说明请见：2.2.3 轻应用播放地址说明
+                    kitToken: params.kitToken // 播放Token，通过接口getKitToken获取，具体请见：2.2.4 getKitToken接口协议说明
+                }
+            ], // 播放地址
+            width: 665, // 播放器宽度
+            height: 367, // 播放器高度
+            poster: '', // 封面图url
+            autoplay: true, // 是否自动播放
+            controls: true // 是否展示控制栏
+        });
+        player.play();
+    }
+
+    //云台控制
+    function controlPTZDaHua(control){
+        var params = window.parent.videoDahuaTempdata;
+        params["operation"]  = control;
+        params["channelId"] = "0";
+        var duration = $("#duration").val();
+        params["duration"] = duration;
+        $.ajax({
+            type : "POST",
+            url : "../../AjHuaApi/controlMovePTZ",
+            data : params,
+            dataType:"json",
+            success : function(res) {
+                //console.info(res);
+            }
+        });
+    }
+    /**
+     * 摄像头截图
+     */
+    function capturePicture4GDaHua(){
+        var params = window.parent.videoDahuaTempdata;
+        $.messager.progress({
+            title:'图片下载中..',
+            msg:''
+        });
+        $.ajax({
+            type : "POST",
+            url : "../../AjHuaApi/setDeviceSnapEnhanced",
+            data : params,
+            dataType:"json",
+            success : function(res) {
+                if(res!=null && res!=undefined && res.result!=undefined &&res.result.code=="0" ){
+                    if(res.result.data!=undefined && res.result.data!={} && res.result.data.url!=null&& res.result.data.url!="" ) {
+                        downloadImage(res.result.data.url);
+                    }else{
+                        alert("图片抓取失败");
+                    }
+                }else{
+                    alert("图片抓取失败");
+                }
+            },
+            error:function(){
+                $(".messager-body").window('close');
+            }
+        });
+    }
+    /**
+     * 下载图片到本地
+     * */
+    function downloadImage(imgUrl){
+        setTimeout(function(){
+            $.messager.progress('close');
+            window.location.href = imgUrl;
+        },3000);
+    }
+    /**
+     * 查询本地视频
+     * */
+    function returnPlay() {
+        var params = window.parent.videoDahuaTempdata;
+        var dateTimeStr = $("#myDateTimeHidden").val();
+        var dateStr = $("#myDateHidden").val();
+        if (dateStr == "" || dateStr == undefined) {
+            $.messager.alert('提示', '请选择日期!', 'error');
+            return false;
+        }
+        if (dateTimeStr != "" && dateTimeStr != undefined) {
+            var arr = dateTimeStr.split(" - ");
+            params["beginTime"] = dateStr + " "+arr[0];
+            params["endTime"] = dateStr + " "+ arr[1];
+            $.ajax({
+                type: "POST",
+                url: "../../AjHuaApi/queryLocalRecords",
+                data: params,
+                dataType: "json",
+                success: function (res) {
+                    console.info(res);
+                }
+            });
+        }
+    }
+    /**
+     * 不用了摄像头播放
+     */
+    function videoDaHhua4GPlay(){
+        var params = window.parent.videoDahuaTempdata;
+        $.ajax({
+            type : "POST",
+            url : "../../AjHuaApi/getLiveStreamInfo",
+            data : params,
+            dataType:"json",
+            success : function(res){
+                console.info(res.result.data.streams[0].hls);
+                if(res.result!=null && res.result!=undefined && res.result.code=="0" ){
+                    player = cyberplayer("daHua4GCamera").setup({
+                        width: 650, // 宽度，也可以支持百分比（不过父元素宽度要有）
+                        height: 365, // 高度，也可以支持百分比
+                        title: "", // 标题
+                        isLive: true, // 必须设置，表明是直播视频
+                        file: res.result.data.streams[0].hls, // //您的视频源的地址（目前是乐橙示例播放地址）
+                        image: '', // 预览图
+                        autostart: false, // 是否自动播放
+                        stretching: "uniform", // 拉伸设置
+                        repeat: false, // 是否重复播放
+                        volume: 0, // 音量，注：仅当用户同意、网站由用户激活或媒体无声时允许自动播放
+                        controls: true, // 是否显示控制栏
+                        hls: {
+                            reconnecttime: 5 // hls直播重连间隔秒数
+                        },
+                        ak: "39f82ac87fc3462ea4dcc78734450f57" // 百度智能云平台注册（https://cloud.baidu.com）即可获得accessKey
+                    });
+                }
+            }
+        });
+    }
+    /**
+     * 摄像头关闭
+     */
+    function video4GStop(){
+        decoder.stop();
+    }
+
+
+
+    /**
+     * 回放
+     * @param url
+     * @param accessToken
+     * @param decoderPath
+     */
+    function returnPlay111 (){
+        var data = window.parent.videoTempdata;
+        var ezopenUrl = "";
+        var dateTimeStr =  $("#myDateTimeHidden").val();
+        var dateStr = $("#myDateHidden").val();
+        if(dateStr=="" || dateStr==undefined){
+            $.messager.alert('提示','请选择日期!','error');
+            return false;
+        }
+        if(dateTimeStr!="" && dateTimeStr!=undefined){
+            var arr = dateTimeStr.split(" - ");
+            var startStr = arr[0].replace(/[\. ,:-]+/g, "");
+            var endStr = arr[1].replace(/[\. ,:-]+/g, "");
+            var dateArr = "";
+            if(dateStr!="" && dateStr!=undefined){
+                dateArr = dateStr.replace(/[\. ,:-]+/g, "");
+            }else{
+                return false;
+            }
+            ezopenUrl = data.videoRec+"?begin="+dateArr+startStr+"&end="+dateArr+endStr;
+            var accessToken = data.videoToken;
+            var decoderPath = '..//..//hikvision';
+            $("#video4GStopAll").css('display',"inline");
+            $("#video4GPlayer").css('display',"none");
+            if(decoder!=null){
+                video4GStop();
+            }
+            initDecoder(ezopenUrl,accessToken,decoderPath);
+            decoder.play({
+                handleError: handleError,
+            });
+            // console.info(ezopenUrl);
+        }else{
+            $.messager.alert('提示','请选择时间范围!','error');
+        }
+    }
+
+    /**
+     * 停止回放
+     */
+    function stopreturnPlay(){
+        $("#video4GStopAll").css('display',"none");
+        $("#video4GPlayer").css('display',"inline");
+        if(decoder!=null){
+            video4GStop();
+        }
+    }
+    function handleError(e){
+        console.log('捕获到错误',e)
+        // log(JSON.stringify(e),'error');
+        //alert(e)
+    }
+    function handleSuccess(){
+        console.log("播放成功回调函数，此处可执行播放成功后续动作");
+    }
+
+    function log(str,className) {
+        var div = document.createElement('DIV');
+        div.className=className || 'normal';
+        div.innerHTML = (new Date()).Format('yyyy-MM-dd hh:mm:ss.S') + JSON.stringify(str);
+        document.body.appendChild(div);
+    }
+</script>

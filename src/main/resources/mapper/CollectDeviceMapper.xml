@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ICollectDeviceDao">
+
+	<resultMap type="com.tcb.env.pojo.CollectDevice" id="collectDeviceResultMap">
+		<id property="cdId" column="cd_id" />
+		<result property="cdCode" column="cd_code" />
+		<result property="cdMn" column="cd_mn" />
+		<result property="cdName" column="cd_name" />
+		<result property="cdIp" column="cd_ip" />
+		<result property="cdPort" column="cd_port" />
+		<result property="cdPwd" column="cd_pwd"/>
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 获取超标采样设备个数 -->
+	<select id="getCollectDeviceCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(td.device_id)
+		FROM
+			tbl_device td
+		WHERE td.device_type = '2'
+		<if test="collectDevice.cdCode != null and collectDevice.cdCode != ''">
+			AND td.device_code = #{collectDevice.cdCode}
+		</if>
+		<if test="collectDevice.cdName != null and collectDevice.cdName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{collectDevice.cdName},'%'))
+		</if>
+	</select>
+
+	<!-- 获取超标采样设备信息 -->
+	<select id="getCollectDevice" resultMap="collectDeviceResultMap">
+		SELECT
+			td.device_id As cd_id,
+			td.device_code AS cd_code,
+			td.device_mn AS cd_mn,
+			td.device_name AS cd_name,
+			td.device_ip AS cd_ip,
+			td.device_port AS cd_port,
+			td.device_pwd AS cd_pwd,
+			td.opt_user,
+			td.opt_time
+		FROM
+			tbl_device td
+		WHERE td.device_type = '2'
+		<if test="collectDevice.cdCode != null and collectDevice.cdCode != ''">
+			AND td.device_code = #{collectDevice.cdCode}
+		</if>
+		<if test="collectDevice.cdName != null and collectDevice.cdName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{collectDevice.cdName},'%'))
+		</if>
+		<if test="collectDevice.rowCount != -1 and collectDevice.rowIndex != -1">
+			LIMIT #{collectDevice.rowIndex, jdbcType = INTEGER},#{collectDevice.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 新增超标采样设备 -->
+	<insert id="insertCollectDevice" parameterType="com.tcb.env.pojo.CollectDevice">
+		INSERT INTO tbl_device
+		(
+			device_code,
+			device_mn,
+			device_name,
+			device_ip,
+			device_port,
+			device_pwd,
+			device_type,
+			opt_user
+		)VALUES(
+			#{collectDevice.cdCode},
+			#{collectDevice.cdMn},
+			#{collectDevice.cdName},
+			#{collectDevice.cdIp},
+			#{collectDevice.cdPort},
+			#{collectDevice.cdPwd},
+			'2',
+			#{collectDevice.optUser}
+		)
+	</insert>
+
+	<!-- 更新超标采样设备 -->
+	<update id="updateCollectDevice" parameterType="com.tcb.env.pojo.CollectDevice">
+		UPDATE tbl_device
+		   SET device_code = #{collectDevice.cdCode}
+			   ,device_mn = #{collectDevice.cdMn}
+			   ,device_name = #{collectDevice.cdName}
+			   ,device_ip = #{collectDevice.cdIp}
+			   ,device_port = #{collectDevice.cdPort}
+			   ,device_pwd = #{collectDevice.cdPwd}
+			   ,opt_user = #{collectDevice.optUser}
+			   ,opt_time = #{collectDevice.optTime}
+		 WHERE device_id = #{collectDevice.cdId, jdbcType = INTEGER}
+		   AND device_type = '2'
+	</update>
+
+	<!-- 删除超标采样设备 -->
+	<delete id="deleteCollectDevice" parameterType="java.util.List">
+		DELETE FROM tbl_device
+		WHERE device_id IN
+		<foreach collection="cdIdList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		AND device_type = '2'
+	</delete>
+
+</mapper>

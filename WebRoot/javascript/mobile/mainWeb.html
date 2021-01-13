@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>移动在线监测系统</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          name='viewport'>
+    <meta name="description" content="Developed By M Abdur Rokib Promy">
+    <meta name="keywords" content="Admin, Bootstrap 3, Template, Theme, Responsive">
+    <!-- bootstrap 3.0.2 -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- font Awesome -->
+    <link href="./css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <!-- Ionicons -->
+    <link href="./css/ionicons.min.css" rel="stylesheet" type="text/css" />
+    <!-- Theme style -->
+    <link title="stylenew" rel="stylesheet" type="text/css" href="./css/stylenew.css"/>
+
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4IU3oIAMpZhfWZsMu7xzqBBAf6vMHcoa"></script>
+    <script src="./js/plugins/baiduMapPlugins/RichMarker_min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <style type="text/css">
+        body > .header .navbar{
+            margin-left:0px;
+        }
+
+        .icon-bar{
+            background: #fff!important;
+            display: block;
+            width: 22px;
+            height: 2px;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+        }
+        .panel-body{
+            padding: 10px;
+        }
+    </style>
+</head>
+<body class="skin-black">
+<header class="header">
+    <nav class="navbar navbar-static-top" role="navigation">
+        <!-- Sidebar toggle button-->
+        <div class="logo">
+            <a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a href="./../../../UserController/toMobileMain"><span style="float:left; font-size: 28px;"><span class="label" style="padding:1px;">移动在线监测</span></span></a>
+        </div>
+        <div class="navbar-right">
+            <ul class="nav navbar-nav">
+            </ul>
+        </div>
+    </nav>
+</header>
+<div class="wrapper row-offcanvas row-offcanvas-left">
+    <!-- Left side column. contains the logo and sidebar -->
+    <aside class="left-side sidebar-offcanvas">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+            <!-- Sidebar user panel -->
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="./img/user1.png" class="img-circle" alt="User Image" />
+                </div>
+                <div class="pull-left info">
+                    <p>欢迎，<label id="userName"></label></p>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li ><a href="mainWeb.html"> <i class="fa fa-dashboard"></i> <span>首页</span></a></li>
+                <li><a href="mapMonitorWeb.html"> <i class="fa fa-bell"></i> <span>地图</span></a></li>
+                <li><a href="dataQueryWeb.html"> <i class="fa fa fa-table"></i> <span>数据</span></a></li>
+                <li><a href="chartQueryWeb.html"> <i class="fa fa fa-table"></i> <span>排名</span></a></li>
+                <li><a href="dataQueryWeb.html"> <i class="fa fa fa-table"></i> <span>报警</span></a></li>
+                <li><a href="#" onclick="mainlogOutFunc()"> <i class="fa fa fa-table"></i> <span></span>注销</a></li>
+            </ul>
+        </section>
+    </aside>
+
+    <aside class="right-side">
+        <section >
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel">
+                        <header class="panel-heading">
+                            首页
+                        </header>
+                        <div class="table-responsive" id="mapDiv">
+                          <div id="myChart1" style="width:100%;height:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div><!--end col-6 -->
+        </section><!-- /.content -->
+    </aside>
+
+</div><!-- ./wrapper -->
+
+
+<script src="./js/jquery.min.js" type="text/javascript"></script>
+<script src="./js/jquery-ui-1.10.3.min.js" type="text/javascript"></script>
+<script src="./js/bootstrap.min.js" type="text/javascript"></script>
+<script src="./js/Director/app.js" type="text/javascript"></script>
+<script src="./js/plugins/echarts/echarts.min.js" type="text/javascript"></script>
+<script src="./../util/ctrl.js" type="text/javascript"></script>
+<script src="./js/dataUtil.js" type="text/javascript"></script>
+<script src="./js/mainWeb.js" type="text/javascript"></script>
+<!-- Director for demo purposes -->
+<script type="text/javascript">
+    //默认左侧导航栏折叠
+    $('.left-side').toggleClass("collapse-left");
+    $(".right-side").toggleClass("strech");
+    var loginname = "";
+    loginname = getCookieValue('EnvDustusername');
+    if(loginname!=null && loginname!=""){
+        $("#userName").html(loginname);
+    }else{
+        $("#userName").html("");
+    }
+    $('input').on('ifChecked', function(event) {
+        $(this).parents('li').addClass("task-done");
+        console.log('ok');
+    });
+    $('input').on('ifUnchecked', function(event) {
+        $(this).parents('li').removeClass("task-done");
+        console.log('not');
+    });
+</script>
+
+<script type="text/javascript">
+    $.ajaxSetup({
+        contentType : "application/x-www-form-urlencoded;charset=utf-8",
+        complete : function(XMLHttpRequest, textStatus) {
+            var sessionstatus = XMLHttpRequest
+                .getResponseHeader("sessionstatus"); //通过XMLHttpRequest取得响应头，sessionstatus，
+            if (sessionstatus == "timeout") {
+                //如果超时就处理 ，指定要跳转的页面
+                window.location.href = "/loginPhone.html";
+            }
+        }
+    });
+    initLayout();
+    queryGenaralMonitorCount();
+</script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ICommMainDao">
+
+	<resultMap type="com.tcb.env.pojo.CommCn" id="commCnResultMap">
+		<id property="cnId" column="cn_id" />
+		<result property="cnCode" column="cn_code" />
+		<result property="cnName" column="cn_name" />
+	</resultMap>
+
+	<resultMap type="com.tcb.env.pojo.CommStatus" id="commStatusResultMap">
+		<id property="statusId" column="status_id" />
+		<result property="statusType" column="status_type" />
+		<result property="statusCode" column="status_code" />
+		<result property="statusName" column="status_name" />
+	</resultMap>
+
+	<resultMap type="com.tcb.env.pojo.CommMain" id="commMainResultMap">
+		<id property="commId" column="comm_id" />
+		<result property="qn" column="qn" />
+		<result property="st" column="st" />
+		<result property="flag" column="flag" />
+		<result property="cp" column="cp" />
+		<result property="excuteTime" column="excute_time" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联表 -->
+		<association property="device" javaType="com.tcb.env.pojo.Device"
+			resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+		<association property="commCn" javaType="com.tcb.env.pojo.CommCn"
+			resultMap="commCnResultMap"></association>
+		<association property="commStatus" javaType="com.tcb.env.pojo.CommStatus"
+			resultMap="commStatusResultMap"></association>
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.CommResultModel" id="commResultModelResultMap">
+		<id property="resultId" column="result_id" />
+		<result property="resultQn" column="result_qn" />
+		<result property="resultCp" column="result_cp" />
+		<result property="mainCn" column="main_cn" />
+		<result property="mainCnName" column="main_cn_name" />
+		<result property="mainDeviceCode" column="device_code" />
+		<result property="mainDeviceName" column="device_name" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 获取计划任务信息个数 -->
+	<select id="getCommMainCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tcm.comm_id)
+		FROM
+			tbl_comm_main tcm
+		INNER JOIN tbl_comm_cn tcn ON tcm.cn = tcn.cn_code
+		INNER JOIN tbl_comm_status tcs ON tcm.status_id = tcs.status_id
+		INNER JOIN tbl_device td ON tcm.device_code = td.device_code
+		LEFT  JOIN tbl_area ta ON td.area_id = ta.area_id
+		LEFT JOIN tbl_device_project tdp ON td.project_id = tdp.project_id
+		WHERE 1=1
+		<if test="commMain.device != null and commMain.device.deviceName != null and commMain.device.deviceName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{commMain.device.deviceName},'%'))
+		</if>
+		<if test="commMain.device != null and commMain.device.area != null and commMain.device.area.areaId != null and commMain.device.area.areaId > 0"  >
+			AND ta.area_id = #{commMain.device.area.areaId}
+		</if>
+		<if test="listDeviceCode.size()>0">
+			AND td.device_code IN
+			<foreach collection="listDeviceCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listDeviceCode.size()==0">
+			AND td.device_code IS NULL
+		</if>
+		<if test="listCnCode.size()>0">
+			AND tcm.cn IN
+			<foreach collection="listCnCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listCnCode.size()==0">
+			AND tcm.cn IS NULL
+		</if>
+	</select>
+	
+	<!-- 获取计划任务信息 -->
+	<select id="getCommMain" resultMap="commMainResultMap">
+		SELECT DISTINCT
+			tcm.comm_id,
+			td.device_ip AS ip,
+			td.device_port AS `port`,
+			td.device_code,
+			td.device_name,
+			td.device_mn,
+			td.device_pwd,
+			ta.area_id,
+			ta.area_name,
+			tdp.project_id,
+			tdp.project_code,
+			tdp.project_name,
+			tcm.qn,
+			tcm.st,
+			tcn.cn_code,
+			tcn.cn_name,
+			tcm.flag,
+			tcm.cp,
+			tcm.excute_time,
+			tcs.status_id,
+			tcs.status_type,
+			tcs.status_code,
+			tcs.status_name,
+			tcm.opt_user,
+			tcm.opt_time
+		FROM
+			tbl_comm_main tcm
+		INNER JOIN tbl_comm_cn tcn ON tcm.cn = tcn.cn_code
+		INNER JOIN tbl_comm_status tcs ON tcm.status_id = tcs.status_id
+		INNER JOIN tbl_device td ON tcm.device_code = td.device_code
+		LEFT JOIN tbl_area ta ON td.area_id = ta.area_id
+		LEFT JOIN tbl_device_project tdp ON td.project_id = tdp.project_id
+		WHERE 1=1
+		<if test="commMain.device != null and commMain.device.deviceName != null and commMain.device.deviceName != ''">
+			AND td.device_name LIKE CONCAT('%',CONCAT(#{commMain.device.deviceName},'%'))
+		</if>
+		<if test="commMain.device != null and commMain.device.area != null and commMain.device.area.areaId != null and commMain.device.area.areaId > 0"  >
+			AND ta.area_id = #{commMain.device.area.areaId}
+		</if>
+		<if test="listDeviceCode.size()>0">
+			AND td.device_code IN
+			<foreach collection="listDeviceCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listDeviceCode.size()==0">
+			AND td.device_code IS NULL
+		</if>
+		<if test="listCnCode.size()>0">
+			AND tcm.cn IN
+			<foreach collection="listCnCode" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listCnCode.size()==0">
+			AND tcm.cn IS NULL
+		</if>
+		<if test="commMain.rowCount != -1 and commMain.rowIndex != -1">
+			LIMIT #{commMain.rowIndex, jdbcType = INTEGER},#{commMain.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 插入计划任务准备信息 -->
+	<insert id="insertCommPrepare">
+		INSERT INTO tbl_comm_prepare (
+					qn, 
+					cn, 
+					<if test="commPrepare.cp != null and commPrepare.cp != ''">
+						cp, 
+					</if>
+					opt_user
+				)
+				VALUES(
+					#{commPrepare.qn},
+					#{commPrepare.commCn.cnCode},
+					<if test="commPrepare.cp != null and commPrepare.cp != ''">
+						#{commPrepare.cp},
+					</if>
+					#{commPrepare.optUser},
+				)
+	</insert>
+	
+	<!-- 插入计划任务信息主表 -->
+	<insert id="insertCommMain" parameterType="java.util.List">
+		INSERT INTO tbl_comm_main (
+					qn,
+					st,
+					cn,
+					device_code,
+					flag,
+					cp,
+					status_id,
+					excute_time,
+					opt_user
+				)
+				VALUES
+				<foreach collection="listCommMain" item="item" index="index" separator=",">
+					(#{item.qn},
+					#{item.st},
+					#{item.commCn.cnCode},
+					#{item.device.deviceCode},
+					#{item.flag},
+					#{item.cp},
+					#{item.commStatus.statusId},
+					#{item.excuteTime},
+					#{item.optUser})
+				</foreach>
+	</insert>
+	
+	<!-- 获取发送状态id -->
+	<select id="getCommStatus" resultMap="commStatusResultMap">
+		SELECT
+			tcs.status_id,
+			tcs.status_type,
+			tcs.status_code,
+			tcs.status_name
+		FROM
+			tbl_comm_status tcs
+		WHERE 1=1
+		AND	tcs.status_type = #{type,jdbcType=VARCHAR}
+		AND tcs.status_code = #{code,jdbcType=VARCHAR}
+		LIMIT 0,1
+	</select>
+	
+	<!-- 删除计划任务信息 -->
+	<delete id="deleteCommMain" parameterType="java.util.List">
+		DELETE
+		FROM
+			tbl_comm_main
+		WHERE 1=1
+		<if test="listCommId.size()>0">
+			AND comm_id IN
+			<foreach collection="listCommId" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listCommId.size()==0">
+			AND comm_id IS NULL
+		</if>
+	</delete>
+	
+		<!-- 删除计划任务信息 -->
+	<delete id="deleteCommMainCn">
+		DELETE
+		FROM
+			tbl_comm_main
+		WHERE 1=1
+		AND cn = #{cnCode,jdbcType=VARCHAR}
+		<if test="listCommId.size()>0">
+			AND comm_id IN
+			<foreach collection="listCommId" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listCommId.size()==0">
+			AND comm_id IS NULL
+		</if>
+	</delete>
+	
+	<!-- 获取CommMain主键 -->
+	<select id="getMainCommId" resultType="java.lang.String">
+		SELECT
+			tcm.comm_id
+		FROM
+			tbl_comm_main tcm
+		WHERE
+			1 = 1
+		AND tcm.cn = #{cnCode,jdbcType=VARCHAR}
+		AND tcm.device_code = #{deviceCode,jdbcType=VARCHAR}
+		LIMIT 0, 1
+	</select>
+	
+	<!-- 获取计划任务结果个数 -->
+	<select id="getCommResultCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_comm_result tcr
+		INNER JOIN tbl_comm_main tcm ON tcr.qn = tcm.qn
+		INNER JOIN tbl_comm_cn tcc ON tcm.cn = tcc.cn_code
+		INNER JOIN tbl_device td ON tcm.device_code = td.device_code
+		WHERE
+			tcm.comm_id = #{commId}
+	</select>
+	
+	<!-- 获取计划任务结果 -->
+	<select id="getCommResult" resultMap="commResultModelResultMap">
+		SELECT
+			tcr.result_id,
+			tcr.qn AS result_qn,
+			tcr.cp AS result_cp,
+			tcm.cn AS main_cn,
+			tcc.cn_name AS main_cn_name,
+			td.device_code,
+			td.device_name,
+			tcr.opt_time
+		FROM
+			tbl_comm_result tcr
+		INNER JOIN tbl_comm_main tcm ON tcr.qn = tcm.qn
+		INNER JOIN tbl_comm_cn tcc ON tcm.cn = tcc.cn_code
+		INNER JOIN tbl_device td ON tcm.device_code = td.device_code
+		WHERE
+			tcm.comm_id = #{commId}
+	</select>
+
+</mapper>

@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<!-- saved from url=(0050)https://yyhsong.github.io/iDataV/case09/index.html -->
+<html>
+	<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="./bigscreen/app.css">
+		<link rel="stylesheet" type="text/css" href="./bigscreen/bootstrap.min.css">
+		<link rel="stylesheet" href="./bigscreen/bootstrap-dataTables/bootstrap-table.min.css">
+		<link rel="stylesheet" href="./bigscreen/loading.css">
+		<!--<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=9ZZehtX7st3BSXRIaOXeRqMl5HPWaZVA"></script>-->
+		<script type="text/javascript" src="./js/jquery.min.js"></script>
+		<script type="text/javascript" src="./../util/config.js"></script>
+	<!--	<script type="text/javascript" src="./bigscreen/mapv.js"></script>-->
+		<script type="text/javascript" src="./bigscreen/echarts/echarts.min.js"></script>
+		<script type="text/javascript" src="./bigscreen/echarts/macarons.js"></script>
+		<script type="text/javascript" src="./bigscreen/util.js"></script>
+		<script type="text/javascript" src="./bigscreen/bigscreen.js"></script>
+		<script type="text/javascript" src="./bigscreen/run.js"></script>
+
+		<style>
+			.anchorBL{display:none;}
+			html,body{
+				height:100%;
+				min-width: 1000px;
+				min-height:600px;
+			}
+
+			.fixed-table-container{
+				border:1px solid #73aae5;
+			}
+			.bootstrap-table .table>thead>tr>th{
+				border-bottom: 1px solid #73aae5;
+			}
+			.table>thead>tr>td{
+				border:0px;
+			}
+			.table>tbody>tr>td{
+				border:0px;
+			}
+			.fixed-table-container thead th{
+				border:0px;
+			}
+		</style>
+	</head>
+
+	<body>
+	<header id="header">
+		<h3 class="header-title">大屏数据全域监控</h3>
+		<div style="width: 100%; height: 90%; background-image: url('./bigscreen/header.png'); margin-top:-30px; background-size: 100%; background-repeat: no-repeat; background-position: center center;"></div>
+		<div class="header-info header-info-l">
+			<div id="dataSourceInfo"></div>
+
+		</div>
+		<div class="header-info header-info-r">数据时间：<span id="nowDate">2019年3月5日 15:46</span></div>
+	</header>
+
+	<div id="container" style="padding-left:15px;">
+		<div id="flexCon">
+			<div class="row">
+
+				<div class="col-md-2" >
+					<div class="row-inner">
+						<div class="rowControl" style="background-size: 100% 100%;background: rgba(29, 22, 52, 0); width: 100%;">
+							<div style=" height: 100%;">
+								<div  class="title" style="padding:8px 10px 0px;">
+									<div class="bigtitle">
+										站点监控物排行
+									</div>
+									<div  class="subtitle">
+										Monitor Ranking
+									</div>
+								</div>
+								<div style="margin-top:10px;margin-left:5%;">
+									<select class="form-control" id="thingMonitor" style="background-color: #0d3270;width:95%;color:#fff;border:none;border-color: #66afe9;
+    outline: 0;-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);" onchange="selectOnchang(this)">
+									</select>
+								</div>
+								<div  id="chartSortLeft" style="height:83%;margin-top:10px;width:100%"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-5">
+					<div class="rowControl" style="border-radius: 0px; border: none; background-color: #091934;
+								background-image: url(./bigscreen/mdbg.png); background-repeat: no-repeat; background-size: 100% 100%;">
+						<div style="height:100%;display: block; z-index: 0; transform: rotate(0deg); opacity: 1; pointer-events: auto;margin:0px -15px;box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.3);">
+							<div class="bg-inner" style="background: rgba(29, 22, 52, 0.5); width: 100%; height:100%;">
+								<div id="allmap" style="width:100%;height:100%;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-5 rowControl" >
+					<div class="col-md-12" style="margin:0px -15px 8px;height:49%;" >
+						<div class="col-md-6" style="height:100%">
+							<div class="row-inner" style="margin:0px -15px 0px -15px;">
+								<div class="bg-inner" style="background: rgba(29, 22, 52, 0); width: 100%; height: 100%;">
+									<div  class="title" style="padding:8px 10px 0px;">
+										<div  class="bigtitle">
+											站点在线率
+										</div>
+										<div  class="subtitle">
+											Online Rate
+										</div>
+									</div>
+									<div  id="chart_msc"></div>
+									<div  id="chart_msc_info">
+										<div  class="chart_msc_info_left">
+											<p class="p1">站点在线</p>
+											<p class="p2" id="onlineData">0(0%)</p>
+										</div>
+										<div  class="chart_msc_info_right">
+											<p  class="p1">站点离线</p>
+											<p  class="p2" id="outlineData">0(0%)</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6" style="height:100%;">
+							<div class="row-inner" style="margin:0px -30px 0px 0px;">
+								<div class="bg-inner" style="background: rgba(29, 22, 52, 0); width: 100%; height: 100%;">
+									<div  class="title" style="padding:8px 10px 0px;">
+										<div class="bigtitle">
+											离线异常比
+										</div>
+										<div class="subtitle">
+											Abnormal Rate
+										</div>
+									</div>
+									<div  id="chart_msc2" ></div>
+									<div  id="chart_msc2_info">
+										<div  class="div1">
+											<p style="color:#fff;padding:4px 8px 0px;text-align:center;">站点断连</p>
+											<p style="color:#fff;padding:0px 8px 0px;text-align:center;font-weight:bold;" id="disconnectStatus">0(0%)</p>
+										</div>
+										<div class="div2">
+											<p style="color:#fff;padding:4px 8px 0px;text-align:center;">站点无数据</p>
+											<p style="color:#fff;padding:0px 8px 0px;text-align:center;font-weight:bold;" id="nodataStatus">0(0%)</p>
+										</div>
+										<div  class="div3">
+											<p style="color:#fff;padding:4px 8px 0px;text-align:center;">站点其他</p>
+											<p style="color:#fff;padding:0px 8px 0px;text-align:center;font-weight:bold;" id="otherStatus">0(0%)</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-12" style="margin:10px -15px 0px;height:48%;">
+						<div class="col-md-6" style="height:100%;">
+							<div class="row-inner" style="margin:0px -15px 0px -15px;">
+								<div class="bg-inner" style="background: rgba(29, 22, 52, 0); width: 100%; height: 100%;">
+									<div  class="title" style="padding:8px 10px 0px;">
+										<div  class="bigtitle">
+											站点超标率
+										</div>
+										<div  class="subtitle">
+											Excess Rate
+										</div>
+
+									</div>
+									<div  id="chart_msc3"></div>
+									<div  id="chart_msc3_info">
+										<div  class="div1">
+											<p style="color:#fff;padding:4px 8px 0px;text-align:center;" >站点超标</p>
+											<p style="color:#fff;padding:0px 8px 0px;text-align:center;font-weight:bold;" id="overStatus" >0(0%)</p>
+										</div>
+
+										<div class="div2">
+											<p style="color:#fff;padding:4px 8px 0px;text-align:center;">站点正常</p>
+											<p style="color:#fff;padding:0px 8px 0px;text-align:center;font-weight:bold;" id="normalStatus">0(0%)</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6" style="height:100%;">
+							<div class="row-inner" style="margin:0px -30px 0px 0px;">
+								<div class="bg-inner" style="background: rgba(29, 22, 52, 0); width: 100%; height: 100%;">
+									<div  class="title" style="padding:8px 10px 0px;">
+										<div  class="bigtitle">
+											超标排行比
+										</div>
+										<div class="subtitle">
+											Excess Ranking
+										</div>
+
+									</div>
+									<div  id="chart_msc4"></div>
+									<div  id="chart_msc4_info">
+										<div  class="div1">
+											<p style="color:#fff;padding:4px 8px 0px;text-align:center;" id="stationAlarmTitle">报警占比</p>
+											<p style="color:#fff;padding:0px 8px 0px;text-align:center;font-weight:bold;" id="stationAlarmRate" >0(0%)</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-2" >
+					<div style="display: block; z-index: 0; transform: rotate(0deg); opacity: 1; pointer-events: auto;margin-top:10px;"  >
+						<div class="-datav-wraper" style="height: 5px; border: none; border-radius: 0px; background: rgba(0, 123, 255, 0.4); filter: blur(2px);"></div>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<div  style="height: 5px; display: block; z-index: 0; transform: rotate(0deg); opacity: 1;margin:10px -15px 0px;">
+						<div class="-datav-wraper" style="height: 5px; border: none; border-radius: 0px; background: rgba(0, 123, 255, 0.4); filter: blur(2px);" ></div>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<div  style="height: 5px; display: block; z-index: 0; transform: rotate(0deg); opacity: 1; pointer-events: auto;margin-top:10px;">
+						<div class="-datav-wraper" style="height: 5px; border: none; border-radius: 0px; background: rgba(0, 123, 255, 0.4); filter: blur(2px);"></div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-2">
+					<div  style="height:131px; display: block; z-index: 0; transform: rotate(0deg); opacity: 1; pointer-events: auto;margin-top:10px;background:url('./bigscreen/bluebg.png');">
+							<span style="float:left;margin-top:15%;">
+								<span id="bigScreenLogoId"></span>
+								<span class="titleCompany" id="compayName"></span>
+								<span  style="float:left;color:#fff;" class="small-font smallsize-font" id="subTitle1"></span>
+								<span  style="float:left;color:#fff;" class="small-font smallsize-font" id="subTitle2"></span>
+							</span>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<div  style=" height:131px;display: block; z-index: 0; transform: rotate(0deg); opacity: 1; pointer-events: auto;color:#1397ff;margin:10px -15px;background:url(./bigscreen/bg1.png)">
+						<div id="scrollDiv" style="height:96%;min-height:25px;color:#fff;line-height:25px;overflow:hidden;width:100%;background: rgba(29, 22, 52, 0)">
+							<div style="height:28px;width:100%;">
+								<table style="width:100%;display: table;text-align: center; border-collapse: collapse;background:rgba(102,175,233,0.3);box-shadow:inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);' cellspacing='0'  cellpadding='0'">
+									<tr style="width:100%">
+										<th  width='20%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>设备MN号</th>
+										<th width='20%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>设备名称</th>
+										<th width='30%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>报警信息</th>
+										<th width='15%'  style='text-align:center;word-break:break-all;word-wrap:break-word;'>负责人</th>
+										<td width='15%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>负责人电话</td>
+									</tr>
+								</table>
+							</div>
+							<ul  id="alarmInfolist" style=list-style:none;" ></ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<div  style=" height:131px;display: block; z-index: 0; transform: rotate(0deg); opacity: 1; pointer-events: auto;color:#1397ff;margin:10px 0px;background:url(./bigscreen/bg1.png)">
+						<div  id="scrollDiv2" style="height:96%;min-height:25px;line-height:25px;overflow:hidden;color:#fff;width:100%;background: rgba(29, 22, 52, 0)">
+							<div style="height:28px;width:100%;">
+								<table style="display: table;width:100%;text-align: center; border-collapse: collapse;background:rgba(102,175,233,0.3);box-shadow:inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);' cellspacing='0'  cellpadding='0'">
+									<tr style="width:100%">
+										<th  width='20%'  style='text-align:center;word-break:break-all;word-wrap:break-word;'>设备MN号</th>
+										<th width='20%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>设备名称</th>
+										<th width='30%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>报警信息</th>
+										<th width='15%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>负责人</th>
+										<td width='15%'   style='text-align:center;word-break:break-all;word-wrap:break-word;'>负责人电话</td>
+									</tr>
+								</table>
+							</div>
+							<ul  id="alarmInfolistOther" style="list-style:none;"></ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer id="footer"></footer>
+
+	<script type="text/javascript" src="./bigscreen/bootstrap-dataTables/bootstrap-table.min.js"></script>
+	<script type="text/javascript" src="./bigscreen/bootstrap-dataTables/bootstrap-table-zh-CN.js"></script>
+	<script type="text/javascript">
+        var map;
+		$("title").html(BIG_SCREEN_TITLE);
+		$("#dataSourceInfo").html(BIG_SCREEN_DATASOURCE);
+		$("#compayName").html(COMPANY_NAME);
+		$("#subTitle1").html(COMPANY_SUB1);
+        $("#subTitle2").html(COMPANY_SUB2);
+        setBigScreenLogo("./../../");
+        initLayout();
+        function fGetChartFontSize(){
+            var dpi = window.screen.availWidth;
+            var fontSize = 12;
+
+             if(dpi <= 1440){
+                fontSize = 14;
+            }
+            else if(dpi <= 1600){
+                fontSize = 16;
+            }else if(dpi<=1680){
+                fontSize = 18;
+			}else if(dpi<=1920){
+                fontSize = 20;
+			}else if(dpi<=2560){
+                fontSize = 22;
+			}
+           // console.info(dpi);
+            return fontSize;
+        }
+        var size = fGetChartFontSize();
+        $(function() {
+            getMonitorThings();
+            //initMap();
+            window.onload = loadJScript; // 异步加载地图
+            refreshTime();
+            queryGenaralMonitorCount();//监控状态查询
+            queryGenaralMonitorValueRankingbs();//监控站点监控物污染排名
+            searchChartAlarmRateFunction();//监控站点报警在总报警中占比
+            alarmInfoTable("NT","");//超标报警表
+            alarmInfoTable("","NT");//其他报警表
+            setInterval(function() {
+
+                refreshTime();
+                selectedSearchDataConn();
+                queryGenaralMonitorCount();
+                queryGenaralMonitorValueRankingbs();
+                searchChartAlarmRateFunction();
+                alarmInfoTable("NT","");
+                alarmInfoTable("","NT");
+            },120000);
+            //浏览器窗口大小变化时，重置报表大小
+            $(window).resize(function() {
+                size = fGetChartFontSize();
+                initLayout();
+                myChart1.resize();
+                myChart2.resize();
+                myChart3.resize();
+                if(myChart4!=null){
+                    myChart4.resize();
+                }
+                // myChart5.resize();
+                chartSortLeft.resize();
+
+            });
+        });
+
+        function initLayout() {
+            var h = document.documentElement.clientHeight - $("#header").height();
+            $('#container').height(h);
+            $(".rowControl").height(h-180);
+        }
+        /**
+         * 查询当前监控物质下污染排名
+         * @param obj
+         */
+        function selectOnchang(obj){
+            queryGenaralMonitorValueRankingbs();
+        }
+
+        function refreshTime(){
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = now.getMonth()+1;
+            var day = now.getDate();
+            var hour = now.getHours();
+            var mintues = now.getMinutes();
+            var seconds = now.getSeconds();
+            if(hour<10){
+                hour = "0" + hour;
+            }
+            if(mintues<10){
+                mintues = "0" + mintues;
+            }
+            if(seconds<10){
+                seconds = "0" +seconds;
+            }
+            $("#nowDate").html(year+"年"+month+"月"+day+"日"+" "+hour+":"+mintues+":"+seconds);
+        }
+
+        //数字变化特效
+        function rollNum(elId, startVal, endVal, decimalNum) {
+            var n = decimalNum || 0;
+            var countUp = new CountUp(elId, startVal, endVal, n, 2.5, {
+                useEasing: true,
+                useGrouping: true,
+                separator: ',',
+                decimal: '.'
+            });
+            if(!countUp.error) {
+                countUp.start();
+            }else {
+                console.error(countUp.error);
+            }
+        }
+	</script>
+
+	</body></html>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IDeviceVideoDao">
+
+    <resultMap type="com.tcb.env.pojo.DeviceVideo" id="deviceVideoResultMap">
+        <id property="videoId" column="video_id" />
+        <result property="videoCode" column="video_code" />
+        <result property="videoName" column="video_name" />
+        <result property="videoIp" column="video_ip" />
+        <result property="videoPort" column="video_port" />
+        <result property="videoUrl" column="video_url" />
+        <result property="videoRec" column="video_rec" />
+        <result property="videoToken" column="video_token" />
+        <result property="kitToken" column="kit_token" />
+        <result property="userCode" column="user_code" />
+        <result property="userPassword" column="user_password" />
+        <result property="videoX" column="video_x" />
+        <result property="videoY" column="video_y" />
+        <result property="videoFlag" column="video_flag" />
+        <result property="videoType" column="video_type" />
+        <result property="videoBrand" column="video_brand" />
+        <result property="optUser" column="opt_user" />
+        <result property="optTime" column="opt_time" />
+        <association property="device" javaType="com.tcb.env.pojo.Device"
+                     resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+    </resultMap>
+
+    <resultMap id="videoImageResultMap" type="com.tcb.env.model.VideoImageModel">
+        <id property="imageId" column="image_id" />
+        <result property="alarmId" column="alarm_id" />
+        <result property="alarmType" column="alarm_type" />
+        <result property="alarmInfo" column="alarm_info" />
+        <result property="thingCode" column="thing_code" />
+        <result property="thingName" column="thing_name" />
+        <result property="thingValue" column="thing_value" />
+        <result property="videoId" column="video_id" />
+        <result property="videoName" column="video_name" />
+        <result property="imageName" column="image_name" />
+        <result property="imagePath" column="image_path" />
+        <result property="imageTime" column="image_time" />
+    </resultMap>
+
+    <resultMap id="cameraMessageResultMap" type="com.tcb.env.message.CameraMessage">
+        <result property="alarmId" column="alarm_id"/>
+        <result property="videoId" column="video_id"/>
+        <result property="videoCode" column="video_code"/>
+        <result property="videoToken" column="video_token"/>
+    </resultMap>
+
+    <!-- 查询设备视频信息个数 -->
+    <select id="getDeviceVideoCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT tdv.video_id)
+        FROM tbl_device_video tdv
+        INNER JOIN tbl_device td ON tdv.device_code = td.device_code
+        <where>
+            <if test="deviceVideo != null and deviceVideo.videoId != null and deviceVideo.videoId>0">
+                tdv.video_id = #{deviceVideo.videoId}
+            </if>
+            <if test="deviceVideo != null and deviceVideo.videoCode != null and deviceVideo.videoCode != ''">
+                AND tdv.video_code = #{deviceVideo.videoCode}
+            </if>
+            <if test="deviceVideo != null and deviceVideo.videoName != null and deviceVideo.videoName != ''">
+                AND tdv.video_name LIKE CONCAT('%',CONCAT(#{deviceVideo.videoName},'%'))
+            </if>
+            <if test="deviceVideo != null and deviceVideo.videoBrand != null and deviceVideo.videoBrand != ''">
+                AND tdv.video_brand = #{deviceVideo.videoBrand}
+            </if>
+            <if test="deviceVideo.device != null and deviceVideo.device.deviceCode != null and deviceVideo.device.deviceCode != ''">
+                AND tdv.device_code = #{deviceVideo.device.deviceCode}
+            </if>
+            <if test="deviceVideo.device != null and deviceVideo.device.area != null
+            and deviceVideo.device.area.areaId != null and deviceVideo.device.area.areaId > 0">
+                AND td.area_id = #{deviceVideo.device.area.areaId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询设备视频信息 -->
+    <select id="getDeviceVideo" resultMap="deviceVideoResultMap">
+        SELECT DISTINCT
+            tdv.video_id,
+            tdv.video_code,
+            tdv.video_name,
+            tdv.video_ip,
+            tdv.video_port,
+            tdv.video_url,
+            tdv.video_rec,
+            tdv.video_token,
+            tdv.kit_token,
+            td.device_id,
+            td.device_code,
+            td.device_name,
+            tdv.user_code,
+            tdv.user_password,
+            tdv.video_x,
+            tdv.video_y,
+            tdv.video_flag,
+            tdv.video_type,
+            tdv.video_brand,
+            tdv.opt_user,
+            tdv.opt_time
+        FROM tbl_device_video tdv
+        INNER JOIN tbl_device td ON tdv.device_code = td.device_code
+        <where>
+            <if test="deviceVideo != null and deviceVideo.videoId != null and deviceVideo.videoId>0">
+                tdv.video_id = #{deviceVideo.videoId}
+            </if>
+            <if test="deviceVideo != null and deviceVideo.videoCode != null and deviceVideo.videoCode != ''">
+                AND tdv.video_code = #{deviceVideo.videoCode}
+            </if>
+            <if test="deviceVideo != null and deviceVideo.videoName != null and deviceVideo.videoName != ''">
+                AND tdv.video_name LIKE CONCAT('%',CONCAT(#{deviceVideo.videoName},'%'))
+            </if>
+            <if test="deviceVideo != null and deviceVideo.videoBrand != null and deviceVideo.videoBrand != ''">
+                AND tdv.video_brand = #{deviceVideo.videoBrand}
+            </if>
+            <if test="deviceVideo.device != null and deviceVideo.device.deviceCode != null and deviceVideo.device.deviceCode != ''">
+                AND tdv.device_code = #{deviceVideo.device.deviceCode}
+            </if>
+            <if test="deviceVideo.device != null and deviceVideo.device.area != null
+            and deviceVideo.device.area.areaId != null and deviceVideo.device.area.areaId > 0">
+                AND td.area_id = #{deviceVideo.device.area.areaId}
+            </if>
+        </where>
+        <if test="deviceVideo.rowCount != -1 and deviceVideo.rowIndex != -1">
+            LIMIT #{deviceVideo.rowIndex, jdbcType = INTEGER},#{deviceVideo.rowCount,jdbcType = INTEGER}
+        </if>
+    </select>
+
+    <!-- 新增设备视频 -->
+    <insert id="insertDeviceVideo" parameterType="com.tcb.env.pojo.DeviceVideo">
+        INSERT INTO tbl_device_video(
+            video_code,
+            video_name,
+            video_ip,
+            video_port,
+            video_url,
+            video_rec,
+            video_token,
+            device_code,
+            user_code,
+            user_password,
+            video_x,
+            video_y,
+            video_flag,
+            video_type,
+            video_brand,
+            opt_user
+        ) VALUES (
+            #{deviceVideo.videoCode},
+            #{deviceVideo.videoName},
+            #{deviceVideo.videoIp},
+            #{deviceVideo.videoPort},
+            #{deviceVideo.videoUrl},
+            #{deviceVideo.videoRec},
+            #{deviceVideo.videoToken},
+            #{deviceVideo.device.deviceCode},
+            #{deviceVideo.userCode},
+            #{deviceVideo.userPassword},
+            #{deviceVideo.videoX},
+            #{deviceVideo.videoY},
+            #{deviceVideo.videoFlag},
+            #{deviceVideo.videoType},
+            #{deviceVideo.videoBrand},
+            #{deviceVideo.optUser}
+        )
+    </insert>
+
+    <!-- 更新设备视频 -->
+    <update id="updateDeviceVideo" parameterType="com.tcb.env.pojo.DeviceVideo">
+        UPDATE tbl_device_video SET
+            video_code = #{deviceVideo.videoCode},
+            video_name = #{deviceVideo.videoName},
+            video_ip = #{deviceVideo.videoIp},
+            video_port = #{deviceVideo.videoPort},
+            video_url = #{deviceVideo.videoUrl},
+            video_rec = #{deviceVideo.videoRec},
+            video_token = #{deviceVideo.videoToken},
+            device_code = #{deviceVideo.device.deviceCode},
+            user_code = #{deviceVideo.userCode},
+            user_password = #{deviceVideo.userPassword},
+            video_x = #{deviceVideo.videoX},
+            video_y = #{deviceVideo.videoY},
+            video_flag = #{deviceVideo.videoFlag},
+            video_type = #{deviceVideo.videoType},
+            video_brand = #{deviceVideo.videoBrand},
+            opt_user = #{deviceVideo.optUser}
+        WHERE video_id = #{deviceVideo.videoId}
+    </update>
+
+    <!-- 删除设备视频 -->
+    <delete id="deleteDeviceVideo" parameterType="java.util.List">
+        DELETE FROM tbl_device_video
+        WHERE
+        <choose>
+            <when test="idList != null and idList.size()>0">
+                video_id IN
+                <foreach collection="idList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </when>
+            <otherwise>
+                video_id IS NULL
+            </otherwise>
+        </choose>
+    </delete>
+
+    <!-- 判断是否存在（非videoId的videoCode） -->
+    <select id="getDeviceVideoExist" resultType="java.lang.Integer">
+        SELECT COUNT(0)
+        FROM tbl_device_video
+        WHERE video_code = #{videoCode}
+        <if test="videoCode != null and videoCode != ''">
+            AND video_id != #{videoId}
+        </if>
+    </select>
+
+    <!-- 查询报警抓拍 -->
+    <select id="getVideoAlarmImage" resultMap="videoImageResultMap">
+        SELECT
+            tvi.image_id,
+            ta.alarm_id,
+            ta.alarm_type,
+            ta.alarm_info,
+            tm.thing_code,
+            tm.thing_name,
+            ta.thing_value,
+            tdv.video_id,
+            tdv.video_name,
+            tvi.image_name,
+            tvi.image_path,
+            tvi.image_time
+        FROM tbl_video_image tvi
+        INNER JOIN tbl_alarm ta ON tvi.alarm_id = ta.alarm_id
+        INNER JOIN tbl_device_video tdv ON tvi.video_id = tdv.video_id
+        LEFT JOIN tbl_monitor tm ON ta.thing_code = tm.thing_code
+        <where>
+            <if test="videoId != null and videoId != ''">
+                tvi.video_id = #{videoId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 更新所有VideoToken -->
+    <update id="updateVideoToken">
+        UPDATE tbl_device_video SET video_token = #{videoToken} WHERE video_brand = #{videoBrand}
+    </update>
+
+    <!-- 更新VideoKitToken -->
+    <update id="updateVideoKitToken">
+        UPDATE tbl_device_video SET kit_token = #{kitToken} WHERE video_code = #{videoCode}
+    </update>
+
+    <!-- 查询需要拍照的摄像头 -->
+    <select id="getPhotographCamera" resultMap="cameraMessageResultMap">
+        SELECT
+            ta.alarm_id,
+            tdv.video_id,
+            tdv.video_code,
+            tdv.video_token
+        FROM tbl_alarm ta
+        INNER JOIN tbl_device td ON ta.device_code = td.device_code
+        INNER JOIN tbl_device_video tdv ON td.device_code = tdv.device_code
+        AND tdv.video_flag = 2 AND tdv.video_type = 2
+        WHERE
+            TIMESTAMPDIFF(SECOND,#{beginTime},ta.update_time)>=0
+        AND TIMESTAMPDIFF(SECOND,ta.update_time,#{endTime})>0
+    </select>
+
+</mapper>

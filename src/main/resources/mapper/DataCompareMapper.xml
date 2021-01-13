@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IDataCompareDao">
+	
+	<resultMap type="com.tcb.env.model.DataCompareModel" id="dataCompareResultMap">
+		<id property="areaId" column="area_id" />
+		<result property="areaName" column="area_name" />
+		<result property="deviceCode" column="device_code" />
+		<result property="deviceName" column="device_name" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="updateType" column="update_type" />
+		<result property="updateTypeName" column="update_type_name" />
+		<result property="originalTime" column="original_time" />
+		<result property="originalValue" column="original_value" />
+		<result property="compareTime" column="compare_time" />
+		<result property="compareValue" column="compare_value" />
+	</resultMap>
+	
+	<!-- 获取日数据 -->
+	<select id="getDayDataCompare" resultMap="dataCompareResultMap">
+		SELECT temp.area_id,
+			   temp.area_name,
+			   temp.device_code,
+			   temp.device_name,
+			   temp.thing_code,
+			   temp.thing_name,
+			   temp.original_time,
+			   ROUND(AVG(temp.original_value),3) AS original_value
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m-%d') As original_time,
+				CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS original_value
+			FROM ${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			WHERE DATE(tms.begin_time) = DATE(#{selectTime})
+			<if test = "thingCodeList != null and thingCodeList.size()>0" >
+				AND tms.thing_code IN
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			  AND tms.update_type = '2031'
+			UNION
+	  	</if>
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m-%d') As original_time,
+				CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS original_value
+			FROM ${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			WHERE DATE(tms.begin_time) = DATE(#{selectTime})
+			<if test = "thingCodeList != null and thingCodeList.size()>0" >
+				AND tms.thing_code IN
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			  AND tms.update_type = '2031'
+  		) temp
+		GROUP BY temp.area_id,temp.area_name,temp.device_code,temp.device_name,temp.thing_code,temp.thing_name,temp.original_time
+		ORDER BY temp.area_name,temp.device_name
+	</select>
+	
+	<!-- 获取月数据 -->
+	<select id="getMonthDataCompare" resultMap="dataCompareResultMap">
+		SELECT temp.area_id,
+			   temp.area_name,
+			   temp.device_code,
+			   temp.device_name,
+			   temp.thing_code,
+			   temp.thing_name,
+			   temp.original_time,
+			   ROUND(AVG(temp.original_value),3) AS original_value
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m') As original_time,
+				CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS original_value
+			FROM ${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			WHERE YEAR(tms.begin_time) = YEAR(#{selectTime})
+			  AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+			<if test = "thingCodeList != null and thingCodeList.size()>0" >
+				AND tms.thing_code IN
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			  AND tms.update_type = '2031'
+			UNION
+	  	</if>
+			SELECT DISTINCT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m') As original_time,
+				CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS original_value
+			FROM ${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			WHERE YEAR(tms.begin_time) = YEAR(#{selectTime})
+			  AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+			<if test = "thingCodeList != null and thingCodeList.size()>0" >
+				AND tms.thing_code IN
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			  AND tms.update_type = '2031'
+  		) temp
+		GROUP BY temp.area_id,temp.area_name,temp.device_code,temp.device_name,temp.thing_code,temp.thing_name,temp.original_time
+		ORDER BY temp.area_name,temp.device_name
+	</select>
+	
+	<!-- 获取日数据值 -->
+	<select id="getDayDataValue" resultType="java.lang.String">
+		SELECT
+			ROUND(AVG(temp.thing_avg),3)
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS thing_avg
+			FROM ${dbOldName}.${deviceCode} tms
+			WHERE DATE(tms.begin_time) = DATE(#{selectTime})
+			  AND tms.thing_code = #{thingCode}
+			  AND tms.update_type = '2031'
+			UNION
+	  	</if>
+			SELECT CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS thing_avg
+			FROM ${dbName}.${deviceCode} tms
+			WHERE DATE(tms.begin_time) = DATE(#{selectTime})
+			  AND tms.thing_code = #{thingCode}
+			  AND tms.update_type = '2031'
+  		) temp
+	</select>
+	
+	<!-- 获取月数据值 -->
+	<select id="getMonthDataValue" resultType="java.lang.String">
+		SELECT ROUND(AVG(temp.thing_avg),3)
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS thing_avg
+			FROM ${dbOldName}.${deviceCode} tms
+			WHERE YEAR(tms.begin_time) = YEAR(#{selectTime})
+			  AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+			  AND tms.thing_code = #{thingCode}
+			  AND tms.update_type = '2031'
+			UNION
+	  	</if>
+			SELECT CASE WHEN #{convertType} = 'zs' THEN tms.thing_zsavg ELSE tms.thing_avg END AS thing_avg
+			FROM ${dbName}.${deviceCode} tms
+			WHERE YEAR(tms.begin_time) = YEAR(#{selectTime})
+			  AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+			  AND tms.thing_code = #{thingCode}
+			  AND tms.update_type = '2031'
+  		) temp
+	</select>
+	
+</mapper>

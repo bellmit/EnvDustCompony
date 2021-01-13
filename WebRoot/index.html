@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta charset="utf-8">
+    <title>index.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+
+  </head>
+  
+  <body>
+    	网页正在跳转中... <br>
+  </body>
+  <script type="text/javascript">
+	 function IsPC()
+	  {
+	      var userAgentInfo = navigator.userAgent;
+	      //alert(userAgentInfo);//Mozilla/5.0 (Windows NT 6.1; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0
+	      var Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod");
+	      var flag = true;
+	      for (var v = 0; v < Agents.length; v++) {
+	          if (userAgentInfo.indexOf(Agents[v]) > 0) { flag = false; break; }
+	      }
+	      return flag;
+	  }
+	  if(!IsPC()){
+	      window.location.href='../loginPhone.html';
+	  }else{
+	  	window.location.href='../login.html';
+	  }
+  </script>
+</html>

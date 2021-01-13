@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IUserAhrDao">
+	<resultMap type="com.tcb.env.pojo.User" id="userForAhrResultMap">
+		<id property="userId" column="user_id" />
+		<result property="userCode" column="user_code" />
+		<result property="userName" column="user_name" />
+	</resultMap>
+	<resultMap type="com.tcb.env.pojo.UserAhr" id="userAhrResultMap">
+		<id property="authorityUserId" column="authority_user_id" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联表 -->
+		<association property="authority" javaType="com.tcb.env.pojo.Authority"
+			resultMap="com.tcb.env.dao.IAuthorityDao.authotiryResultMap"></association>
+		<association property="user" javaType="com.tcb.env.pojo.Authority"
+			resultMap="userForAhrResultMap"></association>
+	</resultMap>
+
+	<!-- 获取用户权限组 -->
+	<select id="getUserAhrCode" resultType="java.lang.String">
+		SELECT
+			tbl_user_ahr.authority_code
+		FROM
+			tbl_user_ahr
+		WHERE
+			tbl_user_ahr.user_code = #{userCode, jdbcType = VARCHAR}
+		LIMIT 0,1
+	</select>
+	
+	<!-- 获取用户权限组 -->
+	<select id="getUserAhrCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_user_ahr
+		WHERE
+			tbl_user_ahr.user_code = #{userCode, jdbcType = VARCHAR}
+	</select>
+
+	<!-- 获取权限组外用户数量 -->
+	<select id="getOtherUserAhrCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM
+		tbl_user,
+		tbl_oranization
+		WHERE
+		tbl_user.org_id = tbl_oranization.org_id
+		AND tbl_user.user_delete = 0
+		AND tbl_user.user_code NOT IN (
+		SELECT
+		tbl_user_ahr.user_code
+		FROM
+		tbl_user_ahr
+		WHERE 1=1
+		<if test="userAhr.authority.authorityCode != null and userAhr.authority.authorityCode != ''">
+			AND tbl_user_ahr.authority_code = #{userAhr.authority.authorityCode, jdbcType = VARCHAR}
+		</if>
+		)
+		<if test="userAhr.user.userName != null and userAhr.user.userName != ''">
+			AND tbl_user.user_name LIKE
+			CONCAT('%',CONCAT(#{userAhr.user.userName},'%'))
+		</if>
+	</select>
+
+	<!-- 获取权限组外用户数据 -->
+	<select id="getOtherUserAhr" resultMap="com.tcb.env.dao.IUserDao.userResultMap">
+		SELECT
+		tbl_user.user_id,
+		tbl_user.user_code,
+		tbl_user.user_password,
+		tbl_user.user_name,
+		tbl_user.statistics_time,
+		tbl_user.user_tel,
+		tbl_user.user_email,
+		tbl_user.user_delete,
+		tbl_user.user_remark,
+		tbl_user.opt_user,
+		tbl_user.opt_time,
+		tbl_oranization.org_name
+		FROM
+		tbl_user,
+		tbl_oranization
+		WHERE
+		tbl_user.org_id = tbl_oranization.org_id
+		AND tbl_user.user_delete = 0
+		AND tbl_user.user_code NOT IN (
+		SELECT
+		tbl_user_ahr.user_code
+		FROM
+		tbl_user_ahr
+		WHERE 1=1
+		<if test="userAhr.authority.authorityCode != null and userAhr.authority.authorityCode != ''">
+			AND tbl_user_ahr.authority_code = #{userAhr.authority.authorityCode, jdbcType = VARCHAR}
+		</if>
+		)
+		<if test="userAhr.user.userName != null and userAhr.user.userName != ''">
+			AND tbl_user.user_name LIKE
+			CONCAT('%',CONCAT(#{userAhr.user.userName},'%'))
+		</if>
+		<if test="userAhr.rowCount != -1 and userAhr.rowIndex != -1">
+			LIMIT #{userAhr.rowIndex, jdbcType =
+			INTEGER},#{userAhr.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+
+	<!-- 新增用户权限组关系数据 -->
+	<insert id="insertUserAhr" parameterType="java.util.List">
+		INSERT INTO tbl_user_ahr(authority_code,
+		user_code,
+		opt_user)
+		VALUES
+		<foreach collection="listUserAhr" item="item" index="index"
+			separator=",">
+			(#{item.authority.authorityCode},
+			#{item.user.userCode},
+			#{item.optUser})
+		</foreach>
+	</insert>
+
+	<!-- 删除用户权限组关系数据 -->
+	<delete id="deleteUserAhr" parameterType="java.util.List">
+		DELETE FROM tbl_user_ahr
+		WHERE tbl_user_ahr.authority_code = #{ahrCode,
+		jdbcType = VARCHAR}
+		AND tbl_user_ahr.user_code IN
+		<foreach collection="listUserCode" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

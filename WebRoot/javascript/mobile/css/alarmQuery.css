@@ -1,0 +1,70 @@
+body > .header .navbar {
+    margin-left: 0px;
+}
+
+.icon-bar {
+    background: #fff !important;
+    display: block;
+    width: 22px;
+    height: 2px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.sidebar-toggle1 {
+    position: absolute;
+    background-color: #00ca6d;
+    background-image: none;
+    padding: 15px 15px;
+    font-family: fontAwesome;
+    border: 1px solid #fff;
+    top: 5px;
+    right: 5px;
+}
+
+.sidebar-toggle1:before {
+    content: "\f0c9";
+    color: #fff;
+}
+
+.sidebar-toggle1:hover {
+    background-color: #00a65a;
+    color: #00a65a;
+    border: 1px solid #00a65a;
+}
+
+.modal-header {
+    padding: 5px;
+}
+
+.modal-body {
+    padding: 5px;
+}
+
+.modal-dialog, .modal-content {
+    /*height: 99% !important;*/
+    width: 100% !important;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-menu > li > a {
+    padding: 10px 20px;
+}
+
+.bootstrap-select {
+    min-width: 100% !important;
+}
+
+.modal-body label {
+    color: #fff;
+    font-size: 14px;
+}
+
+.pagination-detail {
+    display: none;
+}
+
+.form-control {
+    display: inline;
+}

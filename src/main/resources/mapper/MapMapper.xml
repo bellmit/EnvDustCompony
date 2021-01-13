@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IMapDao">
+    <resultMap type="com.tcb.env.model.MapModel" id="areaResultMap">
+        <id property="id" column="area_id"/>
+        <result property="name" column="area_name"/>
+        <result property="levelFlag" column="level_flag"/>
+    </resultMap>
+    <resultMap type="com.tcb.env.model.MapModel" id="areaLevelFlagResultMap">
+        <id property="id" column="level_flag"/>
+        <result property="name" column="level_name"/>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.MapModel" id="areaLevelIdResultMap">
+        <id property="id" column="level_id"/>
+        <result property="name" column="level_name"/>
+    </resultMap>
+    <!-- 设备：厂商code-name映射 -->
+    <resultMap type="com.tcb.env.model.MapModel" id="devicemfrcodeResultMap">
+        <id property="code" column="mfr_code"/>
+        <result property="name" column="mfr_name"/>
+    </resultMap>
+    <!-- 设备：状态code-name映射 -->
+    <resultMap type="com.tcb.env.model.MapModel" id="devicestatuscodeResultMap">
+        <id property="code" column="status_code"/>
+        <result property="name" column="status_name"/>
+    </resultMap>
+    <!-- 监测物：状态code-name映射 -->
+    <resultMap type="com.tcb.env.model.MapModel" id="monitorResultMap">
+        <id property="code" column="thing_code"/>
+        <result property="name" column="thing_name"/>
+        <result property="describe" column="thing_describe"/>
+        <result property="maxValue" column="max_value"/>
+        <result property="minValue" column="min_value"/>
+        <result property="dataFlag" column="data_flag"/>
+    </resultMap>
+    <!-- 设备：负责人id-name映射 -->
+    <resultMap type="com.tcb.env.model.MapModel" id="deviceprincipleResultMap">
+        <id property="id" column="user_id"/>
+        <result property="name" column="user_name"/>
+    </resultMap>
+    <!-- 设备：单位id-name映射 -->
+    <resultMap type="com.tcb.env.model.MapModel" id="deviceorgResultMap">
+        <id property="id" column="org_id"/>
+        <result property="name" column="org_name"/>
+    </resultMap>
+
+    <!-- 系统状态映射 -->
+    <resultMap type="com.tcb.env.model.MapModel" id="statusResultMap">
+        <id property="id" column="status_id"/>
+        <id property="code" column="status_code"/>
+        <result property="name" column="status_name"/>
+    </resultMap>
+
+
+    <!-- 查询区域id-name -->
+    <select id="getAreaMap" resultMap="areaResultMap">
+        SELECT tbl_area.area_id,tbl_area.area_name,tbl_area_level.level_flag
+        FROM tbl_area,tbl_area_level
+        WHERE
+        tbl_area.level_id = tbl_area_level.level_id
+        <if test="id != -1">
+            AND tbl_area.area_id = #{id}
+        </if>
+        <if test="levelflag != -1">
+            AND tbl_area_level.level_flag = #{levelflag}
+        </if>
+    </select>
+
+    <!--查询下级区域id-name-->
+    <select id="getSubAreaMap" resultMap="areaResultMap">
+		SELECT tbl_area.area_id,tbl_area.area_name,tbl_area_level.level_flag
+		FROM tbl_area,tbl_area_level
+		WHERE
+		tbl_area.level_id = tbl_area_level.level_id
+			AND tbl_area.parent_id = #{id}
+	</select>
+
+    <!-- 查询区域级别flag-name -->
+    <select id="getAreaLevelFlag" resultMap="areaLevelFlagResultMap">
+        SELECT level_flag,level_name
+        FROM tbl_area_level
+        WHERE 1=1
+        <if test="id != -1">
+            AND tbl_area_level.level_id = #{id}
+        </if>
+    </select>
+
+    <!-- 查询区域级别id-name -->
+    <select id="getAreaLevelId" resultMap="areaLevelIdResultMap">
+        SELECT level_id,level_name
+        FROM tbl_area_level
+        WHERE 1=1
+        <if test="id != -1">
+            AND tbl_area_level.level_id = #{id}
+        </if>
+        <if test="levelflag != -1">
+            AND tbl_area_level.level_flag = #{levelflag}
+        </if>
+    </select>
+
+    <!-- 查询设备中厂商code-name -->
+    <select id="getDeviceMfrCode" resultMap="devicemfrcodeResultMap">
+        SELECT mfr_code,mfr_name
+        FROM tbl_manufacturer
+        WHERE 1=1
+        <if test="mfrCode != null and mfrCode != ''">
+            AND tbl_manufacturer.mfr_code = #{mfrCode, jdbcType = VARCHAR}
+        </if>
+    </select>
+
+    <!-- 查询设备中状态code-name -->
+    <select id="getDeviceStatusCode" resultMap="devicestatuscodeResultMap">
+        SELECT status_code,status_name
+        FROM tbl_status
+        WHERE 1=1
+        <if test="statusCode != null and statusCode != ''">
+            AND tbl_status.status_code = #{statusCode, jdbcType = VARCHAR}
+        </if>
+    </select>
+
+    <!-- 获取权限监测物 -->
+    <select id="getAuthorityMonitors" resultMap="monitorResultMap">
+        SELECT
+        tbl_monitor.thing_code,
+        tbl_monitor.thing_name,
+        CONCAT(
+        tbl_monitor.thing_name,
+        '(',
+        tbl_monitor.thing_unit,
+        ')'
+        ) AS thing_describe,
+        ROUND(AVG(tbl_device_alarmset.max_value)) AS max_value,
+        ROUND(AVG(tbl_device_alarmset.min_value)) AS min_value,
+        tbl_device_alarmset.data_flag
+        FROM
+        tbl_monitor
+        LEFT JOIN tbl_device_alarmset ON tbl_monitor.thing_code = tbl_device_alarmset.thing_code
+        WHERE
+        tbl_monitor.thing_code IN (
+        SELECT
+        thing_code
+        FROM
+        tbl_access_monitor TAM,
+        tbl_user_ahr TUH
+        WHERE
+        TAM.authority_code = TUH.authority_code
+        AND TUH.user_code = #{usercode,jdbcType = VARCHAR}
+        )
+        <if test="thingid != -1">
+            AND tbl_monitor.thing_id IN (#{thingid,jdbcType = INTEGER})
+        </if>
+        <if test="thingname != null and thingname != ''">
+            AND tbl_monitor.thing_name LIKE CONCAT('%',CONCAT(#{thingname,jdbcType = VARCHAR},'%'))
+        </if>
+        <if test="deviceCodeList != null and deviceCodeList.size() > 0">
+            AND tbl_monitor.thing_code IN
+            (
+            SELECT thing_code FROM tbl_device_time WHERE device_code IN
+            <foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            )
+        </if>
+        GROUP BY thing_code,thing_name,thing_describe
+        ORDER BY tbl_monitor.thing_order
+    </select>
+
+    <!-- 获取权限设备监测物 -->
+    <select id="getAuthorityDeviceMonitors" resultMap="monitorResultMap">
+        SELECT
+        tbl_monitor.thing_code,
+        tbl_monitor.thing_name,
+        CONCAT(
+        tbl_monitor.thing_name,
+        '(',
+        tbl_monitor.thing_unit,
+        ')'
+        ) AS thing_describe,
+        ROUND(AVG(tbl_device_alarmset.max_value)) AS max_value,
+        ROUND(AVG(tbl_device_alarmset.min_value)) AS min_value,
+        tbl_device_alarmset.data_flag
+        FROM
+        tbl_monitor
+        INNER JOIN tbl_device_data tdd ON tdd.data_type='2011' AND tbl_monitor.thing_code = tdd.thing_code AND
+        tdd.device_code = #{devicecode}
+        LEFT JOIN tbl_device_alarmset ON tbl_device_alarmset.device_code=#{devicecode} AND tbl_monitor.thing_code =
+        tbl_device_alarmset.thing_code
+        WHERE
+        tbl_monitor.thing_code IN (
+        SELECT
+        thing_code
+        FROM
+        tbl_access_monitor TAM,
+        tbl_user_ahr TUH
+        WHERE
+        TAM.authority_code = TUH.authority_code
+        AND TUH.user_code = #{usercode,jdbcType = VARCHAR}
+        )
+        <if test="thingid != -1">
+            AND tbl_monitor.thing_id IN (#{thingid,jdbcType = INTEGER})
+        </if>
+        <if test="thingname != null and thingname != ''">
+            AND tbl_monitor.thing_name LIKE CONCAT('%',CONCAT(#{thingname,jdbcType = VARCHAR},'%'))
+        </if>
+        GROUP BY thing_code,thing_name,thing_describe
+        ORDER BY thing_order
+    </select>
+
+    <!-- 查询设备负责人id-name -->
+    <select id="getDeviceprinciple" resultMap="deviceprincipleResultMap">
+        SELECT user_id,user_name
+        FROM tbl_user
+        WHERE 1=1
+        <if test="devicePrinciple != -1">
+            AND tbl_user.user_id = #{devicePrinciple}
+        </if>
+    </select>
+    <!-- 查询设备监督单位id-name -->
+    <select id="getDeviceOversightUnit" resultMap="deviceorgResultMap">
+        SELECT org_id,org_name
+        FROM tbl_oranization
+        WHERE 1=1
+        <if test="orgId != -1">
+            AND tbl_oranization.org_id = #{orgId}
+        </if>
+    </select>
+    <!-- 查询数据库-->
+    <select id="getStatus" resultMap="statusResultMap">
+        SELECT
+        ts.status_id,
+        ts.status_code,
+        ts.status_name
+        FROM
+        tbl_status AS ts
+        <where>
+            <if test="status != null and status!= ''">
+                ts.status_code = #{status_code,jdbcType = VARCHAR}
+            </if>
+            <if test="nostatus != null and nostatus != ''">
+                AND ts.status_code != #{nostatus,jdbcType = VARCHAR}
+            </if>
+            <if test="statusType != null and statusType != ''">
+                AND ts.status_type = #{statusType,jdbcType = VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <select id="getAreaIdFromFlag" resultType="java.lang.Integer">
+		select
+		tbl_area.area_id
+		from
+		tbl_area ,tbl_area_level
+		where
+		tbl_area.level_id=tbl_area_level.level_id
+		and
+		tbl_area_level.level_flag=#{id}
+	</select>
+
+</mapper>

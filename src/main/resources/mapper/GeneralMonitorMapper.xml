@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IGeneralMonitorDao">
+
+	<resultMap type="com.tcb.env.model.DeviceValueModel" id="deviceValueModelResultMap">
+		<result property="deviceCode" column="device_code" />
+		<result property="deviceName" column="device_name" />
+		<result property="dataType" column="data_type" />
+		<result property="dataTypeName" column="data_type_name" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="thingValue" column="thing_value" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.GeneralDeviceLocationModel" id="generalDeviceLocationModelResultMap">
+		<result property="deviceCode" column="device_code" />
+		<result property="deviceName" column="device_name" />
+		<result property="statusCode" column="status_code" />
+		<result property="statusName" column="status_name" />
+		<result property="updateTime" column="update_time" />
+		<result property="deviceX" column="device_x" />
+		<result property="deviceY" column="device_y" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.GeneralAlarmModel" id="generalAlarmModelResultMap">
+		<result property="alarmType" column="alarm_type" />
+		<result property="alarmTypeName" column="status_name" />
+		<result property="deviceCode" column="device_code" />
+		<result property="deviceName" column="device_name" />
+		<result property="alarmInfo" column="alarm_info" />
+		<result property="alarmTime" column="alarm_time" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.GeneralDeviceDataModel" id="generalDeviceDataModelResultMap">
+		<result property="deviceCode" column="device_code" />
+		<result property="deviceName" column="device_name" />
+		<result property="deviceMn" column="device_mn" />
+		<result property="statusCode" column="status_code" />
+		<result property="statusName" column="status_name" />
+		<result property="areaId" column="area_id" />
+		<result property="areaName" column="area_name" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="thingUnit" column="thing_unit" />
+		<result property="updateTime" column="update_time" />
+		<result property="recentData" column="recent_data" />
+		<result property="dataType" column="data_type" />
+		<result property="dataTypeName" column="data_type_name" />
+		<result property="maxValue" column="max_value" />
+		<result property="minValue" column="min_value" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.AreaModel" id="areaModelResultMap">
+		<id property="areaId" column="area_id" />
+		<result property="areaName" column="area_name" />
+	</resultMap>
+
+	<!-- 区域内设备排放值排名 -->
+	<select id="getGenaralMonitorValueRanking" resultMap="deviceValueModelResultMap">
+		SELECT 
+			tdd.device_code,
+			td.device_name,
+			tdd.data_type,
+			CASE WHEN tdd.data_type = '2011' THEN '实时数据' WHEN tdd.data_type = '2031' THEN '每日数据'
+				 WHEN tdd.data_type = '2051' THEN '分钟数据' WHEN tdd.data_type = '2061' THEN '小时数据' END AS data_type_name,
+			tdd.thing_code,
+			tm.thing_name,
+			tdd.recent_data AS thing_value
+		FROM tbl_device_data tdd
+		INNER JOIN tbl_device td ON tdd.device_code = td.device_code
+		<if test="onlineFlag != null and onlineFlag == 'online'">
+			AND td.status_code IN ('N','NT')
+		</if>
+		INNER JOIN tbl_monitor tm ON tdd.thing_code = tm.thing_code
+		WHERE tdd.thing_code = #{thingCode}
+		AND tdd.data_type = #{dataType}
+		<if test="deviceCodeList != null and deviceCodeList.size()>0">
+			AND tdd.device_code IN
+			<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<choose>
+			<when test="order != null and order=='asc'">
+				ORDER BY tdd.recent_data ASC
+			</when>
+			<otherwise>
+				ORDER BY tdd.recent_data DESC
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="limit != null and limit >=0">
+				LIMIT 0,#{limit, jdbcType = INTEGER}
+			</when>
+			<otherwise>
+				LIMIT 0,5
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 设备监测物平均值 -->
+	<select id="getDeviceListAvgValue" resultType="java.lang.String">
+		SELECT ROUND(AVG(tdd.recent_data),3)
+		FROM tbl_device_data tdd
+		WHERE tdd.thing_code = #{thingCode}
+		AND tdd.data_type = #{dataType}
+		<choose>
+			<when test="deviceCodeList != null and deviceCodeList.size()>0">
+				AND tdd.device_code IN
+				<foreach collection="deviceCodeList" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				AND tdd.device_code IS NULL
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查询设备坐标状态 -->
+	<select id="getGeneralDeviceLocation" resultMap="generalDeviceLocationModelResultMap">
+		SELECT
+			td.device_code,
+			td.device_mn,
+			td.device_name,
+			td.device_x,
+			td.device_y,
+			ts.status_id,
+			ts.status_code,
+			ts.status_name,
+			MAX(tdt.update_time) AS update_time
+		FROM
+			tbl_device td
+		INNER JOIN tbl_status ts ON td.status_code = ts.status_code
+		LEFT JOIN tbl_device_time tdt ON td.device_code = tdt.device_code
+		<where>
+			<if test="deviceCodeList != null and deviceCodeList.size()>0">
+				td.device_code IN (
+				<foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="dataTypeList != null and dataTypeList.size()>0">
+				AND td.status_code IN
+				<foreach collection="dataTypeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="noDataTypeList != null and noDataTypeList.size()>0">
+				AND td.status_code NOT IN
+				<foreach collection="noDataTypeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		GROUP BY td.device_code
+	</select>
+	
+	<!-- 查询报警信息 -->
+	<select id="getGeneralAlarm" resultMap="generalAlarmModelResultMap">
+		SELECT 
+			ta.alarm_type,
+			ts.status_name,
+			td.device_code,
+			td.device_name,
+			ta.alarm_time,
+			CASE WHEN alarm_type='NT' THEN CONCAT(td.device_code,',',tm.thing_name,':',ta.thing_value,',报警时间:',ta.alarm_time)
+			ELSE CONCAT(td.device_code,',',ta.alarm_info,',报警时间:',ta.alarm_time) END AS alarm_info
+		FROM 
+			tbl_alarm ta
+		INNER JOIN tbl_device td ON ta.device_code = td.device_code
+		INNER JOIN tbl_status ts ON ta.alarm_type = ts.status_code 
+		LEFT JOIN tbl_monitor tm ON ta.thing_code = tm.thing_code
+		<where>
+			<if test="deviceCodeList != null and deviceCodeList.size()>0">
+				ta.device_code IN (
+				<foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="dataTypeList != null and dataTypeList.size()>0">
+				AND td.status_code IN
+				<foreach collection="dataTypeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="noDataTypeList != null and noDataTypeList.size()>0">
+				AND td.status_code NOT IN
+				<foreach collection="noDataTypeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>		
+		ORDER BY ta.alarm_time DESC
+		<choose>
+			<when test="limit != null and limit>0">
+				LIMIT 0,#{limit}
+			</when>
+			<otherwise>
+				LIMIT 0,10
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查询设备最新数据信息 -->
+	<select id="getGeneralDeviceData" resultMap="generalDeviceDataModelResultMap">
+		SELECT
+			DISTINCT td.device_code,
+			td.device_name,
+			td.device_mn,
+			ts.status_id,
+			ts.status_code,
+			ts.status_name,
+			ta.area_id,
+			ta.area_name,
+			tm.thing_code,
+			tm.thing_name,
+			tm.thing_unit,
+			tdms.max_value,
+			tdms.min_value,
+			DATE_FORMAT(TIMESTAMPADD(MINUTE,-1,tdd.update_time),'%Y-%m-%d %H:%i') AS update_time,
+			tdd.recent_data,
+			tdd.data_type,
+			CASE WHEN data_type='2011' THEN '实时数据' WHEN data_type='2031' THEN '每日数据' WHEN data_type='2051' THEN '分钟数据'
+			WHEN data_type='2061' THEN '小时数据' ELSE '未知数据类型' END AS data_type_name
+		FROM
+			tbl_device td
+		INNER JOIN tbl_status ts ON td.status_code = ts.status_code
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		LEFT JOIN tbl_device_data tdd ON td.device_code = tdd.device_code
+		LEFT JOIN tbl_device_alarmset tdms ON tdd.thing_code = tdms.thing_code AND tdd.device_code = tdms.device_code
+		LEFT JOIN tbl_monitor tm ON tdd.thing_code = tm.thing_code
+		<where>
+			<if test="deviceCodeList != null and deviceCodeList.size()>0">
+				td.device_code IN
+				<foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="statusCodeList != null and statusCodeList.size()>0">
+				AND td.status_code IN
+				<foreach collection="statusCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="noStatusCodeList != null and noStatusCodeList.size()>0">
+				AND td.status_code IN
+				<foreach collection="noStatusCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="dataTypeList != null and dataTypeList.size()>0">
+				AND tdd.data_type IN
+				<foreach collection="dataTypeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="thingCodeList != null and thingCodeList.size()>0">
+				AND tm.thing_code IN
+				<foreach collection="thingCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		ORDER BY td.device_code DESC,tm.thing_order ASC
+	</select>
+	
+	<!-- 查询无数据设备信息 -->
+	<select id="getGeneralDeviceNoData" resultMap="generalDeviceDataModelResultMap">
+		SELECT
+			DISTINCT td.device_code,
+			td.device_name,
+			td.device_mn,
+			ts.status_id,
+			ts.status_code,
+			ts.status_name,
+			ta.area_id,
+			ta.area_name,
+			tm.thing_code,
+			tm.thing_name,
+			tm.thing_unit,
+			DATE_FORMAT(TIMESTAMPADD(MINUTE,-1,tdd.update_time),'%Y-%m-%d %H:%i') AS update_time,
+			tdd.recent_data,
+			tdd.data_type,
+			'' AS data_type_name
+		FROM
+			tbl_device td
+		INNER JOIN tbl_status ts ON td.status_code = ts.status_code
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		LEFT JOIN tbl_device_data tdd ON td.device_code = tdd.device_code
+		LEFT JOIN tbl_monitor tm ON tdd.thing_code = tm.thing_code
+		<where>
+			tdd.update_time IS NULL
+			<if test="deviceCodeList != null and deviceCodeList.size()>0">
+				AND td.device_code IN
+				<foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="statusCodeList != null and statusCodeList.size()>0">
+				AND td.status_code IN
+				<foreach collection="statusCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="noStatusCodeList != null and noStatusCodeList.size()>0">
+				AND td.status_code IN
+				<foreach collection="noStatusCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		ORDER BY td.device_code DESC
+	</select>
+	
+	<!-- 获取用户权限设备的区域列表 -->
+	<select id="getAuthorityDeviceArea" resultMap="areaModelResultMap">
+		SELECT DISTINCT
+			ta.area_id,
+			ta.area_name
+		FROM
+			tbl_area ta
+		INNER JOIN tbl_device td ON ta.area_id = td.area_id
+		WHERE
+			td.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device tad,
+					tbl_user_ahr tuh
+				WHERE
+					tad.authority_code = tuh.authority_code
+				AND tuh.user_code = #{userCode}
+			)
+	</select>
+	
+
+</mapper>

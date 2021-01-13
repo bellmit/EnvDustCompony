@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IDeviceProjectDao">
+
+    <resultMap type="com.tcb.env.pojo.DeviceProject" id="deviceProjectResultMap">
+        <id property="projectId" column="project_id" />
+        <result property="projectCode" column="project_code" />
+        <result property="projectName" column="project_name" />
+        <result property="projectOrder" column="project_order" />
+        <result property="optUser" column="opt_user" />
+        <result property="optTime" column="opt_time" />
+    </resultMap>
+
+    <!-- 获取设备项目个数 -->
+    <select id="getDeviceProjectCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT tdp.project_id)
+        FROM
+            tbl_device_project tdp
+    </select>
+
+    <!-- 获取设备项目信息 -->
+    <select id="getDeviceProject" resultMap="deviceProjectResultMap">
+        SELECT DISTINCT
+            tdp.project_id,
+            tdp.project_code,
+            tdp.project_name,
+            tdp.project_order,
+            tdp.opt_user,
+            tdp.opt_time
+        FROM
+            tbl_device_project tdp
+        ORDER BY tdp.project_order
+    </select>
+
+</mapper>

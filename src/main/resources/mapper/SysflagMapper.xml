@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ISysflagDao">
+<!-- 类名和数据库中表的属性名一一对应 -->
+	<resultMap type="com.tcb.env.pojo.Sysflag" id="sysflagResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="sysId" column="sys_id" />
+		<result property="sysFlagCode" column="sys_flag_code" />
+		<result property="sysValue" column="sys_value" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+	
+	<!-- 查询数据个数   COUNT(0)表示忽略所有lie-->
+	<select id="getCount" resultType="java.lang.Integer" >
+		SELECT COUNT(0)
+		FROM
+		tbl_sys_flag
+		WHERE
+		1 = 1
+		<if test="sysflag.sysId != -1">
+			AND tbl_sys_flag.sys_id = #{sysflag.sysId, jdbcType = INTEGER}
+		</if>
+		<if test="sysflag.sysFlagCode != null and sysflag.sysFlagCode != ''">
+			AND tbl_sys_flag.sys_flag_code = #{sysflag.sysFlagCode, jdbcType = VARCHAR}
+		</if>
+
+	</select>
+<!-- 查询数据库-->
+	<select id="getSysflag" parameterType="com.tcb.env.pojo.Sysflag"
+		resultMap="sysflagResultMap">
+		SELECT	
+		tbl_sys_flag.sys_id,
+		tbl_sys_flag.sys_flag_code,
+		tbl_sys_flag.sys_value,
+		tbl_sys_flag.opt_user,
+		tbl_sys_flag.opt_time
+		FROM
+		tbl_sys_flag
+		WHERE<!-- 表示条件：如果此字段不为空则以此字段作为条件，来取出整行，
+		如果此字段为空，则不做为条件，也就是没有取出条件，不取出
+		哪个不空取哪个-->
+		1 = 1
+		<if test="sysflag.sysId != -1">
+			AND tbl_sys_flag.sys_id = #{sysflag.sysId, jdbcType = INTEGER}
+		</if>
+		<if test="sysflag.sysFlagCode != null and sysflag.sysFlagCode != ''">
+			AND tbl_sys_flag.sys_flag_code = #{sysflag.sysFlagCode, jdbcType = VARCHAR}
+		</if>
+		</select>  
+
+<!-- 更新操作 -->
+	<update id="updateSysflag" parameterType="java.util.List">
+		<!-- SET列名称，新值，具体哪一行看where -->
+		<foreach collection="list" item="item" index="index" separator=",">	
+			UPDATE tbl_sys_flag 
+			SET	
+			tbl_sys_flag.opt_time = #{item.optTime}	
+			<if test="item.sysValue != null and item.sysValue != ''">
+				,tbl_sys_flag.sys_value = #{item.sysValue}
+			</if>
+			<if test="item.optUser != -1">
+				,tbl_sys_flag.opt_user = #{item.optUser}
+			</if>	
+			<!-- where列名称，某值，修改某行的标识 -->
+			WHERE 
+			tbl_sys_flag.sys_flag_code = #{item.sysFlagCode, jdbcType = VARCHAR}
+		</foreach>
+	</update>
+<!-- 更新时查询是否存在厂商编号 -->
+	<select id="getSysflagExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_sys_flag
+		WHERE 1=1 
+		<if test="sysflagid != -1">
+			AND tbl_sys_flag.sys_id != #{sysflagid, jdbcType = INTEGER}
+		</if>
+		<if test="sysflagcode != null and sysflagcode != ''">
+			AND tbl_sys_flag.sys_flag_code = #{sysflagcode, jdbcType = VARCHAR}
+		</if>
+	</select>
+    
+</mapper>

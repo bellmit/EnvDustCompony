@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IAuthorityDao">
+
+	<resultMap type="com.tcb.env.pojo.Authority" id="authorityResultMap">
+		<id property="authorityId" column="authority_id" />
+		<result property="authorityCode" column="authority_code" />
+		<result property="authorityName" column="authority_name" />
+		<result property="remark" column="remark" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 查询权限组个数 -->
+	<select id="getAuthorityCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM
+			tbl_authority ta
+		WHERE 1=1
+		<if test="authority.authorityId != -1">
+			AND ta.authority_id = #{authority.authorityId, jdbcType =
+			INTEGER}
+		</if>
+		<if
+			test="authority.authorityCode != null and authority.authorityCode != ''">
+			AND ta.authority_code = #{authority.authorityCode, jdbcType =
+			VARCHAR}
+		</if>
+		<if test="authority.authorityName != null and authority.authorityName != ''">
+			AND ta.authority_name LIKE
+			CONCAT('%',CONCAT(#{authority.authorityName,jdbcType =VARCHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 查询权限组数据 -->
+	<select id="getAuthority" resultMap="authorityResultMap">
+		SELECT
+			ta.authority_id,
+			ta.authority_code,
+			ta.authority_name,
+			ta.remark,
+			ta.opt_user,
+			ta.opt_time
+		FROM
+			tbl_authority ta
+		WHERE
+			1 = 1
+		<if test="authority.authorityId != -1">
+			AND ta.authority_id = #{authority.authorityId, jdbcType =
+			INTEGER}
+		</if>
+		<if test="authority.authorityCode != null and authority.authorityCode != ''">
+			AND ta.authority_code = #{authority.authorityCode, jdbcType =
+			VARCHAR}
+		</if>
+		<if
+			test="authority.authorityName != null and authority.authorityName != ''">
+			AND ta.authority_name LIKE
+			CONCAT('%',CONCAT(#{authority.authorityName,jdbcType =VARCHAR},'%'))
+		</if>
+		<if test="authority.rowCount != -1 and authority.rowIndex != -1">
+			LIMIT #{authority.rowIndex, jdbcType = INTEGER},#{authority.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 插入权限组数据 -->
+	<insert id="insertAuthority" parameterType="java.util.List">
+		INSERT INTO tbl_authority(authority_code,
+			authority_name,
+			remark,
+			opt_user)
+		VALUES
+		<foreach collection="listAuthority" item="item" index="index" separator=",">
+			(#{item.authorityCode},
+			#{item.authorityName},
+			#{item.remark},
+			#{item.optUser})
+		</foreach>
+	</insert>
+	
+	<!-- 更新权限组数据 -->
+	<update id="updateAuthority" parameterType="java.util.List">
+		<foreach collection="listAuthority" item="item" index="index" separator=",">
+			UPDATE tbl_authority SET 
+			
+			tbl_authority.opt_time = #{item.optTime}
+			<if test="item.authorityCode != null and item.authorityCode != ''">
+				,tbl_authority.authority_code = #{item.authorityCode,jdbcType =VARCHAR}
+			</if>
+			<if test="item.authorityName != null and item.authorityName != ''">
+				,tbl_authority.authority_name = #{item.authorityName,jdbcType =VARCHAR}
+			</if>
+			<if test="item.remark != null and item.remark != ''">
+				,tbl_authority.remark = #{item.remark,jdbcType =VARCHAR}
+			</if>
+			<if test="item.optUser != -1">
+				,tbl_authority.opt_user = #{item.optUser}
+			</if>
+			WHERE tbl_authority.authority_id = #{item.authorityId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+	
+	<!-- 删除权限组数据 -->
+	<delete id="deleteAuthority" parameterType="java.util.List">
+		DELETE FROM tbl_authority
+		WHERE 
+		<choose>
+			<when test="listid != null and listid.size()>0">
+				authority_id IN
+				<foreach collection="listid" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				authority_id = NULL
+			</otherwise>
+		</choose>
+
+	</delete>
+	
+	<!-- 查询是否存在权限组，更新用 -->
+	<select id="getAuthorityExist" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM tbl_authority
+		WHERE tbl_authority.authority_code = #{authorityCode,jdbcType = VARCHAR}
+		<if test="authorityId != -1">
+			AND tbl_authority.authority_id != #{authorityId, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 通过Id获取编码 -->
+	<select id="getAuthorityCodeById" resultType="java.lang.String">
+		SELECT
+			authority_code
+		FROM tbl_authority
+		WHERE authority_id = #{authorityId}
+		LIMIT 0,1
+	</select>
+	
+</mapper>

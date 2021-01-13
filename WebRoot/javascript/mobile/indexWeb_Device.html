@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          name='viewport'>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="./css/bootstrap3.3.7/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/ionicons.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/bootstrap-select.min.css" rel="stylesheet" type="text/css"/>
+    <!--<link href="./css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>-->
+    <link title="stylenew" rel="stylesheet" type="text/css" href="./css/stylenew.css"/>
+    <link title="stylenew" rel="stylesheet" type="text/css" href="./css/siteTable.css"/>
+    <title>首页</title>
+    <style>
+        body > .header .navbar {
+            margin-left: 0px;
+        }
+
+        .slimScrollBar {
+            width: 0px !important;
+        }
+
+        .icon-bar {
+            background: #fff !important;
+            display: block;
+            width: 22px;
+            height: 2px;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+        }
+
+        .sidebar-toggle1 {
+            position: absolute;
+            background-color: #00ca6d;
+            background-image: none;
+            padding: 15px 15px;
+            font-family: fontAwesome;
+            border: 1px solid #fff;
+            top: 5px;
+            right: 5px;
+        }
+
+        .sidebar-toggle1:before {
+            content: "\f0c9";
+            color: #fff;
+        }
+
+        .sidebar-toggle1:hover {
+            background-color: #00a65a;
+            color: #00a65a;
+            border: 1px solid #00a65a;
+        }
+
+        .col-xs-4 {
+            padding: 0px 1px;
+        }
+
+        .info-box {
+            margin-bottom: 5px;
+        }
+
+        .modal-header {
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 5px;
+        }
+
+        .modal-dialog, .modal-content {
+            /*height: 99% !important;*/
+            width: 100% !important;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-menu > li > a {
+            padding: 10px 20px;
+        }
+
+        .bootstrap-select .dropdown-menu {
+            min-width: 100% !important;
+        }
+
+        .modal-body label {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .info-box-number {
+            display: block;
+            font-weight: bold;
+            font-size: 18px
+        }
+
+        .info-box-text {
+            display: block;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .progress {
+            height: 2px;
+            overflow: hidden;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1)
+        }
+    </style>
+</head>
+<body class="skin-black">
+<header class="header">
+    <nav class="navbar navbar-static-top" role="navigation">
+        <div class="logo">
+            <a href="#" class="navbar-btn btnRipple sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a href="./../../../UserController/toMobileMain"><span style="float:left; font-size: 28px;"><span
+                    class="label" style="padding:1px;">移动在线监测</span></span></a>
+        </div>
+        <div class="navbar-right">
+            <ul class="nav navbar-nav">
+            </ul>
+        </div>
+    </nav>
+</header>
+<div class="wrapper row-offcanvas row-offcanvas-left">
+    <aside class="left-side sidebar-offcanvas ">
+        <section class="sidebar">
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="./img/user1.png" class="img-circle" alt="User Image"/>
+                </div>
+                <div class="pull-left info">
+                    <p>欢迎，<label id="userName"></label></p>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="selected"><a href="indexWeb.html"> <i class="fa fa-home"></i> <span>首页</span></a></li>
+                <li><a href="mapMonitorWeb.html"> <i class="fa fa-map-marker"></i> <span>地图</span></a></li>
+                <li><a href="dataQueryWeb.html"><i class="fa fa-list"></i> <span>数据</span></a></li>
+                <li><a href="chartQueryWeb.html"><i class="fa fa-line-chart"></i> <span>趋势</span></a></li>
+                <li ><a href="alarmQueryWeb.html"><i class="fa fa-warning"></i> <span>报警</span></a></li>
+                <li><a href="#" onclick="mainlogOutFunc()"> <i class="fa fa-sign-out"></i> <span>注销</span></a></li>
+            </ul>
+        </section>
+    </aside>
+    <aside class="right-side ">
+        <section>
+            <div class="row no-margin">
+                <div class="row no-margin">
+                    <div class="col-xs-12 no-padding">
+                        <div style="background-color: #00ca6d;color: #fff;position: relative">
+                            <a href="#myModal" class="sidebar-toggle dropdown-toggle sidebar-toggle1"
+                               data-toggle="modal">
+                                <span class="sr-only">切换导航</span>
+                            </a>
+                            <input id="deviceName" hidden>
+                            <input id="areaId" hidden>
+                            <span class="info-box-number"
+                                  style="height: 20px;margin-left: 7px;position: relative;top: 5px;"
+                                  id="pointName"></span>
+                            <span class="info-box-number"
+                                  style="text-align: center;height: 70px;padding: 15px;font-size: 28px"
+                                  id="thingValue"></span>
+                            <div style="height: 20px;position: relative;bottom: 5px;padding: 0 5px">
+                                <span class="" style="float: left;width: 40%;" id="thingLevel"></span>
+                                <span class="" style="float: left;width: 20%;text-align: center;"
+                                      id="pointStatus"></span>
+                                <span class="" style="float: right;width: 40%;text-align: right;"
+                                      id="thingName"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-margin" style="border: 2px solid #a0a6ad;" id="resultContent">
+                </div>
+                <div class="row no-margin">
+                    <div class="col-xs-12 no-padding"
+                         style="border-bottom: 2px solid #a0a6ad;border-left: 2px solid #a0a6ad;border-right: 2px solid #a0a6ad;">
+                        <h4>污染物占比</h4>
+                        <div id="main" style="height:300px;"></div>
+                    </div>
+                </div>
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog no-margin">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                        style="color: #fff">
+                                    &times;
+                                </button>
+                                <h5 class="modal-title" id="myModalLabel" style="color: #fff">点位选择</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div>
+                                    <label>区域：</label>
+                                    <select class="selectpicker" data-style="btn-info" id="manufactor">
+                                    </select>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <label>设备：</label>
+                                    <select class="selectpicker" data-style="btn-info" id="device"></select>
+                                </div>
+                                <div style="margin-top: 10px;height: 40px">
+                                    <button type="button" class="btn btn-primary" style="float: right;margin-right: 1px"
+                                            onclick="search();">确定
+                                    </button>
+                                    <button type="button" class="btn btn-default "
+                                            style="float: right;margin-right: 8px"
+                                            data-dismiss="modal">关闭
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!-- /.content -->
+    </aside>
+</div>
+</body>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui-1.10.3.min.js" type="text/javascript"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/bootstrap-select.min.js"></script>
+<!--<script src="./js/adminlte.min.js"></script>-->
+<script src="./js/defaults-zh_CN.min.js"></script>
+<script src="./js/plugins/echarts/echarts.min.js"></script>
+<script src="./js/dataUtil.js" type="text/javascript"></script>
+<script src="./js/Director/app.js" type="text/javascript"></script>
+<script src="./../util/ctrl.js" type="text/javascript"></script>
+<script>
+    //默认左侧导航栏折叠
+    $('.left-side').toggleClass("collapse-left");
+    $(".right-side").toggleClass("strech");
+    option = {
+        legend: {
+            x: 'left',
+            y: '70%'
+        },
+        calculable: true,
+        series: [
+            {
+                type: 'pie',
+                radius: ['20%', '59%'],
+                center: ['50%', '35%'],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            position: 'inner',
+                            formatter: function (params) {
+                                return (params.percent - 0).toFixed(0) + '%'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        }
+                    },
+                    emphasis: {
+                        label: {
+                            show: false,
+                            position: 'center',
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    }
+                },
+                data: []
+            }
+        ]
+    };
+    var myChart = echarts.init(document.getElementById('main'));
+    myChart.setOption(option);
+    $('#manufactor,#device').selectpicker({
+        'width': '100%'
+    });
+    window.onresize = function () {
+        myChart.resize();
+    };
+    var loginname = "";
+    loginname = getCookieValue('EnvDustusername');
+    if (loginname != null && loginname != "") {
+        $("#userName").html(loginname);
+    } else {
+        $("#userName").html("");
+    }
+    loadData($("#deviceName").val());
+    loadManufactor($("#areaId").val());
+
+    function search() {
+        var deviceName = $("#device").val();
+        loadData(deviceName);
+        $("#myModal").modal('hide');
+    }
+
+    function loadData(deviceName) {
+        $.ajax({
+            type: "post",
+            async: false,
+            url: "../../MobileController/getPointRecentData",
+            data: {deviceName: deviceName},
+            dataType: "json",
+            success: function (result) {
+                if (result.areaId == null) {
+                    alert("该设备暂无信息");
+                } else {
+                    var data = [];
+                    var html = '<h4>污染物详情</h4>\n';
+                    $("#areaId").val(result.areaId);
+                    $("#deviceName").val(result.pointName);
+                    $("#pointName").html(result.pointName + "(" + result.areaName + ")");
+                    for (var i = 0; i < result.pointListData.length; i++) {
+                        if (i == 0) {
+                            $("#thingValue").html(result.pointListData[i].thingValue);
+                            if (result.pointListData[i].thingLevelName == null || result.pointListData[i].thingLevelName == '') {
+                                $("#thingLevel").html("污染等级:暂无");
+                            } else {
+                                $("#thingLevel").html("污染等级:" + result.pointListData[i].thingLevelName);
+                            }
+                            $("#pointStatus").html(result.pointStatusName);
+                            $("#thingName").html("污染物:" + result.pointListData[i].thingName);
+                        }
+                        var thingUnit = result.pointListData[i].thingUnit;
+                        if(thingUnit != null && thingUnit != ""){
+                            thingUnit = thingUnit.toLowerCase();
+                        }
+                        if (thingUnit == "mg/m3" || thingUnit == "μg/m3" || thingUnit == "ng/m3") {
+                            var json = {};
+                            if (thingUnit == "mg/m3") {
+                                json.value = result.pointListData[i].thingValue * 1000 * 1000;
+                            } else if (thingUnit == "μg/m3") {
+                                json.value = result.pointListData[i].thingValue * 1000;
+                            }
+                            else {
+                                json.value = result.pointListData[i].thingValue;
+                            }
+                            json.name = result.pointListData[i].thingName;
+                            data.push(json);
+                        }
+                        if (thingUnit == "mg/l") {
+                            var json = {};
+                            json.value = result.pointListData[i].thingValue;
+                            json.name = result.pointListData[i].thingName;
+                            data.push(json);
+                        }
+                        var color = result.pointListData[i].thingLevelColor;
+                        if (color == null) {
+                            color = "green";
+                        }
+                        html += '<div class="col-xs-4 ">\n' +
+                            '            <div class="info-box " style="min-height: 40px!important;">\n' +
+                            '                <span class="info-box-text" style="margin-left: 1px">' + result.pointListData[i].thingName + '</span>\n' +
+                            '                <span class="info-box-text" style="margin-left: 1px;color: ' + color + '">' + result.pointListData[i].thingValue + '<span\n' +
+                            '                        style="float: right;margin-right: 5px;text-transform: lowercase;color:#808080">' + thingUnit + '</span></span>\n' +
+                            '                <div class="progress no-margin">\n' +
+                            '                    <div class="progress-bar" style="width: 100%;background-color:' + color + '"></div>\n' +
+                            '                </div>\n' +
+                            '            </div>\n' +
+                            '        </div>'
+                    }
+                    $("#resultContent").html(html);
+                    myChart.hideLoading();    //隐藏加载动画
+                    myChart.setOption({        //加载数据图表
+                        series: [{data: data}]
+                    });
+                }
+            },
+            error: function () {
+                alert("图表请求数据失败!");
+                myChart.hideLoading();
+            }
+        });
+    }
+
+    function loadManufactor(areaId) {
+        $.ajax({
+            type: 'post',
+            async: false,
+            url: '../../AreaController/queryBottomAreas',
+            dataType: "json",
+            success: function (data) {
+                $("#manufactor").empty();
+                for (var i = 0; i < data.rows.length; i++) {
+                    if (data.rows[i].areaId == areaId) {
+                        $("#manufactor").append("<option value='" + data.rows[i].areaId + "' selected>" + data.rows[i].areaName + "</option>");
+                    } else {
+                        $("#manufactor").append("<option value='" + data.rows[i].areaId + "'>" + data.rows[i].areaName + "</option>");
+                    }
+                }
+                $("#manufactor").selectpicker("refresh");
+                loadDevice(areaId);
+            }
+        });
+    }
+
+    function loadDevice(areaId) {
+        $.ajax({
+            type: 'post',
+            url: '../../DeviceController/queryAreaAuthDevice',
+            data: {areaId: areaId},
+            dataType: "json",
+            success: function (data) {
+                $("#device").empty();
+                for (var i = 0; i < data.rows.length; i++) {
+                    if (data.rows[i].deviceName == $("#deviceName").val()) {
+                        $("#device").append("<option value='" + data.rows[i].deviceName + "' selected>" + data.rows[i].deviceName + "</option>");
+                    } else {
+                        $("#device").append("<option value='" + data.rows[i].deviceName + "'>" + data.rows[i].deviceName + "</option>");
+                    }
+                }
+                $("#device").selectpicker("refresh");
+            }
+        });
+    }
+
+    $("#manufactor").change(function () {
+        loadDevice($("#manufactor").val());
+    });
+
+</script>
+</html>

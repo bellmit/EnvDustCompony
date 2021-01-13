@@ -1,0 +1,1071 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IMonitorStorageDao">
+
+	<parameterMap type="java.util.HashMap" id="paramMonitor">
+		<parameter property="dboldname" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="devcode" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="thingcode" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="starttime" jdbcType="TIMESTAMP" mode="IN" />
+		<parameter property="endtime" jdbcType="TIMESTAMP" mode="IN" />
+		<parameter property="rowindex" jdbcType="INTEGER" mode="IN" />
+		<parameter property="rowcount" jdbcType="INTEGER" mode="IN" />
+		<parameter property="allcount" jdbcType="INTEGER" mode="OUT" />
+	</parameterMap>
+
+	<resultMap type="com.tcb.env.model.MonitorStorageModel" id="monitorResultMap">
+		<result property="deviceCode" column="devcode" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceName" column="devname" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceMn" column="devMn" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="areaId" column="areaId" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="areaName" column="areaName" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingCode" column="thingcode" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingName" column="thingname" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceStatus" column="devstatus" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceStatusInfo" column="devicestatusinfo" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="monitorValue" column="monitorvalue" javaType="java.lang.Double" jdbcType="DOUBLE" />
+		<result property="zsMonitorValue" column="zsmonitorvalue" javaType="java.lang.Double" jdbcType="DOUBLE" />
+		<result property="frequeTime" column="frequetime" javaType="java.lang.String" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.model.OriginalDataModel" id="originalDataResultMap">
+		<id property="storageId" column="storageId" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+		<result property="deviceCode" column="deviceCode" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceName" column="deviceName" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="deviceMn" column="deviceMn" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingCode" column="thingCode" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingName" column="thingName" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingUnit" column="thingUnit" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingRtd" column="thingRtd" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingAvg" column="thingAvg" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingMax" column="thingMax" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingMin" column="thingMin" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsRtd" column="thingZsRtd" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsAvg" column="thingZsAvg" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsMax" column="thingZsMax" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="thingZsMin" column="thingZsMin" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="updateType" column="updateType" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="updateTypeName" column="updateTypeName" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="updateTime" column="updateTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="rtdTime" column="rtdTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="beginTime" column="beginTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="endTime" column="endTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="statusCode" column="statusCode" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="statusName" column="statusName" javaType="java.lang.String" jdbcType="VARCHAR" />
+			
+	</resultMap>
+	
+	<resultMap type="com.tcb.env.pojo.NetStatusCount" id="netStatusCountResultMap">
+		<result property="statusCode" column="status_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+		<result property="statusCount" column="status_count" javaType="java.lang.Integer" jdbcType="INTEGER" />
+	</resultMap>
+
+	<!-- 获取分钟统计数据 -->
+	<select id="getPerMinuteMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call PerMinuteStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)}
+	</select>
+	
+	<!-- 获取小时统计数据 -->
+	<select id="getPerHourMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call PerHourStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)}
+	</select>
+
+	<!-- 获取每日统计数据 -->
+	<select id="getPerDayMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call PerDayStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)
+		}
+	</select>
+
+	<!-- 获取每月统计数据 -->
+	<select id="getPerMonthMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call
+		PerMonthStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)
+		}
+	</select>
+
+	<!-- 获取季度统计数据 -->
+	<select id="getPerQuarterMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call
+		PerQuarterStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)
+		}
+	</select>
+	
+	<!-- 获取分钟统计数据(实时统计) -->
+	<select id="getPerMinuteStaMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call PerMinuteStaStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)}
+	</select>
+	
+	<!-- 获取小时统计数据(实时统计) -->
+	<select id="getPerHourStaMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call PerHourStaStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)}
+
+	</select>
+
+	<!-- 获取每日统计数据(实时统计) -->
+	<select id="getPerDayStaMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call PerDayStaStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)
+		}
+	</select>
+
+	<!-- 获取每月统计数据(实时统计) -->
+	<select id="getPerMonthStaMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call
+		PerMonthStaStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)
+		}
+	</select>
+
+	<!-- 获取季度统计数据(实时统计) -->
+	<select id="getPerQuarterStaMonitorData" statementType="CALLABLE"
+		parameterMap="paramMonitor" resultMap="monitorResultMap">
+		{call
+		PerQuarterStaStatisticsOutput(
+		?,?,?,?,?,?,?,?
+		)
+		}
+	</select>
+
+
+	<!-- 获取实时数据个数 -->
+	<select id="getTimelyMonitorDataCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM ${devicecode} AS tms
+		INNER JOIN tbl_device AS tdv ON tms.device_code = tdv.device_code
+		INNER JOIN tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+		<where>
+			tms.device_code = #{devicecode,jdbcType = VARCHAR}
+			<choose>
+				<when test="dataType == '2011'">
+					AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{nowtime,jdbcType = TIMESTAMP}) &gt;= 0
+					AND TIMESTAMPDIFF(SECOND,#{selecttime,jdbcType = TIMESTAMP},tms.rtd_time) &gt;= 0
+				</when>
+				<otherwise>
+					AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{nowtime,jdbcType = TIMESTAMP}) &gt;= 0
+					AND TIMESTAMPDIFF(SECOND,#{selecttime,jdbcType = TIMESTAMP},tms.begin_time) &gt;= 0
+				</otherwise>
+			</choose>
+			<if test="listthingcode.size()>0">
+				AND tms.thing_code IN
+				<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="listthingcode.size()==0">
+				AND tms.thing_code IS NULL
+			</if>
+			AND tms.update_type=#{dataType}
+		</where>
+	</select>
+
+	<!-- 获取实时数据 -->
+	<select id="getTimelyMonitorData" resultMap="monitorResultMap">
+		SELECT
+		tdv.device_code AS devcode,
+		tdv.device_name AS devname,
+		tms.thing_code AS thingcode,
+		tmo.thing_name AS thingname,
+		tmo.thing_order AS thingorder,
+		<choose>
+			<when test="dataType == '2011'">
+				ROUND(AVG(tms.thing_rtd),3) AS monitorvalue,
+				ROUND(AVG(tms.thing_zsrtd),3) AS zsmonitorvalue,
+				CONCAT(DATE(tms.rtd_time),' ',LPAD(HOUR(tms.rtd_time),2,0),':',LPAD(MINUTE(tms.rtd_time),2,0),' 分') AS frequetime
+			</when>
+			<otherwise>
+				ROUND(AVG(tms.thing_avg),3) AS monitorvalue,
+				ROUND(AVG(tms.thing_zsavg),3) AS zsmonitorvalue,
+				<choose>
+					<when test="dataType == '2031'">
+						CONCAT(DATE(tms.begin_time),' 日') AS frequetime
+					</when>
+					<when test="dataType == '2061'">
+						CONCAT(DATE(tms.begin_time),' ',LPAD(HOUR(tms.begin_time),2,0),' 时') AS frequetime
+					</when>
+					<otherwise>
+						CONCAT(DATE(tms.begin_time),' ',LPAD(HOUR(tms.begin_time),2,0),':',LPAD(MINUTE(tms.begin_time),2,0),' 分') AS frequetime
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+		FROM
+		${devicecode} AS tms
+		INNER JOIN tbl_device AS tdv ON tms.device_code = tdv.device_code
+		INNER JOIN tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+		<where>
+			tms.device_code = #{devicecode,jdbcType = VARCHAR}
+			<choose>
+				<when test="dataType == '2011'">
+					AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{nowtime,jdbcType = TIMESTAMP}) &gt;= 0
+					AND TIMESTAMPDIFF(SECOND,#{selecttime,jdbcType = TIMESTAMP},tms.rtd_time) &gt;= 0
+				</when>
+				<otherwise>
+					AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{nowtime,jdbcType = TIMESTAMP}) &gt;= 0
+					AND TIMESTAMPDIFF(SECOND,#{selecttime,jdbcType = TIMESTAMP},tms.begin_time) &gt;= 0
+				</otherwise>
+			</choose>
+			<if test="listthingcode.size()>0">
+				AND tms.thing_code IN
+				<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="listthingcode.size()==0">
+				AND tms.thing_code IS NULL
+			</if>
+			AND tms.update_type=#{dataType}
+		</where>
+		GROUP BY devcode,thingorder,thingcode,frequetime
+		ORDER BY devcode,thingorder,thingcode,frequetime DESC
+	</select>
+	
+	<!-- 是否存在新上传的小时数据(小时) -->
+	<select id="getHourMonitorDataCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM
+		${devicecode} AS tms INNER JOIN tbl_device AS tdv
+		ON
+		tms.device_code = tdv.device_code
+		INNER JOIN tbl_monitor tmo ON
+		tms.thing_code = tmo.thing_code
+		WHERE
+		TIMESTAMPDIFF(SECOND,tms.update_time,#{nowtime,
+		jdbcType = TIMESTAMP})
+		&gt;= 0
+		AND
+		TIMESTAMPDIFF(SECOND,#{selecttime,
+		jdbcType =
+		TIMESTAMP},tms.update_time)
+		&gt;= 0
+		AND tms.update_type = '2061'
+		AND tms.device_code = #{devicecode,jdbcType = VARCHAR}
+		<if test="listthingcode.size()>0">
+			AND tms.thing_code IN 
+			<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listthingcode.size()==0">
+			AND tms.thing_code IS NULL
+		</if>
+		ORDER BY tms.update_time DESC
+	</select>
+	
+	<!-- 获取实时小时数据(小时) -->
+	<select id="getHourMonitorData" resultMap="monitorResultMap">
+		SELECT
+			tdv.device_code AS devcode,
+			tdv.device_name AS
+			devname,tms.thing_code AS thingcode,
+			tmo.thing_name AS thingname,
+			tms.thing_avg AS monitorvalue,
+			tms.thing_zsavg AS zsmonitorvalue,
+			CONCAT(DATE(tms.begin_time),' ',LPAD(HOUR(tms.begin_time),2,0),'时') AS frequetime
+		FROM
+			${devicecode} AS tms
+		INNER JOIN tbl_device AS tdv ON tms.device_code = tdv.device_code
+		INNER JOIN tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+		WHERE
+		(
+			TO_DAYS(tms.begin_time)*24 + HOUR (tms.begin_time)
+		) BETWEEN (
+			TO_DAYS(#{selecttime,jdbcType = TIMESTAMP})*24 + HOUR (#{selecttime,jdbcType = TIMESTAMP})
+		)
+			AND (TO_DAYS(#{nowtime,jdbcType = TIMESTAMP})*24 + HOUR(#{nowtime,jdbcType = TIMESTAMP}))
+		AND tms.update_type = '2061'
+		AND tms.device_code = #{devicecode,jdbcType = VARCHAR}
+		<if test="listthingcode.size()>0">
+			AND tms.thing_code IN 
+			<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listthingcode.size()==0">
+			AND tms.thing_code IS NULL
+		</if>
+		ORDER BY tms.update_time DESC
+	</select>
+	
+	<!-- 获取网络监控数据最新更新时间 -->
+	<select id="getNetMonitorRecentTime" resultMap="monitorResultMap">
+		SELECT DISTINCT
+			DISTINCT(td.device_code) AS devcode,
+			td.device_name AS devname,
+			td.status_code AS devstatus,
+			td.device_mn AS devMn,
+			ta.area_id AS areaId,
+			ta.area_name AS areaName,
+		CASE
+		WHEN ts.status_code = 'O' THEN
+			CONCAT(
+				ts.status_name,',持续',
+				CAST(
+					TIMESTAMPDIFF(
+						DAY,
+						tdt.update_time,
+						NOW()
+					)
+					AS CHAR
+				),
+				'天',
+				CAST(
+					MOD(
+						TIMESTAMPDIFF(
+							HOUR,
+							tdt.update_time,
+							NOW()
+						),
+						24
+					) AS CHAR
+				),
+				'小时',
+				CAST(
+					MOD (
+						TIMESTAMPDIFF(
+							MINUTE,
+							tdt.update_time,
+							NOW()
+						),
+						60
+					) AS CHAR
+				),
+				'分钟'
+			)
+		ELSE
+			ts.status_name
+		END AS devicestatusinfo,
+		 tdt.thing_code AS thingcode,
+		 tm.thing_name AS thingname,
+	   	 '' AS monitorvalue,
+		DATE_FORMAT(tdt.update_time,'%Y-%m-%d %T') AS frequetime
+		FROM tbl_device td
+		INNER JOIN tbl_device_time tdt ON td.device_code = tdt.device_code 
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		<if test="listthingcode.size()>0">
+			AND tdt.thing_code IN 
+			<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listthingcode.size()==0">
+			AND tdt.thing_code IS NULL
+		</if>
+		INNER JOIN tbl_monitor tm ON tdt.thing_code = tm.thing_code
+		INNER JOIN tbl_status ts ON td.status_code = ts.status_code
+		WHERE td.device_code = #{devicecode}
+		<if test="statusCode != null and statusCode != '' ">
+			<choose>
+				<when test="statusCode == 'other'">
+					AND td.status_code NOT IN ('N','NT','Z','O')
+				</when>
+				<otherwise>
+					AND td.status_code = #{statusCode}
+				</otherwise>
+			</choose>
+		</if>
+		GROUP BY ta.area_id,ta.area_name,td.device_code,td.device_name,tdt.thing_code,tm.thing_name
+		ORDER BY tdt.update_time DESC
+	</select>
+	
+	<!-- 获取网络监控数据最新更新值 -->
+	<select id="getNetMonitorRecentData" resultMap="monitorResultMap">
+		SELECT 			
+			DISTINCT(TEMP.device_code) AS devcode,
+			TEMP.device_name AS devname,
+			TEMP.status_code AS devstatus,
+			TEMP.device_mn AS devMn,
+			ta.area_id AS areaId,
+			ta.area_name AS areaName,
+			'' AS devicestatusinfo,
+		 	TEMP.thing_code AS thingcode,
+		 	TEMP.thing_name AS thingname,
+			tdd.recent_data AS monitorvalue,
+			tdd.recent_zsdata AS zsmonitorvalue,
+			DATE_FORMAT(TEMP.update_time,'%Y-%m-%d %T') AS frequetime
+		FROM (
+			SELECT DISTINCT
+				DISTINCT td.device_code,
+				td.device_name,
+				td.status_code,
+				td.device_mn,
+			 	tms.thing_code,
+			 	tm.thing_name,
+			 	ta.area_id,
+		   	MAX(tms.update_time) AS update_time
+			FROM tbl_device td
+			INNER JOIN tbl_device_data tms ON td.device_code = tms.device_code 
+			INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+			<if test="listthingcode.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="listthingcode.size()==0">
+				AND tms.thing_code IS NULL
+			</if>
+			INNER JOIN tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN tbl_status ts ON td.status_code = ts.status_code
+			INNER JOIN tbl_device_time tdt ON tms.update_time = tdt.update_time AND tms.device_code = tdt.device_code
+			WHERE td.device_code = #{devicecode}
+			<if test="statusCode != null and statusCode != '' ">
+			<choose>
+				<when test="statusCode == 'other'">
+					AND td.status_code NOT IN ('N','NT','Z','O')
+				</when>
+				<otherwise>
+					AND td.status_code = #{statusCode}
+				</otherwise>
+			</choose>
+		</if>
+			GROUP BY ta.area_id,td.device_id,td.device_code,td.device_name,tms.thing_code,tm.thing_name
+			ORDER BY tms.update_time DESC	
+		) TEMP INNER JOIN tbl_device_data tdd ON tdd.update_time = TEMP.update_time 
+			   AND tdd.device_code = TEMP.device_code
+			   AND tdd.thing_code = TEMP.thing_code
+			   INNER JOIN tbl_area ta ON TEMP.area_id = ta.area_id
+	</select>
+
+	<!-- 获取获取网络监控数据（存在监测数据） -->
+	<select id="getNetMonitorData" resultMap="monitorResultMap">
+		SELECT DISTINCT
+					(td.device_code) AS devcode,
+					td.device_name AS devname,
+					td.status_code AS devstatus,
+					td.device_mn AS devMn,
+				CASE
+				WHEN td.status_code = 'N' THEN
+					'正常'
+				WHEN td.status_code = 'NT' THEN
+					ts.status_name
+				WHEN ts.status_code IS NOT NULL THEN
+					CONCAT(
+						ts.status_name,',持续时间',
+						CAST(
+							FLOOR(
+								TIMESTAMPDIFF(
+									MINUTE,
+									tdt.update_time,
+									NOW()
+								) / 60
+							) AS CHAR
+						),
+						'小时',
+						CAST(
+							MOD (
+								TIMESTAMPDIFF(
+									MINUTE,
+									tdt.update_time,
+									NOW()
+								),
+								60
+							) AS CHAR
+						),
+						'分钟'
+					)
+				ELSE
+					CONCAT(
+						'未知原因,持续时间',
+						CAST(
+							FLOOR(
+								TIMESTAMPDIFF(
+									MINUTE,
+									tdt.update_time,
+									NOW()
+								) / 60
+							) AS CHAR
+						),
+						'小时',
+						CAST(
+							MOD (
+								TIMESTAMPDIFF(
+									MINUTE,
+									tdt.update_time,
+									NOW()
+								),
+								60
+							) AS CHAR
+						),
+						'分钟'
+					)
+				END AS devicestatusinfo,
+				 tms.thing_code AS thingcode,
+				 tm.thing_name AS thingname,
+			  	CASE
+				WHEN tms.update_type = '2011' THEN
+					tms.thing_rtd
+				ELSE
+					tms.thing_avg
+				END AS monitorvalue,
+				CASE
+				WHEN tms.update_type = '2011' THEN
+					tms.thing_zsrtd
+				ELSE
+					tms.thing_zsavg
+				END AS zsmonitorvalue,
+				DATE_FORMAT(tdt.update_time,'%Y-%m-%d %T') AS frequetime
+		FROM
+		tbl_device td
+		INNER JOIN
+		tbl_device_time tdt ON
+		td.device_code = tdt.device_code
+		INNER JOIN
+		${devicecode} tms ON
+		td.device_code = tms.device_code AND tdt.update_time = tms.update_time
+		INNER JOIN
+		tbl_monitor tm ON
+		tms.thing_code = tm.thing_code
+		LEFT JOIN
+		tbl_status ts ON
+		td.status_code = ts.status_code
+		WHERE
+		TIMESTAMPDIFF(SECOND,tdt.update_time,tms.update_time) = 0
+		<if test="listthingcode.size()>0">
+			AND tms.thing_code IN 
+			<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="listthingcode.size()==0">
+			AND tms.thing_code IS NULL
+		</if>
+		GROUP BY
+		td.device_code,
+		td.device_name,
+		tms.thing_code,
+		tm.thing_name
+		ORDER BY
+		update_time DESC
+	</select>
+	
+	<!-- 不存在监测数据 -->
+	<select id="getNetNoData" resultMap="monitorResultMap">
+		SELECT
+		DISTINCT(td.device_code) AS devcode,
+		td.device_name AS devname,
+		td.status_code AS devstatus,
+		td.device_mn AS devMn,
+		ta.area_id AS areaId,
+		ta.area_name AS areaName,
+		CASE
+		WHEN td.status_code = 'N' THEN
+			'正常'
+		WHEN ts.status_code IS NOT NULL THEN
+			ts.status_name
+		ELSE
+			'未知原因'
+		END AS devicestatusinfo,
+		 '' AS thingcode,
+		 '' AS thingname,
+		 '' AS monitorvalue,
+		 '' AS zsmonitorvalue,
+		 '' AS frequetime
+		FROM
+			tbl_device td
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		LEFT JOIN tbl_status ts ON td.status_code = ts.status_code
+		WHERE
+			td.device_code = #{deviceCode,jdbcType = VARCHAR}
+		AND td.status_code = 'Z'
+		GROUP BY ta.area_id,ta.area_name,td.device_code,td.device_name
+	</select>
+	
+	<!-- 通过设备code获取name -->
+	<select id="getDeviceNamebyCode" resultType="java.lang.String">
+		SELECT
+			tbl_device.device_name
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN
+         <foreach collection="listDevCode" item="item"  open="(" separator="," close=")">
+			#{item,jdbcType = VARCHAR}
+		</foreach>  
+	</select>
+	
+	<!-- 通过监测物code获取name -->
+	<select id="getMonNamebyCode" resultType="java.lang.String">
+		SELECT
+			tbl_monitor.thing_name
+		FROM
+			tbl_monitor
+		WHERE
+			tbl_monitor.thing_code IN
+         <foreach collection="listMonCode" item="item"  open="(" separator="," close=")">
+			#{item,jdbcType = VARCHAR}
+		</foreach>
+		ORDER BY thing_order
+	</select>
+	
+	<!-- 获取原始数据个数 -->
+	<select id="getOriginalDataCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT
+				temp.storage_id AS storageId,
+				temp.device_code AS deviceCode,
+				temp.device_name AS deviceName,
+				temp.device_mn AS deviceMn,
+				temp.thing_code AS thingCode,
+				temp.thing_name AS thingName,
+				ROUND(temp.thing_rtd,3) AS thingRtd,
+				ROUND(temp.thing_avg,3) AS thingAvg,
+				ROUND(temp.thing_max,3) AS thingMax,
+				ROUND(temp.thing_min,3) AS thingMin,
+				ROUND(temp.thing_zsrtd,3) AS thingZsRtd,
+				ROUND(temp.thing_zsavg,3) AS thingZsAvg,
+				ROUND(temp.thing_zsmax,3) AS thingZsMax,
+				ROUND(temp.thing_zsmin,3) AS thingZsMin,
+				temp.update_type AS updateType,
+				CASE WHEN temp.update_type = '2011' THEN
+					'实时数据'
+				WHEN update_type = '2051' THEN
+					'分钟数据'
+				WHEN update_type = '2061' THEN
+					'小时数据'
+				WHEN update_type = '2031' THEN
+					'每日数据'
+				ELSE
+					'未知类型'
+				END AS updateTypeName,
+			 DATE_FORMAT(temp.update_time,'%Y-%m-%d %T') AS updateTime,
+			 DATE_FORMAT(temp.rtd_time,'%Y-%m-%d %T') AS rtdTime,
+			 DATE_FORMAT(temp.begin_time,'%Y-%m-%d %T') AS beginTime,
+			 DATE_FORMAT(temp.end_time,'%Y-%m-%d %T') AS endTime,
+			 temp.status_code AS statusCode,
+			 temp.status_name AS statusName
+			FROM (
+			<if test="dbOldName != null and dbOldName != ''">
+				SELECT
+					DISTINCT tms.storage_id,
+					tdv.device_code,
+					tdv.device_name,
+					tdv.device_mn,
+					tms.thing_code,
+					tmo.thing_name,
+					tms.thing_rtd,
+					tms.thing_avg,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_zsrtd,
+					tms.thing_zsavg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.update_type,
+					tms.update_time,
+					tms.rtd_time,
+					tms.begin_time,
+					tms.end_time,
+					ts.status_code,
+					ts.status_name
+				FROM
+					${dbOldName}.${devicecode} AS tms
+				INNER JOIN ${dbName}.tbl_device AS tdv ON tms.device_code = tdv.device_code
+				INNER JOIN ${dbName}.tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+				LEFT JOIN ${dbName}.tbl_status ts ON tms.thing_flag = ts.status_code
+				WHERE tms.device_code = #{devicecode,jdbcType = VARCHAR}
+				<choose>
+					<when test="select == 'more-data'">
+						AND TIMESTAMPDIFF(SECOND,tms.update_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+						AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.update_time) &gt;= 0
+					</when>
+					<otherwise>
+						<choose>
+							<when test="updateType == '2011'">
+								AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+								AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.rtd_time) &gt;= 0
+							</when>
+							<otherwise>
+								AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+								AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.begin_time) &gt;= 0
+							</otherwise>
+						</choose>
+					</otherwise>
+				</choose>
+				<if test="listthingcode.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				<if test="listthingcode.size()==0">
+					AND tms.thing_code IS NULL
+				</if>
+				AND tms.update_type = #{updateType,jdbcType = VARCHAR}
+				UNION
+			</if>
+				SELECT
+					DISTINCT tms.storage_id,
+					tdv.device_code,
+					tdv.device_name,
+					tdv.device_mn,
+					tms.thing_code,
+					tmo.thing_name,
+					tms.thing_rtd,
+					tms.thing_avg,
+					tms.thing_max,
+					tms.thing_min,
+					tms.thing_zsrtd,
+					tms.thing_zsavg,
+					tms.thing_zsmax,
+					tms.thing_zsmin,
+					tms.update_type,
+					tms.update_time,
+					tms.rtd_time,
+					tms.begin_time,
+					tms.end_time,
+					ts.status_code,
+					ts.status_name
+				FROM
+					${dbName}.${devicecode} AS tms
+				INNER JOIN ${dbName}.tbl_device AS tdv ON tms.device_code = tdv.device_code
+				INNER JOIN ${dbName}.tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+				LEFT JOIN ${dbName}.tbl_status ts ON tms.thing_flag = ts.status_code
+				WHERE tms.device_code = #{devicecode,jdbcType = VARCHAR}
+				<choose>
+					<when test="select == 'more-data'">
+						AND TIMESTAMPDIFF(SECOND,tms.update_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+						AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.update_time) &gt;= 0
+					</when>
+					<otherwise>
+						<choose>
+							<when test="updateType == '2011'">
+								AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+								AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.rtd_time) &gt;= 0
+							</when>
+							<otherwise>
+								AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+								AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.begin_time) &gt;= 0
+							</otherwise>
+						</choose>
+					</otherwise>
+				</choose>
+				<if test="listthingcode.size()>0">
+					AND tms.thing_code IN 
+					<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				<if test="listthingcode.size()==0">
+					AND tms.thing_code IS NULL
+				</if>
+				AND tms.update_type = #{updateType,jdbcType = VARCHAR}
+			) temp
+			ORDER BY temp.update_time DESC,temp.thing_code ASC
+		) CTEMP
+	</select>
+	
+	<!-- 获取原始数据 -->
+	<select id="getOriginalData" resultMap="originalDataResultMap">
+		SELECT
+			temp.storage_id AS storageId,
+			temp.device_code AS deviceCode,
+			temp.device_name AS deviceName,
+			temp.device_mn AS deviceMn,
+			temp.thing_code AS thingCode,
+			temp.thing_name AS thingName,
+			temp.thing_unit AS thingUnit,
+			ROUND(temp.thing_rtd,3) AS thingRtd,
+			ROUND(temp.thing_avg,3) AS thingAvg,
+			ROUND(temp.thing_max,3) AS thingMax,
+			ROUND(temp.thing_min,3) AS thingMin,
+			ROUND(temp.thing_zsrtd,3) AS thingZsRtd,
+			ROUND(temp.thing_zsavg,3) AS thingZsAvg,
+			ROUND(temp.thing_zsmax,3) AS thingZsMax,
+			ROUND(temp.thing_zsmin,3) AS thingZsMin,
+			temp.update_type AS updateType,
+			CASE WHEN temp.update_type = '2011' THEN
+				'实时数据'
+			WHEN update_type = '2051' THEN
+				'分钟数据'
+			WHEN update_type = '2061' THEN
+				'小时数据'
+			WHEN update_type = '2031' THEN
+				'每日数据'
+			ELSE
+				'未知类型'
+			END AS updateTypeName,
+		 DATE_FORMAT(temp.update_time,'%Y-%m-%d %T') AS updateTime,
+		 DATE_FORMAT(temp.rtd_time,'%Y-%m-%d %H:%i') AS rtdTime,
+		 DATE_FORMAT(temp.begin_time,'%Y-%m-%d %H:%i') AS beginTime,
+		 DATE_FORMAT(temp.end_time,'%Y-%m-%d %H:%i') AS endTime,
+		 temp.status_code AS statusCode,
+		 temp.status_name AS statusName
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				DISTINCT tms.storage_id,
+				tdv.device_code,
+				tdv.device_name,
+				tdv.device_mn,
+				tms.thing_code,
+				tmo.thing_name,
+				tmo.thing_unit,
+				tms.thing_rtd,
+				tms.thing_avg,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_zsrtd,
+				tms.thing_zsavg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.update_type,
+				tms.update_time,
+				tms.rtd_time,
+				tms.begin_time,
+				tms.end_time,
+				ts.status_code,
+				ts.status_name
+			FROM
+				${dbOldName}.${devicecode} AS tms
+			INNER JOIN ${dbName}.tbl_device AS tdv ON tms.device_code = tdv.device_code
+			INNER JOIN ${dbName}.tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+			LEFT JOIN ${dbName}.tbl_status ts ON tms.thing_flag = ts.status_code
+			WHERE tms.device_code = #{devicecode,jdbcType = VARCHAR}
+			<choose>
+				<when test="select != null and select == 'more-data'">
+					AND TIMESTAMPDIFF(SECOND,tms.update_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+					AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.update_time) &gt;= 0
+				</when>
+				<otherwise>
+					<choose>
+						<when test="updateType == '2011'">
+							AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+							AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.rtd_time) &gt;= 0
+						</when>
+						<otherwise>
+							AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+							AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.begin_time) &gt;= 0
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+			<if test="listthingcode.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="listthingcode.size()==0">
+				AND tms.thing_code IS NULL
+			</if>
+			AND tms.update_type = #{updateType,jdbcType = VARCHAR}
+			UNION
+		</if>
+			SELECT
+				DISTINCT tms.storage_id,
+				tdv.device_code,
+				tdv.device_name,
+				tdv.device_mn,
+				tms.thing_code,
+				tmo.thing_name,
+				tmo.thing_unit,
+				tms.thing_rtd,
+				tms.thing_avg,
+				tms.thing_max,
+				tms.thing_min,
+				tms.thing_zsrtd,
+				tms.thing_zsavg,
+				tms.thing_zsmax,
+				tms.thing_zsmin,
+				tms.update_type,
+				tms.update_time,
+				tms.rtd_time,
+				tms.begin_time,
+				tms.end_time,
+				ts.status_code,
+				ts.status_name
+			FROM
+				${dbName}.${devicecode} AS tms
+			INNER JOIN ${dbName}.tbl_device AS tdv ON tms.device_code = tdv.device_code
+			INNER JOIN ${dbName}.tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+			LEFT JOIN ${dbName}.tbl_status ts ON tms.thing_flag = ts.status_code
+			WHERE tms.device_code = #{devicecode,jdbcType = VARCHAR}
+			<choose>
+				<when test="select != null and select == 'more-data'">
+					AND TIMESTAMPDIFF(SECOND,tms.update_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+					AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.update_time) &gt;= 0
+				</when>
+				<otherwise>
+					<choose>
+						<when test="updateType == '2011'">
+							AND TIMESTAMPDIFF(SECOND,tms.rtd_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+							AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.rtd_time) &gt;= 0
+						</when>
+						<otherwise>
+							AND TIMESTAMPDIFF(SECOND,tms.begin_time,#{endtime,jdbcType = TIMESTAMP }) &gt;= 0
+							AND TIMESTAMPDIFF(SECOND,#{begintime,jdbcType = TIMESTAMP }, tms.begin_time) &gt;= 0
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+			<if test="listthingcode.size()>0">
+				AND tms.thing_code IN 
+				<foreach collection="listthingcode" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="listthingcode.size()==0">
+				AND tms.thing_code IS NULL
+			</if>
+			AND tms.update_type = #{updateType,jdbcType = VARCHAR}
+		) temp
+		ORDER BY temp.update_time DESC,temp.thing_code ASC
+		<if test="rowIndex != -1 and rowCount != -1">
+			LIMIT #{rowIndex,jdbcType = INTEGER},#{rowCount, jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取原始数据(通过ID) -->
+	<select id="getOriginalDataById" resultMap="originalDataResultMap">
+		SELECT DISTINCT 
+				tms.storage_id AS storageId,
+				tdv.device_code AS deviceCode,
+				tdv.device_name AS deviceName,
+				tdv.device_mn AS deviceMn,
+				tmo.thing_code AS thingCode,
+				tmo.thing_name AS thingName,
+				ROUND(tms.thing_rtd,3) AS thingRtd,
+				ROUND(tms.thing_avg,3) AS thingAvg,
+				ROUND(tms.thing_max,3) AS thingMax,
+				ROUND(tms.thing_min,3) AS thingMin,
+				ROUND(tms.thing_zsrtd,3) AS thingZsRtd,
+				ROUND(tms.thing_zsavg,3) AS thingZsAvg,
+				ROUND(tms.thing_zsmax,3) AS thingZsMax,
+				ROUND(tms.thing_zsmin,3) AS thingZsMin,
+				tms.update_type AS updateType,
+				CASE WHEN tms.update_type = '2011' THEN
+					'实时数据'
+				WHEN update_type = '2051' THEN
+					'分钟数据'
+				WHEN update_type = '2061' THEN
+					'小时数据'
+				WHEN update_type = '2031' THEN
+					'每日数据'
+				ELSE
+					'未知类型'
+				END AS updateTypeName,
+				DATE_FORMAT(tms.update_time,'%Y-%m-%d %T') AS updateTime,
+				DATE_FORMAT(tms.rtd_time,'%Y-%m-%d %H:%i') AS rtdTime,
+				DATE_FORMAT(tms.begin_time,'%Y-%m-%d %H:%i') AS beginTime,
+				DATE_FORMAT(tms.end_time,'%Y-%m-%d %H:%i') AS endTime,
+				ts.status_code AS statusCode,
+				ts.status_name AS statusName
+			FROM
+				${dbName}.${deviceCode} AS tms
+			INNER JOIN ${dbName}.tbl_device AS tdv ON tms.device_code = tdv.device_code
+			INNER JOIN ${dbName}.tbl_monitor tmo ON tms.thing_code = tmo.thing_code
+			LEFT JOIN ${dbName}.tbl_status ts ON tms.thing_flag = ts.status_code
+			WHERE tms.storage_id = #{storageId}
+	</select>
+	
+	<!-- 获取网络状态个数 -->
+	<select id="getNetStatusCount" resultMap="netStatusCountResultMap">
+		SELECT
+			status_code,
+			COUNT(0) AS status_count
+		FROM
+			tbl_device
+		WHERE
+			tbl_device.device_code IN (
+				SELECT
+					device_code
+				FROM
+					tbl_access_device TD,
+					tbl_user_ahr TUH
+				WHERE
+					TD.authority_code = TUH.authority_code
+				AND TUH.user_code = #{usercode,jdbcType = VARCHAR}
+			)
+		<if test="listdevicecode.size()>0">
+			AND tbl_device.device_code IN
+			<foreach collection="listdevicecode" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY
+			status_code
+	</select>
+	
+	<!-- 更新原始数据(数据修约) -->
+	<update id="updateOriginalData">
+		UPDATE ${dbName}.${originalDataModel.deviceCode}
+		   SET update_time = update_time
+		   <if test="originalDataModel.thingRtd != null and originalDataModel.thingRtd != ''">
+		   		,thing_rtd = #{originalDataModel.thingRtd}
+		   </if>
+   		   <if test="originalDataModel.thingAvg != null and originalDataModel.thingAvg != ''">
+		   		,thing_avg = #{originalDataModel.thingAvg}
+		   </if>
+   		   <if test="originalDataModel.thingMax != null and originalDataModel.thingMax != ''">
+		   		,thing_max = #{originalDataModel.thingMax}
+		   </if>
+   		   <if test="originalDataModel.thingMin != null and originalDataModel.thingMin != ''">
+		   		,thing_min = #{originalDataModel.thingMin}
+		   </if>
+		 WHERE storage_id = #{originalDataModel.storageId}
+	</update>
+	
+	<!-- 删除原始数据(数据修约) -->
+	<delete id="deleteOriginalData">
+		DELETE FROM ${dbName}.${deviceCode} WHERE storage_id = #{storageId}
+	</delete>
+	
+	<!-- 通过状态筛选设备编码 -->
+	<select id="getDeviceCodeByStatus" resultType="java.lang.String">
+		SELECT DISTINCT td.device_code
+		FROM tbl_device td
+		<where>
+			<choose>
+				<when test="deviceCodeList.size()>0">
+				td.device_code IN
+				<foreach collection="deviceCodeList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				</when>
+				<otherwise>
+					AND td.device_code IS NULL
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="deviceStatus == 'other'">
+					AND td.status_code NOT IN ('N','NT','Z','O')
+				</when>
+				<otherwise>
+					AND td.status_code = #{deviceStatus}
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+</mapper>

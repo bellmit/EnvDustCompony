@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>站点污染月份分布</title>
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap-year-calendar/css/bootstrap-year-calendar.min.css">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css">
+       <!-- <link rel="stylesheet" type="text/css" href="../../javascript/plugins/jQuery-dataTables/jquery.dataTables.min.css">-->
+        <link rel="stylesheet" href="../../javascript/plugins/bootstrap-dataTables/bootstrap-table.min.css">
+        <style>
+            .content-header i{
+                font-size: 14px;
+                color: #00b0ea;
+            }
+
+            .content-header span{
+                font-size: 16px;
+                margin: 13px 0 0 10px;
+                color: #00b0ea;
+            }
+
+            .table{
+                table-layout:fixed;word-break:break-all
+            }
+            #myDiv .table-bordered tr th{
+                font-weight: bold;
+                font-size:14px;
+                line-height:24px;
+                text-align:center;
+                vertical-align: middle;
+            }
+            #myDiv .table-bordered tr td{
+                font-size:14px;
+                line-height:24px;
+                text-align:center;
+                vertical-align: middle;
+                white-space: normal;
+                word-wrap: break-word;
+                word-break: break-all;
+            }
+
+            .datagrid-mask{
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0.3;
+                filter: alpha(opacity=30);
+                display: none;
+                background: #ccc;
+            }
+
+            .datagrid-mask-msg {
+                position: absolute;
+                top: 50%;
+                margin-top: -10px;
+                padding: 10px 5px 10px 30px;
+                width: auto;
+                font-size:12px;
+                border-width: 2px;
+                border-style: solid;
+                display: none;
+                background: #ffffff url(../images/loading.gif) no-repeat scroll 5px center;
+                border-color: #D3D3D3;
+            }
+        </style>
+    </head>
+    <body class="hold-transition skin-blue sidebar-mini">
+        <section class="content">
+            <!--月历-->
+            <div class="row" style=" margin-right: 0px;">
+                <div class="col-md-12" id="myDiv" style="overflow:auto;margin-top:15px;margin-right: 15px;">
+                </div>
+            </div>
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+                <div class="modal-dialog" style="width: 700px;margin-top: 5%;height:500px;" >
+                    <div class="modal-content" style="height:100%;width:100%;">
+                        <div class="modal-header">
+                            <button type="button" class="close"  aria-hidden="true" data-dismiss="modal">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                污染月分布图
+                            </h4>
+                        </div>
+                        <div class="modal-body" >
+                            <!-- TODO  加载柱状图，参数后传 -->
+                            <br>
+                            <div id="contrast" style="width: 600px;height:400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+    <script src="../../javascript/plugins/jQuery/jquery-3.3.1.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap3.3.7/bootstrap.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-year-calendar/js/bootstrap-year-calendar.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.zh-CN.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script src="../../javascript/plugins/bootstrap-dataTables/bootstrap-table.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-dataTables/bootstrap-table-zh-CN.js"></script>
+    <script src="../../javascript/plugins/echarts/echarts.min.js"></script>
+    <script src="../../javascript/plugins/loading/loading.js"></script>
+    <script type="application/javascript">
+        var monthParams = window.parent.dataMonthPollutionJson;
+
+        /**
+         *查询月数据
+         * */
+        function getMonthData(){
+            var deviceCodeList = ['1234567890000b','1234567890000c','1234567890000d','1234567890000a','123456789001aa'];
+            var dataMonth = monthParams["searchTime"];//date.getFullYear() + "-" +((date.getMonth() + 1) > 9 ? (date.getMonth() + 1):("0"+(date.getMonth() + 1))) ;
+            var data = {"success":true,"code":"201","msg":"操作成功","data":[{"deviceCode":"1234567890000b","deviceName":"测试B设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"154.786","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-01-02"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"143.02","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-03"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"160.285","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-01-04"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"490.839","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-07"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"434.31","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-08"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"659.391","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-09"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"460.22","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-10"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"498.012","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-11"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"428.017","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-14"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"381.476","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-15"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"529.479","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-16"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"435.654","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-17"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"575.191","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-18"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"426.22","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-21"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"521.112","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-23"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"535.814","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-24"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"510.298","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-25"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"531.008","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-28"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"355.526","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-29"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"594.356","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-30"}]},{"deviceCode":"1234567890000c","deviceName":"测试C设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"110.916","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-02"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"115.463","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-03"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"124.857","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-04"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"377.449","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-07"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"392.84","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-08"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"511.022","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-09"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"354.354","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-10"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"496.692","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-11"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"401.62","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-14"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"631.943","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-15"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"427.422","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-16"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"511.129","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-17"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"554.389","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-18"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"428.865","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-21"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"650.102","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-23"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"438.275","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-24"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"480.636","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-25"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"512.835","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-28"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"537.908","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-29"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"303.158","levelName":"中度","levelNo":"4","levelColor":"#ff401a","dataDate":"2019-01-30"}]},{"deviceCode":"1234567890000d","deviceName":"测试D设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"118.543","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-02"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"130.613","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-03"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"112.511","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-04"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"490.684","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-07"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"651.96","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-08"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"465.43","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-09"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"618.349","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-10"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"376.426","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-11"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"439.867","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-14"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"385.034","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-15"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"437.811","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-16"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"516.726","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-17"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"556.7","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-18"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"427.78","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-21"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"369.751","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-23"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"524.725","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-24"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"520.71","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-25"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"601.071","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-28"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"394.84","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-29"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"379.238","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-30"}]},{"deviceCode":"1234567890000a","deviceName":"测试A设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"104.966","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-02"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"135.84","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-03"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"111.132","levelName":"良","levelNo":"2","levelColor":"#efdc31","dataDate":"2019-01-04"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"584.822","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-07"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"269.71","levelName":"中度","levelNo":"4","levelColor":"#ff401a","dataDate":"2019-01-08"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"573.856","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-09"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"523.495","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-10"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"498.402","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-11"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"477.763","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-14"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"439.981","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-15"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"369.376","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-16"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"494.411","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-17"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"377.506","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-18"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"414.565","levelName":"重度","levelNo":"5","levelColor":"#d20040","dataDate":"2019-01-21"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"484.297","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-23"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"519.164","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-24"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"602.641","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-25"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":"PM10","thingName":"PM10","thingAvg":"309.915","levelName":"中度","levelNo":"4","levelColor":"#ff401a","dataDate":"2019-01-28"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"540.962","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-29"},{"thingCode":"PM10","thingName":"PM10","thingAvg":"445.141","levelName":"严重","levelNo":"6","levelColor":"#9c0a4e","dataDate":"2019-01-30"}]},{"deviceCode":"123456789001aa","deviceName":"测试AA设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null}]}]};
+            getMonthTable(data.data);
+            //添加数据的查询
+           /* $.ajax({
+                url:'/comprehensiveAnalysis/getSitePollutionMonthDistributeData',
+                type:'post',
+                data:{"deviceCodeList":deviceCodeList,"thingCode":pollutionMonthCode,"dataMonth":dataMonth},
+                dataType:'json',
+                success:function (result) {
+                    if(result != null){
+                        var data = [];
+                        if(result.success){
+                            data = result.data;
+                        }
+                        getMonthTable(data);
+                    }
+                    ajaxLoadEnd();
+                },
+                error:function (e) {
+                    ajaxLoadEnd();
+                    console.log("月历加载数据异常" + e);
+                }
+            });*/
+        }
+
+        /**显示月监控物质表格
+         * @param data 后台传来的数据
+         */
+        function getMonthTable(data){
+            $("#myDiv").html();
+            //表格组件
+            var th = ' <table class="table table-bordered" id="monthTable"  data-target="#myModal" style="text-align: center">'+ '<tr><th width="50px;">序号</th>' + '<th width="100px;">名称</th>';
+            var total = 30;
+            for(var i = 1 ; i <= total; i++){
+                if(i < 10){
+                    th += '<th width="70px;">' + '0'+ i + '</th>'
+                }else{
+                    th += '<th  width="70px;">' + i + '</th>'
+                }
+            }
+            th += '</tr>';
+            //表格内容
+            for(var i = 1 ;i <= data.length ; i++){
+                var id = data[i-1].deviceCode;
+                th += '<tr  id='+data[i-1].deviceCode+' >';
+                //添加序号
+                th += '<td>'+ i +'</td>';
+                //添加名称
+                th += '<td>'+ data[i-1].deviceName +'</td>';
+                var pmdmList = data[i-1].pmdmList;
+                //添加颜色
+                for(var j = 0; j < pmdmList.length ; j ++){
+                    if(pmdmList[j].thingAvg != null){
+                        var bgcolor = pmdmList[j].levelColor;
+                        var color = "black";
+
+                        if(bgcolor==null || bgcolor==""){
+                            bgcolor = "#fff";
+                        }
+                        if(pmdmList[j].levelNo!=null&&pmdmList[j].levelNo!=""&& Number(pmdmList[j].levelNo)>3){
+                            color = "#fff";
+                        }
+                        th += '<td   style="color:'+color+';background-color: '+ bgcolor + '"' +'>'+ pmdmList[j].thingAvg + '</td>';
+                    }else{
+                        th += '<td></td>';
+                    }
+                }
+                th += '</tr>';
+
+            }
+            th += '</table>';
+            //加载表格
+            $("#myDiv").html(th);
+            bindTableTrClick();//绑定行事件
+        }
+
+        getMonthData();
+
+        /**
+         *绑定表格的行事件
+         * */
+        function bindTableTrClick(){
+            $("#monthTable tr").unbind("click").click(function(e){
+                var deviceCode =  e.currentTarget.id;
+                if(e.currentTarget.id!="" && e.currentTarget.id!=undefined){
+                    handleMonthData(deviceCode);
+                }
+            })
+        }
+
+        /**
+         * 关闭模态窗口
+         */
+        $(function () { $('#myModal').on('hide.bs.modal', function () {
+            $(this).removeData("bs.modal");
+        })});
+        function handleMonthData(deviceCode){
+
+           // var date = $("#datetimepicker").data("datetimepicker").getDate();
+          //  var dataMonth = date.getFullYear() + "-" +((date.getMonth() + 1) > 9 ? (date.getMonth() + 1):("0"+(date.getMonth() + 1)));
+            //  $.bootstrapLoading.start({ loadingTips: "正在处理数据，请稍候..." });
+            //ajaxLoading("正在处理数据，请稍候...");
+            $('#myModal').modal();
+            var deviceName = "";
+            var colorList = [];
+            var xAxisData =  [];
+            var serieData = [];
+            var result = {"success":true,"code":"201","msg":"操作成功","data":{"deviceCode":"1234567890000b","deviceName":"测试B设备","dataDate":"2019-01","dataList":["","154.786","143.02","160.285","","","490.839","434.31","659.391","460.22","498.012","","","428.017","381.476","529.479","435.654","575.191","","","426.22","","521.112","535.814","510.298","","","531.008","355.526","594.356"],"timeList":["2019-01-01","2019-01-02","2019-01-03","2019-01-04","2019-01-05","2019-01-06","2019-01-07","2019-01-08","2019-01-09","2019-01-10","2019-01-11","2019-01-12","2019-01-13","2019-01-14","2019-01-15","2019-01-16","2019-01-17","2019-01-18","2019-01-19","2019-01-20","2019-01-21","2019-01-22","2019-01-23","2019-01-24","2019-01-25","2019-01-26","2019-01-27","2019-01-28","2019-01-29","2019-01-30"],"colorList":["","#fa0","#efdc31","#fa0","","","#9c0a4e","#9c0a4e","#9c0a4e","#9c0a4e","#9c0a4e","","","#9c0a4e","#d20040","#9c0a4e","#9c0a4e","#9c0a4e","","","#9c0a4e","","#9c0a4e","#9c0a4e","#9c0a4e","","","#9c0a4e","#d20040","#9c0a4e"]}};
+            if(result != null && result.success && result.data!=undefined){
+                deviceName = result.data.deviceName;
+                colorList =  result.data.colorList;
+                xAxisData =  result.data.timeList;
+                serieData = result.data.dataList;
+            }
+            var dataMonth = "2019-06";
+            var pollutionMonthName = "";
+            $("#myModalLabel").text(deviceName + pollutionMonthName + "污染月分布图");
+            getMonthDataModel(dataMonth,deviceName,colorList,xAxisData,serieData);
+          /*  $.ajax({
+                url:'/comprehensiveAnalysis/getSitePollutionSingleMonthChartData',
+                type:'post',
+                dataType:'json',
+                data:{"deviceCode":deviceCode,"thingCode":pollutionMonthCode,"dataMonth":dataMonth},
+                success:function (result) {
+                    var deviceName = "";
+                    var colorList = [];
+                    var xAxisData =  [];
+                    var serieData = [];
+                    if(result != null && result.success && result.data!=undefined){
+                        deviceName = result.data.deviceName;
+                        colorList =  result.data.colorList;
+                        xAxisData =  result.data.timeList;
+                        serieData = result.data.dataList;
+                    }
+                    $("#myModalLabel").text(deviceName + pollutionMonthName + "污染月分布图");
+                    getMonthDataModel(dataMonth,deviceName,colorList,xAxisData,serieData);
+                    ajaxLoadEnd();
+                },
+                error:function (e) {
+                    ajaxLoadEnd();
+                    console.log("月历加载数据异常" + e);
+                }
+            });*/
+        }
+        //点击弹出模态框，参数：时间，检测物质，地区
+        function getMonthDataModel(dataDay,deviceName,colorList,xAxisData,serieData){
+            // 基于准备好的dom，初始化echarts实例
+
+            var myChart = echarts.init(document.getElementById('contrast'));
+
+            option = {
+                title: {
+                    show: "true",//是否显示标题，默认显示，可以不设置
+                    text: dataDay,//图表标题文本内容
+                    textStyle: {//标题内容的样式
+                        color: '#000',//京东红
+                        fontStyle: 'normal',//主标题文字字体风格，默认normal，有italic(斜体),oblique(斜体)
+                        fontWeight: "lighter",//可选normal(正常)，bold(加粗)，bolder(加粗)，lighter(变细)，100|200|300|400|500...
+                        fontFamily: "san-serif",//主题文字字体，默认微软雅黑
+                        fontSize: 18//主题文字字体大小，默认为18px
+                    },
+                    textBaseline: "top",//默认就好,垂直对齐方式,不要设置
+                    left:"center"
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255,255,255,0.7)',
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    formatter: function(params) {
+                        var res = '<div style="color:black;">';
+                        res += '<strong>' + params[0].name + '</strong>'
+                        for (var i = 0, l = params.length; i < l; i++) {
+                            res += '<br/>' + params[i].seriesName + ' : ' + params[i].value
+                        }
+                        res += '</div>';
+                        return res;
+                    }
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable: true,
+                xAxis: [
+                    {
+                        type : 'category',
+                        data : xAxisData
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name:deviceName,
+                        type:'bar',
+                        data:serieData,
+                        markPoint : {
+                            itemStyle: {
+                                normal: {
+                                    // 定制显示（按顺序）
+                                    color: function(params) {
+                                        if(colorList.length>0){
+                                            return colorList[params.dataIndex]
+                                        }else{
+                                            return "black";
+                                        }
+
+                                    }
+                                },
+                            },
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        itemStyle: {
+                            normal: {
+                                // 定制显示（按顺序）
+                                color: function(params) {
+                                    if(colorList.length>0){
+                                        return colorList[params.dataIndex]
+                                    }else{
+                                        return "black";
+                                    }
+
+                                }
+                            },
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option,true);
+            window.onresize = function () {
+                myChart.resize();
+            }
+        }
+    </script>
+</html>

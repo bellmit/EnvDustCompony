@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.ICollectDeviceBoxDao">
+
+	<resultMap type="com.tcb.env.pojo.CollectDeviceBox" id="collectDeviceBoxResultMap">
+		<id property="boxId" column="box_id" />
+		<result property="boxNo" column="box_no" />
+		<result property="boxName" column="box_name" />
+		<result property="boxStatus" column="box_status" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+		<!-- 级联采样设备表 -->
+		<association property="collectDevice" column="cd_id" javaType="com.tcb.env.pojo.CollectDevice"
+			resultMap="com.tcb.env.dao.ICollectDeviceDao.collectDeviceResultMap"></association>
+	</resultMap>
+
+	<!-- 获取超标采样设备个数 -->
+	<select id="getCollectDeviceBoxCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(tcdb.box_id)
+		FROM
+			tbl_collect_device_box tcdb
+		INNER JOIN tbl_device td ON tcdb.cd_id = td.device_id
+		<where>
+			<if test="collectDeviceBox.collectDevice != null and collectDeviceBox.collectDevice.cdId != ''
+					and collectDeviceBox.collectDevice.cdId != null">
+				td.device_id = #{collectDeviceBox.collectDevice.cdId}
+			</if>
+			<if test="collectDeviceBox.collectDevice != null and collectDeviceBox.collectDevice.cdCode != ''
+					and collectDeviceBox.collectDevice.cdCode != null">
+				AND td.device_code = #{collectDeviceBox.collectDevice.cdCode}
+			</if>
+			<if test="collectDeviceBox.boxName != null and collectDeviceBox.boxName != ''">
+				AND tcdb.box_name LIKE CONCAT('%',CONCAT(#{collectDeviceBox.boxName},'%'))
+			</if>
+			<if test="collectDeviceBox.boxNo != null and collectDeviceBox.boxNo != ''">
+				AND tcdb.box_no = #{collectDeviceBox.boxNo}
+			</if>
+		</where>
+	</select>
+
+	<!-- 获取超标采样设备信息 -->
+	<select id="getCollectDeviceBox" resultMap="collectDeviceBoxResultMap">
+		SELECT
+			tcdb.box_id,
+			tcdb.box_no,
+			tcdb.box_name,
+			tcdb.box_status,
+			td.device_id AS cd_id,
+			td.device_code AS cd_code,
+			td.device_mn AS cd_mn,
+			td.device_name AS cd_name,
+			tcdb.opt_user,
+			tcdb.opt_time
+		FROM
+			tbl_collect_device_box tcdb
+		INNER JOIN tbl_device td ON tcdb.cd_id = td.device_id
+		<where>
+			<if test="collectDeviceBox.collectDevice != null and collectDeviceBox.collectDevice.cdId != ''
+					and collectDeviceBox.collectDevice.cdId != null">
+				td.device_id = #{collectDeviceBox.collectDevice.cdId}
+			</if>
+			<if test="collectDeviceBox.collectDevice != null and collectDeviceBox.collectDevice.cdCode != ''
+					and collectDeviceBox.collectDevice.cdCode != null">
+				AND td.device_code = #{collectDeviceBox.collectDevice.cdCode}
+			</if>
+			<if test="collectDeviceBox.boxNo != null and collectDeviceBox.boxNo != ''">
+				AND tcdb.box_no = #{collectDeviceBox.boxNo}
+			</if>
+			<if test="collectDeviceBox.boxName != null and collectDeviceBox.boxName != ''">
+				AND tcdb.box_name LIKE CONCAT('%',CONCAT(#{collectDeviceBox.boxName},'%'))
+			</if>
+		</where>
+		<if test="collectDeviceBox.rowCount != -1 and collectDeviceBox.rowIndex != -1">
+			LIMIT #{collectDeviceBox.rowIndex, jdbcType = INTEGER},#{collectDeviceBox.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	
+	<!-- 新增超标采样设备箱子 -->
+	<insert id="insertCollectDeviceBox" parameterType="com.tcb.env.pojo.CollectDeviceBox">
+		INSERT INTO tbl_collect_device_box
+		(
+			box_no,
+			box_name,
+			box_status,
+			cd_id,
+			opt_user
+		)VALUES(
+			#{collectDeviceBox.boxNo},
+			#{collectDeviceBox.boxName},
+			#{collectDeviceBox.boxStatus},
+			#{collectDeviceBox.collectDevice.cdId},
+			#{collectDeviceBox.optUser}
+		)
+	</insert>
+
+	<!-- 更新超标采样设备箱子 -->
+	<update id="updateCollectDeviceBox" parameterType="com.tcb.env.pojo.CollectDeviceBox">
+		UPDATE tbl_collect_device_box
+		   SET box_no = #{collectDeviceBox.boxNo}
+			   ,box_name = #{collectDeviceBox.boxName}
+			   ,box_status = #{collectDeviceBox.boxStatus}
+			   ,cd_id = #{collectDeviceBox.collectDevice.cdId}
+			   ,opt_user = #{collectDeviceBox.optUser}
+			   ,opt_time = #{collectDeviceBox.optTime}
+		 WHERE box_id = #{collectDeviceBox.boxId, jdbcType = BIGINT}
+	</update>
+
+	<!-- 删除超标采样设备箱子 -->
+	<delete id="deleteCollectDeviceBox" parameterType="java.util.List">
+		DELETE FROM tbl_collect_device_box
+		WHERE box_id IN
+		<foreach collection="boxIdList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!-- 是否存在相同的采样箱子（更新） -->
+	<select id="getSampleBoxExist" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT tcdb.box_id)
+		FROM
+			tbl_collect_device_box tcdb
+		WHERE
+			tcdb.box_id != #{boxId}
+		AND tcdb.box_no = #{boxNo}
+		AND tcdb.cd_id = #{cdId}
+	</select>
+
+</mapper>

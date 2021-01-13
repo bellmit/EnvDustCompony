@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IIpDao">
+	<!-- 类名和数据库中表的属性名一一对应 -->
+	<resultMap type="com.tcb.env.pojo.Ip" id="ipResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="ipId" column="ip_id" />
+		<result property="ipAddress" column="ip_address" />
+		<result property="remark" column="remark" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<!-- 查询数据个数 COUNT(0)表示忽略所有lie -->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM
+		tbl_ip
+		WHERE
+		1 = 1
+		<if test="ip.ipId != -1">
+			AND tbl_ip.ip_id = #{ip.ipId, jdbcType = INTEGER}
+		</if>
+		<if test="ip.ipAddress != null and ip.ipAddress != ''">
+			AND tbl_ip.ip_address = #{ip.ipAddress, jdbcType =
+			VARCHAR}
+		</if>
+		<if test="ip.remark != null and ip.remark != ''">
+			AND tbl_ip.remark LIKE
+			CONCAT('%',CONCAT(#{ip.remark},'%'))
+		</if>
+	</select>
+	<!-- 查询数据库 -->
+	<select id="getIp" parameterType="com.tcb.env.pojo.Ip"
+		resultMap="ipResultMap">
+		SELECT
+		tbl_ip.ip_id,
+		tbl_ip.ip_address,
+		tbl_ip.remark,
+		tbl_ip.opt_user,
+		tbl_ip.opt_time
+		FROM
+		tbl_ip
+		WHERE<!-- 表示条件：如果此字段不为空则以此字段作为条件，来取出整行， 如果此字段为空，则不做为条件，也就是没有取出条件，不取出 
+			哪个不空取哪个 -->
+		1 = 1
+		<if test="ip.ipId != -1">
+			AND tbl_ip.ip_id = #{ip.ipId, jdbcType = INTEGER}
+		</if>
+		<if test="ip.remark != null and ip.remark != ''">
+			AND tbl_ip.remark LIKE
+			CONCAT('%',CONCAT(#{ip.remark},'%'))
+		</if>
+		<if test="ip.rowCount != -1 and ip.rowIndex != -1">
+			LIMIT #{ip.rowIndex, jdbcType =
+			INTEGER},#{ip.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	<insert id="insertIp" parameterType="java.util.List">
+		insert
+		into tbl_ip
+		(ip_address,
+		remark,
+		opt_user
+		)
+		values
+		<foreach collection="listip" item="item" index="index"
+			separator=",">
+			(#{item.ipAddress},
+			#{item.remark},
+			#{item.optUser})
+		</foreach>
+	</insert>
+	<delete id="deleteIp" parameterType="java.util.List">
+		DELETE FROM tbl_ip
+		WHERE
+		tbl_ip.ip_id
+		IN
+		<foreach collection="ipid" item="item" open="(" separator=","
+			close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<select id="getIpExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_ip
+		WHERE 1=1
+		<if test="ipid != -1">
+			AND tbl_ip.ip_id != #{ipid, jdbcType = INTEGER}
+		</if>
+		<if test="ipaddress != null and ipaddress != ''">
+			AND tbl_ip.ip_address = #{ipaddress, jdbcType = VARCHAR}
+		</if>
+	</select>
+	<update id="updateIp" parameterType="java.util.List">
+		<!-- SET列名称，新值，具体哪一行看where -->
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			UPDATE tbl_ip
+			SET
+			tbl_ip.opt_time = #{item.optTime}
+			<if test="item.ipAddress != null and item.ipAddress != ''">
+				,tbl_ip.ip_address = #{item.ipAddress}
+			</if>
+			<if test="item.remark != null and item.remark != ''">
+				,tbl_ip.remark = #{item.remark}
+			</if>
+			<if test="item.optUser != -1">
+				,tbl_ip.opt_user = #{item.optUser}
+			</if>
+			<!-- where列名称，某值，修改某行的标识 -->
+			WHERE
+			tbl_ip.ip_id = #{item.ipId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+</mapper>

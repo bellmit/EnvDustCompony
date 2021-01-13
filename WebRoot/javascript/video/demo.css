@@ -1,0 +1,301 @@
+@charset "utf-8";
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+.video {
+    font-size: 12px !important;
+    padding: 5px;
+    text-align:left;
+}
+
+select {
+    height: 20px;
+    line-height: 20px;
+}
+
+legend {
+    padding: 0px !important;
+    border: 0px !important;
+    margin: 0px !important;
+    width: auto !important;
+    font-size: 14px !important;
+}
+
+table {
+    border-spacing: 3px 3px!important;
+    border-collapse: separate!important;
+}
+
+.modal-title{
+    float: left;
+    line-height: 1.2;
+    color: #333;
+    /* font-weight: 700; */
+    font-size: 14px;
+    margin: 5px 10px 0px 10px;
+}
+
+.left {
+    float: left;
+}
+.closeCtrl{
+    /*border-bottom: 2px solid #ccc;*//*margin-bottom: 5px;padding-top: 10px*/
+    width: 100%;
+    text-align: center;
+    border-bottom: 2px solid #ccc;
+    background-color: #f3f3f3;
+    background: -webkit-linear-gradient(top,#F8F8F8 0,#eeeeee 20%);
+    background: -moz-linear-gradient(top,#F8F8F8 0,#eeeeee 20%);
+    background: -o-linear-gradient(top,#F8F8F8 0,#eeeeee 20%);
+    background: linear-gradient(to bottom,#F8F8F8 0,#eeeeee 20%);
+    background-repeat: repeat-x;
+    border-color: #D3D3D3;
+    overflow: hidden;
+}
+a.closeBtn:hover{
+    color:red;
+}
+.closeBtn{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    opacity: 0.6;
+    filter: alpha(opacity=60);
+    vertical-align: top;
+    font-size:24px;
+    cursor:pointer;
+}
+.freeze {
+    position: absolute;
+    text-align: center;
+    background: #343434;
+    color: #FFFFFF;
+    font-size: 26px;
+    font-weight: bold;
+    filter: alpha(opacity=60);
+    opacity: 0.6;
+}
+
+.vtop {
+    vertical-align: middle;
+    margin-top: -1px;
+}
+
+/*插件*/
+.plugin {
+    width: 480px;
+    height: 300px;
+}
+
+fieldset {
+    display: block;
+}
+
+/*登录*/
+.login {
+    width: 480px;
+    padding: 0px 10px 0px 10px;
+    margin-left: 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.login .tt {
+    width: 100px;
+    text-align: center;
+}
+
+.login .txt {
+    width: 130px;
+}
+
+.login .btn1 {
+    width: 45px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.login .btn12 {
+    width: 100px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.login .sel {
+    width: 105px;
+}
+
+.login .sel2 {
+    width: 50px;
+}
+
+/*数字通道*/
+.ipchannel {
+    width: 480px;
+    padding:0px 0px 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.ipchannel .btn1 {
+    width: 130px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.ipchannel .digitaltdiv {
+    height: 100px;
+    overflow: hidden;
+    overflow-y: auto;
+    border: 1px solid #7F9DB9;
+    font-size: 11px;
+}
+
+.ipchannel .digitalchannellist th, .ipchannel .digitalchannellist td {
+    padding: 2px;
+    border: 1px solid #7F9DB9;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+/*预览*/
+.preview {
+    width: 480px;
+    padding: 0px 0px 10px;
+    padding-top: 0;
+    margin-left: 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.preview .tt {
+    width: 60px;
+}
+
+.preview .txt {
+    width: 30px;
+}
+
+.preview .btn1 {
+    width: 70px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.preview .btn12 {
+    width: 90px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.preview .sel {
+    width: 105px;
+}
+
+/*云台*/
+.ptz {
+    width: 480px;
+    padding: 0px 10px 0px 10px;
+    margin-left: 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.ptz .tt {
+    width: 60px;
+}
+
+.ptz .txt {
+    width: 60px;
+}
+
+.ptz .btn1 {
+    width: 45px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.ptz .btn12 {
+    width: 60px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.ptz .sel {
+    width: 65px;
+}
+
+/*回放*/
+.playback {
+    width: 480px;
+    padding: 0px 10px 10px 10px;
+    margin-left: 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.playback .tt {
+    width: 60px;
+}
+
+.playback .txt {
+    width: 140px;
+}
+
+.playback .btn1 {
+    width: 45px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.playback .btn12 {
+    width: 70px;
+    height: 22px;
+    line-height: 18px;
+}
+
+.playback .sel {
+    width: 65px;
+}
+
+.playback .searchdiv {
+    height: 176px;
+    overflow: hidden;
+    overflow-y: auto;
+    border: 1px solid #7F9DB9;
+    font-size: 11px;
+}
+
+.playback .searchlist th, .playback .searchlist td {
+    padding: 2px;
+    border: 1px solid #7F9DB9;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+/*操作信息*/
+.operate {
+    width: 480px;
+    padding: 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.operate .opinfo {
+    height: 132px;
+    border: 1px solid #7F9DB9;
+    overflow: auto;
+}
+
+/*事件回调*/
+.callback {
+    width: 480px;
+    padding: 10px;
+    border: 1px solid #7F9DB9;
+}
+
+.callback .cbinfo {
+    height: 108px;
+    border: 1px solid #7F9DB9;
+    overflow: auto;
+}

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                		http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+        				http://www.springframework.org/schema/context
+                		http://www.springframework.org/schema/context/spring-context-4.1.xsd
+                		http://www.springframework.org/schema/tx  
+                		http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+                		http://www.springframework.org/schema/aop
+                		http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+                		http://www.springframework.org/schema/task    
+					    http://www.springframework.org/schema/task/spring-task-4.1.xsd">
+	<!-- task任务扫描注解 -->
+	<task:annotation-driven />
+	<!-- 自动扫描 -->
+	<context:component-scan base-package="com.tcb.env">
+	<!-- 
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" /> -->
+	</context:component-scan>
+	<!-- 引入配置文件 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:jdbc.properties" />
+	</bean>
+
+	<bean id="db" class="com.alibaba.druid.pool.DruidDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${driver}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
+		<!-- 初始化连接大小 -->
+		<property name="initialSize" value="${initialSize}"></property>
+		<!-- 连接池最大数量 -->
+		<property name="maxActive" value="${maxActive}"></property>
+		<!-- 连接池最大空闲 -->
+		<!-- <property name="maxIdle" value="${maxIdle}"></property> -->
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="${minIdle}"></property>
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="${maxWait}"></property>
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${timeBetween}"></property>
+		<!-- 超过时间限制是否回收 -->
+		<property name="removeAbandoned" value="true"></property>
+		<!-- 超时时间；单位为秒。180秒=3分钟 -->
+		<property name="removeAbandonedTimeout" value="180"></property>
+		<!-- 关闭abanded连接时输出错误日志 -->
+		<property name="logAbandoned" value="true"></property>
+		<!-- sql validate配置(心跳检查,自动连接) -->
+		<property name="testWhileIdle" value="true"></property>
+		<property name="testOnBorrow" value="false"></property>
+		<property name="testOnReturn" value="false"></property>
+		<property name="validationQuery" value="select now() from dual"></property>
+		<property name="minEvictableIdleTimeMillis" value="${minEvictable}"></property>
+		<!-- <property name="numTestsPerEvictionRun" value="${maxIdle}"></property> -->
+		<property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatement}"></property>
+	</bean>
+
+	<bean id="db1" class="com.alibaba.druid.pool.DruidDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${driver1}" />
+		<property name="url" value="${url1}" />
+		<property name="username" value="${username1}" />
+		<property name="password" value="${password1}" />
+		<!-- 初始化连接大小 -->
+		<property name="initialSize" value="${initialSize}"></property>
+		<!-- 连接池最大数量 -->
+		<property name="maxActive" value="${maxActive}"></property>
+		<!-- 连接池最大空闲 -->
+		<!-- <property name="maxIdle" value="${maxIdle}"></property> -->
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="${minIdle}"></property>
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="${maxWait}"></property>
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${timeBetween}"></property>
+		<!-- 超过时间限制是否回收 -->
+		<property name="removeAbandoned" value="true"></property>
+		<!-- 超时时间；单位为秒。180秒=3分钟 -->
+		<property name="removeAbandonedTimeout" value="180"></property>
+		<!-- 关闭abanded连接时输出错误日志 -->
+		<property name="logAbandoned" value="true"></property>
+		<!-- sql validate配置(心跳检查,自动连接) -->
+		<property name="testWhileIdle" value="true"></property>
+		<property name="testOnBorrow" value="false"></property>
+		<property name="testOnReturn" value="false"></property>
+		<property name="validationQuery" value="select now() from dual"></property>
+		<property name="minEvictableIdleTimeMillis" value="${minEvictable}"></property>
+		<!-- <property name="numTestsPerEvictionRun" value="${maxIdle}"></property> -->
+		<property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatement}"></property>
+	</bean>
+	
+	<bean id="dbvideo" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${drivervideo}" />
+		<property name="url" value="${urlvideo}" />
+		<property name="username" value="${usernamevideo}" />
+		<property name="password" value="${passwordvideo}" />
+	</bean>
+
+	<bean id="dataSource" class="com.tcb.env.util.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="db" value-ref="db" />
+				<entry key="db1" value-ref="db1" />
+				<entry key="dbvideo" value-ref="dbvideo" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="db" />
+	</bean>
+
+	<!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 自动扫描mapping.xml文件 -->
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+	</bean>
+
+	<!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.tcb.env.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+
+	<!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<context:annotation-config />
+
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- spring线程管理 -->
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<!-- 核心线程数 -->
+		<property name="corePoolSize" value="${task.core_pool_size}" />
+		<!-- 最大线程数 -->
+		<property name="maxPoolSize" value="${task.max_pool_size}" />
+		<!-- 队列最大长度 -->
+		<property name="queueCapacity" value="${task.queue_capacity}" />
+		<!-- 线程池维护线程所允许的空闲时间，默认为80s -->
+		<property name="keepAliveSeconds" value="${task.keep_alive_seconds}" />
+	</bean>
+	
+	<bean class="com.tcb.env.config.Dom4jConfig"></bean>
+
+</beans>

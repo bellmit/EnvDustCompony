@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IStatusDao">
+	<resultMap type="com.tcb.env.pojo.Status" id="statusResultMap">
+		<id property="statusId" column="status_id" />
+		<result property="statusCode" column="status_code" />
+		<result property="statusName" column="status_name" />
+	</resultMap>
+
+	<!-- 查询数据库-->
+	<select id="getStatus" parameterType="com.tcb.env.pojo.Status"
+		resultMap="statusResultMap">
+		SELECT	
+		ts.status_id,
+		ts.status_code,
+		ts.status_name		
+		FROM
+		tbl_status AS ts
+		WHERE
+		1 = 1
+		<if test="status != null and status!= ''">
+			AND ts.status_code = #{status_code,jdbcType = VARCHAR}
+		</if>
+		<if test="nostatus != null and nostatus != ''">
+			AND ts.status_code != #{nostatus,jdbcType = VARCHAR}
+		</if>
+	</select>
+	
+</mapper>

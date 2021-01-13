@@ -1,0 +1,46 @@
+<html>
+<head>
+<style type="text/css">
+.btn {
+	border: 0px; /*去边框*/
+	width: 128px; /*宽*/
+	height: 128px; /*高*/
+	background-image: url(./images/playervideo.png); /*背景图片*/
+	background-color: #d3e0fc;
+	font-size: 30px; /*字体大小*/
+	color: white; /*字体颜色*/
+}
+
+.btndiv {
+	left: 40%;
+	top: 30%;
+	position: relative;
+}
+</style>
+<script type="text/javascript">
+function openvideo(){
+	document.getElementById('btndivid').style.display="none";
+	var url = window.hellobaby;
+	var objectContent =  '<object type="application/x-vlc-plugin" id="vlc" events="True" width="99%" height="97%" pluginspage="http://www.videolan.org" codebase="http://downloads.videolan.org/pub/videolan/vlc-webplugins/2.0.6/npapi-vlc-2.0.6.tar.xz">' 
+			+'<param name="mrl" value= "'+url+'" />'
+			+'<param name="volume" value="100"/> '
+			+'<param name="autoplay" value="true" /> '
+			+'<param name="loop" value="false" /> '
+			+'<param name="fullscreen" value="false" /> '
+			+'</object>';
+			document.getElementById('videodiv').innerHTML = objectContent;//找到id为'myId'的标签内插入html变量的值 
+}
+
+</script>
+</head>
+<body style="height:100%">
+	<!--[if IE]>
+<![endif]-->
+	<!--[if !IE]><!-->
+	<div id="videodiv"></div>
+	<div id="btndivid" class="btndiv">
+		<input type="button" onclick="openvideo()" value="" class="btn" />
+	</div>
+	<!--<![endif]-->
+</body>
+</html>

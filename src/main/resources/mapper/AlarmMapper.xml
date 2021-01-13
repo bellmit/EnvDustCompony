@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IAlarmDao">
+
+	<resultMap type="com.tcb.env.pojo.Alarm" id="alarmResultMap">
+		<id property="alarmId" column="alarm_id" />
+		<result property="alarmInfo" column="alarm_info" />
+		<result property="alarmAction" column="alarm_action" />
+		<result property="actionUser" column="action_user" />
+		<result property="alarmStatus" column="alarm_status" />
+		<result property="alarmTime" column="alarm_time"/>
+		<result property="actionTime" column="action_time"/>
+		<result property="sendFlag" column="send_flag"/>
+		<result property="upValue" column="up_value"/>
+		<result property="lowValue" column="low_value"/>
+		<result property="thingValue" column="thing_value"/>
+		<result property="receiveFlag" column="receive_flag"/>
+		<result property="levelNo" column="level_no"/>
+		<result property="dataTime" column="data_time"/>
+		<!-- 级联类型表 -->
+		<association property="status" javaType="com.tcb.env.pojo.Status"
+			resultMap="com.tcb.env.dao.IStatusDao.statusResultMap"></association>
+		<!-- 级联设备表 -->
+		<association property="device" javaType="com.tcb.env.pojo.Device"
+			resultMap="com.tcb.env.dao.IDeviceDao.deviceResultMap"></association>
+		<!-- 级联监测物表 -->
+		<association property="monitor" javaType="com.tcb.env.pojo.Monitor"
+			resultMap="com.tcb.env.dao.IMonitorDao.monitorResultMap"></association>
+	</resultMap>
+
+	<resultMap id="alarmLevelResultMap" type="java.util.Map">
+		<result property="levelNo" column="level_no" />
+		<result property="alarmInfo" column="alarm_info" />
+	</resultMap>
+
+	<!-- 获取报警信息个数 -->
+	<select id="getAlarmCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+		(
+		SELECT
+			DISTINCT temp.alarm_id
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				DISTINCT ta.alarm_id,
+				ts.status_code,
+				ts.status_name,
+				td.device_code,
+				td.device_name,
+				ta.alarm_info,
+				ta.alarm_action,
+				ta.action_user,
+				ta.alarm_status,
+				ta.alarm_time,
+				ta.action_time,
+				ta.send_flag,
+				tm.thing_code,
+				tm.thing_name,
+				ta.thing_value,
+				tar.area_id,
+				tar.area_name,
+				ta.data_time
+			FROM
+				${dbOldName}.tbl_alarm AS ta
+			INNER JOIN ${dbName}.tbl_status AS ts ON ta.alarm_type = ts.status_code
+			INNER JOIN ${dbName}.tbl_device AS td ON ta.device_code = td.device_code
+			LEFT JOIN ${dbName}.tbl_monitor AS tm ON ta.thing_code = tm.thing_code
+			LEFT JOIN ${dbName}.tbl_area AS tar ON td.area_id = tar.area_id
+			WHERE 1 = 1
+			<if test="alarm.device.deviceName != null and alarm.device.deviceName != ''">
+				AND td.device_name LIKE CONCAT('%',CONCAT(#{alarm.device.deviceName},'%'))
+			</if>
+			<if test="alarm.status.statusCode != null and alarm.status.statusCode != ''">
+				AND ta.alarm_type = #{alarm.status.statusCode, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.alarmStatus != null and alarm.alarmStatus != ''">
+				AND ta.alarm_status = #{alarm.alarmStatus, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.beginAlarmTime != null and alarm.beginAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,#{alarm.beginAlarmTime},ta.alarm_time)>=0
+			</if>
+			<if test="alarm.endAlarmTime != null and alarm.endAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,ta.alarm_time,#{alarm.endAlarmTime})>=0
+			</if>
+			<if test="listDevCode.size>0">
+				AND td.device_code IN
+				<foreach collection="listDevCode" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			UNION
+		</if>
+			SELECT
+				DISTINCT ta.alarm_id,
+				ts.status_code,
+				ts.status_name,
+				td.device_code,
+				td.device_name,
+				ta.alarm_info,
+				ta.alarm_action,
+				ta.action_user,
+				ta.alarm_status,
+				ta.alarm_time,
+				ta.action_time,
+				ta.send_flag,
+				tm.thing_code,
+				tm.thing_name,
+				ta.thing_value,
+				tar.area_id,
+				tar.area_name,
+				ta.data_time
+			FROM
+				${dbName}.tbl_alarm AS ta
+			INNER JOIN ${dbName}.tbl_status AS ts ON ta.alarm_type = ts.status_code
+			INNER JOIN ${dbName}.tbl_device AS td ON ta.device_code = td.device_code
+			LEFT JOIN ${dbName}.tbl_monitor AS tm ON ta.thing_code = tm.thing_code
+			LEFT JOIN ${dbName}.tbl_area AS tar ON td.area_id = tar.area_id
+			WHERE 1 = 1
+			<if test="alarm.device.deviceName != null and alarm.device.deviceName != ''">
+				AND td.device_name LIKE CONCAT('%',CONCAT(#{alarm.device.deviceName},'%'))
+			</if>
+			<if test="alarm.status.statusCode != null and alarm.status.statusCode != ''">
+				AND ta.alarm_type = #{alarm.status.statusCode, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.alarmStatus != null and alarm.alarmStatus != ''">
+				AND ta.alarm_status = #{alarm.alarmStatus, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.beginAlarmTime != null and alarm.beginAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,#{alarm.beginAlarmTime},ta.alarm_time)>=0
+			</if>
+			<if test="alarm.endAlarmTime != null and alarm.endAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,ta.alarm_time,#{alarm.endAlarmTime})>=0
+			</if>
+			<if test="listDevCode.size>0">
+				AND td.device_code IN
+				<foreach collection="listDevCode" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			) temp
+		) CTEMP
+	</select>
+
+	<!-- 获取报警信息 -->
+	<select id="getAlarm" resultMap="alarmResultMap">
+		SELECT DISTINCT
+			temp.alarm_id,
+			temp.status_code,
+			temp.status_name,
+			temp.device_code,
+			temp.device_name,
+			temp.alarm_info,
+			temp.alarm_action,
+			temp.action_user,
+			temp.alarm_status,
+			temp.alarm_time,
+			temp.action_time,
+			temp.send_flag,
+			temp.thing_code,
+			temp.thing_name,
+			temp.thing_value,
+			temp.area_id,
+			temp.area_name,
+			temp.level_no,
+			temp.data_time
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				DISTINCT ta.alarm_id,
+				ts.status_code,
+				ts.status_name,
+				td.device_code,
+				td.device_name,
+				ta.alarm_info,
+				ta.alarm_action,
+				ta.action_user,
+				ta.alarm_status,
+				ta.alarm_time,
+				ta.action_time,
+				ta.send_flag,
+				tm.thing_code,
+				tm.thing_name,
+				ta.thing_value,
+				tar.area_id,
+				tar.area_name,
+				ta.level_no,
+				ta.data_time
+			FROM
+				${dbOldName}.tbl_alarm AS ta
+			INNER JOIN ${dbName}.tbl_status AS ts ON ta.alarm_type = ts.status_code
+			INNER JOIN ${dbName}.tbl_device AS td ON ta.device_code = td.device_code
+			LEFT JOIN ${dbName}.tbl_monitor AS tm ON ta.thing_code = tm.thing_code
+			LEFT JOIN ${dbName}.tbl_area AS tar ON td.area_id = tar.area_id
+			WHERE 1 = 1
+			<if test="alarm.device.deviceName != null and alarm.device.deviceName != ''">
+				AND td.device_name LIKE CONCAT('%',CONCAT(#{alarm.device.deviceName},'%'))
+			</if>
+			<if test="alarm.status.statusCode != null and alarm.status.statusCode != ''">
+				AND ta.alarm_type = #{alarm.status.statusCode, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.alarmStatus != null and alarm.alarmStatus != ''">
+				AND ta.alarm_status = #{alarm.alarmStatus, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.beginAlarmTime != null and alarm.beginAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,#{alarm.beginAlarmTime},ta.alarm_time)>=0
+			</if>
+			<if test="alarm.endAlarmTime != null and alarm.endAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,ta.alarm_time,#{alarm.endAlarmTime})>=0
+			</if>
+			<if test="listDevCode.size>0">
+				AND td.device_code IN
+				<foreach collection="listDevCode" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			UNION
+		</if>
+			SELECT
+				DISTINCT ta.alarm_id,
+				ts.status_code,
+				ts.status_name,
+				td.device_code,
+				td.device_name,
+				ta.alarm_info,
+				ta.alarm_action,
+				ta.action_user,
+				ta.alarm_status,
+				ta.alarm_time,
+				ta.action_time,
+				ta.send_flag,
+				tm.thing_code,
+				tm.thing_name,
+				ta.thing_value,
+				tar.area_id,
+				tar.area_name,
+				ta.level_no,
+				ta.data_time
+			FROM
+				${dbName}.tbl_alarm AS ta
+			INNER JOIN ${dbName}.tbl_status AS ts ON ta.alarm_type = ts.status_code
+			INNER JOIN ${dbName}.tbl_device AS td ON ta.device_code = td.device_code
+			LEFT JOIN ${dbName}.tbl_monitor AS tm ON ta.thing_code = tm.thing_code
+			LEFT JOIN ${dbName}.tbl_area AS tar ON td.area_id = tar.area_id
+			WHERE 1 = 1
+			<if test="alarm.device.deviceName != null and alarm.device.deviceName != ''">
+				AND td.device_name LIKE CONCAT('%',CONCAT(#{alarm.device.deviceName},'%'))
+			</if>
+			<if test="alarm.status.statusCode != null and alarm.status.statusCode != ''">
+				AND ta.alarm_type = #{alarm.status.statusCode, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.alarmStatus != null and alarm.alarmStatus != ''">
+				AND ta.alarm_status = #{alarm.alarmStatus, jdbcType = VARCHAR}
+			</if>
+			<if test="alarm.beginAlarmTime != null and alarm.beginAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,#{alarm.beginAlarmTime},ta.alarm_time)>=0
+			</if>
+			<if test="alarm.endAlarmTime != null and alarm.endAlarmTime != ''">
+				AND TIMESTAMPDIFF(SECOND,ta.alarm_time,#{alarm.endAlarmTime})>=0
+			</if>
+			<if test="listDevCode.size>0">
+				AND td.device_code IN
+				<foreach collection="listDevCode" item="item"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			) temp
+			ORDER BY temp.alarm_time DESC
+			<if test="alarm.rowCount != -1 and alarm.rowIndex != -1">
+				LIMIT #{alarm.rowIndex, jdbcType = INTEGER},#{alarm.rowCount,jdbcType = INTEGER}
+			</if>
+	</select>
+
+	<!-- 更新报警信息 -->
+	<update id="updateAlarm">
+		UPDATE ${dbName}.tbl_alarm
+		SET action_time = #{alarm.actionTime}
+			,action_user = #{alarm.actionUser}
+			,alarm_status = #{alarm.alarmStatus}
+			,alarm_action = #{alarm.alarmAction}
+		WHERE
+		alarm_id = #{alarm.alarmId, jdbcType = INTEGER}
+	</update>
+
+	<!-- 删除报警信息 -->
+	<delete id="deleteAlarm" parameterType="java.util.List">
+		DELETE FROM ${dbName}.tbl_alarm
+		WHERE tbl_alarm.alarm_id IN
+		<foreach collection="listid" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<!-- 删除设备报警信息 -->
+	<delete id="deleteDeviceAlarm">
+		DELETE FROM ${dbName}.tbl_alarm
+		WHERE device_code = #{deviceCode}
+	</delete>
+	
+	<!-- 获取最新报警信息 -->
+	<select id="getRecentlyAlarmInfo" resultMap="alarmLevelResultMap">
+		SELECT
+			level_no,
+			CASE WHEN alarm_type = 'NT' AND level_no = '1' THEN CONCAT('普通报警',':',tm.thing_name,'(',ta.thing_value,')')
+			WHEN alarm_type = 'NT' AND level_no = '2' THEN CONCAT('紧急报警',':',tm.thing_name,'(',ta.thing_value,')')
+			WHEN alarm_type = 'NT' AND level_no = '3' THEN CONCAT('严重报警',':',tm.thing_name,'(',ta.thing_value,')')
+			WHEN alarm_type = 'D' AND level_no = '1' THEN CONCAT(ta.alarm_info,'(普通报警)')
+			WHEN alarm_type = 'D' AND level_no = '2' THEN CONCAT(ta.alarm_info,'(紧急报警)')
+			WHEN alarm_type = 'D' AND level_no = '3' THEN CONCAT(ta.alarm_info,'(严重报警)')
+			ELSE alarm_info END AS alarm_info
+		FROM
+			${dbName}.tbl_alarm ta
+		LEFT JOIN tbl_monitor tm ON tm.thing_code = ta.thing_code
+		WHERE
+			ta.device_code = #{deviceCode}
+		AND ta.alarm_status = '1'
+		AND ta.alarm_type = #{alarmType}
+		AND ta.alarm_time = (
+			SELECT
+				alarm_time
+			FROM
+				${dbName}.tbl_alarm
+			WHERE
+				device_code = #{deviceCode}
+			AND alarm_status = '1'
+			AND alarm_type = #{alarmType}
+			ORDER BY alarm_time DESC
+			LIMIT 0,1
+		)
+		ORDER BY ta.alarm_time DESC
+	</select>
+
+	<!-- 获取最新报警信息（未解决） -->
+	<select id="getRecentlyAlarmIdInfo" resultMap="alarmResultMap">
+		SELECT
+			ta.alarm_id,
+			CASE WHEN alarm_type = 'NT' THEN CONCAT(alarm_info,':',tm.thing_name,'(',ta.thing_value,')')
+			ELSE alarm_info END AS alarm_info
+		FROM
+			${dbName}.tbl_alarm ta
+		LEFT JOIN tbl_monitor tm ON tm.thing_code = ta.thing_code
+		WHERE
+			ta.device_code = #{deviceCode}
+		AND ta.alarm_status = '1'
+		AND ta.alarm_type = #{alarmType}
+		AND ta.alarm_time = (
+			SELECT
+				alarm_time
+			FROM
+				${dbName}.tbl_alarm
+			WHERE
+				device_code = #{deviceCode}
+			AND alarm_status = '1'
+			AND alarm_type = #{alarmType}
+			ORDER BY alarm_time DESC
+			LIMIT 0,1
+		)
+		ORDER BY ta.alarm_time DESC
+	</select>
+	
+	<!-- 获取报警设备编码 -->
+	<select id="getDeviceCode" resultType="java.lang.String">
+		SELECT 
+			temp.device_code
+		FROM
+		(
+			SELECT
+				ta.device_code
+			FROM
+				${dbName}.tbl_alarm ta
+			WHERE
+				ta.alarm_id = #{alarmId}
+			UNION
+			SELECT
+				ta.device_code
+			FROM
+				${dbOldName}.tbl_alarm ta
+			WHERE
+				ta.alarm_id = #{alarmId}
+		) temp
+		LIMIT 0,1
+	</select>
+	
+	<!-- 获取需要发送通知的设备报警 -->
+	<select id="getSmsAlarmInfo" resultMap="alarmResultMap">
+		SELECT DISTINCT
+			ta.alarm_id,
+			ts.status_code,
+			ts.status_name,
+			td.device_id,
+			td.device_code,
+			td.device_name,
+			ta.alarm_info,
+			ta.alarm_action,
+			ta.action_user,
+			ta.alarm_status,
+			ta.alarm_time,
+			ta.action_time,
+			tm.thing_code,
+			tm.thing_name,
+			ta.thing_value,
+			tar.area_id,
+			tar.area_name,
+			tsm.receive_flag,
+			ta.level_no
+		FROM
+			${dbName}.tbl_device AS td
+		INNER JOIN ${dbName}.tbl_sms tsm ON td.device_id = tsm.device_id AND tsm.effective_flag = 1
+		AND TIMESTAMPDIFF(SECOND,tsm.begin_time,NOW())>=0 AND TIMESTAMPDIFF(SECOND,NOW(),tsm.end_time)>=0
+		INNER JOIN ${dbName}.tbl_alarm ta ON td.device_code = ta.device_code AND ta.alarm_type = tsm.status_code
+		AND TIMESTAMPDIFF(SECOND,tsm.begin_time,ta.alarm_time)>=0 AND TIMESTAMPDIFF(SECOND,ta.alarm_time,tsm.end_time)>=0
+		INNER JOIN ${dbName}.tbl_status AS ts ON ta.alarm_type = ts.status_code
+		LEFT JOIN ${dbName}.tbl_monitor AS tm ON ta.thing_code = tm.thing_code
+		LEFT JOIN ${dbName}.tbl_area AS tar ON td.area_id = tar.area_id
+		WHERE ta.send_flag = 0 AND ta.alarm_status = '1'
+	</select>
+	
+	<!-- 更新发送标识 -->
+	<update id="updateSmsAlarmFlag">
+		UPDATE ${dbName}.tbl_alarm SET send_flag = #{sendFlag} WHERE alarm_id = #{alarmId}
+	</update>
+	
+	<!-- 获取负责人组织相关电话 -->
+	<select id="getSmsPhone" resultType="java.lang.String">
+		SELECT
+			DISTINCT tu.user_tel
+		FROM
+			tbl_sms ts
+		INNER JOIN ${dbName}.tbl_sms_user tsu ON ts.sms_id = tsu.sms_id
+		INNER JOIN ${dbName}.tbl_user tu ON tsu.user_id = tu.user_id
+		WHERE ts.device_id = #{deviceId}
+		AND ts.status_code = #{statusCode}
+		<if test="thingCode != null and thingCode != ''">
+			AND ts.thing_code = #{thingCode}
+		</if>
+	  	AND tu.user_tel IS NOT NULL
+	  	AND tu.user_tel != ''
+	</select>
+
+	<!-- 获取负责人组织相关邮件地址 -->
+	<select id="getSmsMail" resultType="java.lang.String">
+		SELECT
+			DISTINCT tu.user_email
+		FROM
+			tbl_sms ts
+		INNER JOIN ${dbName}.tbl_sms_user tsu ON ts.sms_id = tsu.sms_id
+		INNER JOIN ${dbName}.tbl_user tu ON tsu.user_id = tu.user_id
+		WHERE ts.device_id = #{deviceId}
+		AND ts.status_code = #{statusCode}
+		<if test="thingCode != null and thingCode != ''">
+			AND ts.thing_code = #{thingCode}
+		</if>
+		AND tu.user_email IS NOT NULL
+		AND tu.user_email != ''
+	</select>
+
+	<!-- 获取设备报警级别 -->
+	<select id="getAlarmLevel" resultType="java.lang.String">
+		SELECT
+			level_no
+		FROM
+			${dbName}.tbl_alarm
+		WHERE
+			device_code = #{deviceCode}
+			AND alarm_type = 'NT'
+		ORDER BY
+			update_time DESC
+		LIMIT 0,1
+	</select>
+
+</mapper>

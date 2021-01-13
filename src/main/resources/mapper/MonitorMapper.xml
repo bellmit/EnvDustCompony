@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IMonitorDao">
+	<!-- 类名和数据库中表的属性名一一对应 -->
+	<resultMap type="com.tcb.env.pojo.Monitor" id="monitorResultMap">
+		<!-- 属性名和数据库列名映射 -->
+		<id property="thingId" column="thing_id" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="thingUnit" column="thing_unit" />
+		<result property="thingOrder" column="thing_order" />
+		<result property="optUser" column="opt_user" />
+		<result property="optTime" column="opt_time" />
+	</resultMap>
+
+	<resultMap type="com.tcb.env.model.MonitorLevelModel" id="monitorLevelModelResultMap">
+		<id property="tlId" column="tl_id" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="levelMin" column="level_min" />
+		<result property="levelMax" column="level_max" />
+		<result property="levelNo" column="level_no" />
+		<result property="levelName" column="level_name" />
+		<result property="levelColor" column="level_color" />
+		<result property="levelVisible" column="level_visible" />
+	</resultMap>
+
+	<!-- 查询数据个数 COUNT(0)表示忽略所有lie -->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(0)
+		FROM
+			tbl_monitor
+		WHERE 1 = 1
+		<if test="monitor.thingId != -1">
+			AND tbl_monitor.thing_id = #{monitor.thingId, jdbcType = INTEGER}
+		</if>
+		<if test="monitor.thingCode != null and monitor.thingCode != ''">
+			AND tbl_monitor.thing_code = #{monitor.thingCode, jdbcType = VARCHAR}
+		</if>
+		<if test="monitor.thingName != null and monitor.thingName != ''">
+			AND tbl_monitor.thing_name LIKE CONCAT('%',CONCAT(#{monitor.thingName},'%'))
+		</if>
+	</select>
+	<!-- 查询数据库 -->
+	<select id="getMonitor" parameterType="com.tcb.env.pojo.Monitor" resultMap="monitorResultMap">
+		SELECT
+			tbl_monitor.thing_id,
+			tbl_monitor.thing_code,
+			tbl_monitor.thing_name,
+			tbl_monitor.thing_unit,
+			tbl_monitor.thing_order,
+			tbl_monitor.opt_user,
+			tbl_monitor.opt_time
+		FROM
+			tbl_monitor
+		WHERE 1 = 1
+		<if test="monitor.thingId != -1">
+			AND tbl_monitor.thing_id = #{monitor.thingId , jdbcType =
+			INTEGER}
+		</if>
+		<if test="monitor.thingName != null and monitor.thingName != ''">
+			AND tbl_monitor.thing_name LIKE CONCAT('%',CONCAT(#{monitor.thingName},'%'))
+		</if>
+		<if test="monitor.rowCount != -1 and monitor.rowIndex != -1">
+			LIMIT #{monitor.rowIndex, jdbcType = INTEGER},#{monitor.rowCount,jdbcType = INTEGER}
+		</if>
+	</select>
+	<!-- 插入语句 valuse为要传入的参数 数据库自动生成主键值 -->
+	<insert id="insertMonitor" parameterType="com.tcb.env.pojo.Monitor">
+		insert into tbl_monitor
+		(
+			thing_code,
+			thing_name,
+			thing_unit,
+			<if test="monitor.thingOrder != null">
+				thing_order,
+			</if>
+			opt_user
+		)
+		values
+		(
+			#{monitor.thingCode},
+			#{monitor.thingName},
+			#{monitor.thingUnit},
+			<if test="monitor.thingOrder != null">
+				#{monitor.thingOrder},
+			</if>
+			#{monitor.optUser}
+		)
+	</insert>
+	<!-- 删除语句 成功返回1，不成功返回0 -->
+	<delete id="deleteMonitor" parameterType="java.util.List">
+		DELETE FROM tbl_monitor
+		WHERE
+		tbl_monitor.thing_id IN
+		<foreach collection="monitorid" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<!-- 更新时查询是否存在编号 -->
+	<select id="getMonitorExist" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM tbl_monitor
+		WHERE 1=1
+		<if test="monitorid != -1">
+			AND tbl_monitor.thing_id != #{monitorid, jdbcType =
+			INTEGER}
+		</if>
+		<if test="monitorcode != null and monitorcode != ''">
+			AND tbl_monitor.thing_code = #{monitorcode, jdbcType =
+			VARCHAR}
+		</if>
+		<if test="monitorname != null and monitorname != ''">
+			AND tbl_monitor.thing_name = #{monitorname, jdbcType =
+			VARCHAR}
+		</if>
+	</select>
+	<!-- 更新操作 -->
+	<update id="updateMonitor" parameterType="java.util.List">
+		<!-- SET列名称，新值，具体哪一行看where -->
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			UPDATE tbl_monitor
+			SET
+			tbl_monitor.opt_time = #{item.optTime}
+			<if test="item.thingCode != null and item.thingCode != ''">
+				,tbl_monitor.thing_code = #{item.thingCode}
+			</if>
+			<if test="item.thingName != null and item.thingName != ''">
+				,tbl_monitor.thing_name = #{item.thingName}
+			</if>
+			<if test="item.thingUnit != null and item.thingUnit != ''">
+				,tbl_monitor.thing_unit = #{item.thingUnit}
+			</if>
+			<if test="item.thingOrder != null">
+				,tbl_monitor.thing_order = #{item.thingOrder}
+			</if>
+			<if test="item.optUser != -1">
+				,tbl_monitor.opt_user = #{item.optUser}
+			</if>
+			<!-- where列名称，某值，修改某行的标识 -->
+			WHERE
+			tbl_monitor.thing_id = #{item.thingId, jdbcType = INTEGER}
+		</foreach>
+	</update>
+	
+	<!-- 获取监测物名称（通过编号） -->
+	<select id="getMonitorName" resultType="java.lang.String">
+		SELECT
+			tm.thing_name
+		FROM
+			tbl_monitor tm
+		WHERE
+			1 = 1
+		AND tm.thing_code = #{thingCode, jdbcType = VARCHAR}
+		LIMIT 0,1
+	</select>
+
+	<!-- 查询监测物等级信息 -->
+	<select id="getMonitorLevel" resultMap="monitorLevelModelResultMap">
+		SELECT DISTINCT
+			tml.tl_id,
+			tml.thing_code,
+			tm.thing_name,
+			tml.level_min,
+			tml.level_max,
+			tml.level_no,
+			tml.level_name,
+			tml.level_color,
+			tml.level_visible
+		FROM
+			tbl_monitor_level tml
+			INNER JOIN tbl_monitor tm ON tml.thing_code = tm.thing_code
+		WHERE
+			tml.thing_code = #{thingCode}
+	</select>
+
+	<!-- 查询监测物等级信息(根据数值) -->
+	<select id="getMonitorValueLevel" resultMap="monitorLevelModelResultMap">
+		SELECT DISTINCT
+			tml.tl_id,
+			tml.thing_code,
+			tm.thing_name,
+			tml.level_no,
+			tml.level_name,
+			tml.level_color
+		FROM tbl_monitor_level tml
+		INNER JOIN tbl_monitor tm ON tm.thing_code = tml.thing_code
+        WHERE #{thingValue} >= bml.level_min AND #{thingValue} &lt; bml.level_max
+	</select>
+	
+</mapper>

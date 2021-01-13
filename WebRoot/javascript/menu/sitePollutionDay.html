@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>站点污染日分布</title>
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap-year-calendar/css/bootstrap-year-calendar.min.css">
+        <link rel="stylesheet" type="text/css" href="../../javascript/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css">
+        <!-- <link rel="stylesheet" type="text/css" href="../../javascript/plugins/jQuery-dataTables/jquery.dataTables.min.css">-->
+        <link rel="stylesheet" href="../../javascript/plugins/bootstrap-dataTables/bootstrap-table.min.css">
+        <style>
+            .content-header i{
+                font-size: 14px;
+                color: #00b0ea;
+            }
+
+            .content-header span{
+                font-size: 16px;
+                margin: 13px 0 0 10px;
+                color: #00b0ea;
+            }
+
+            .table{
+                table-layout:fixed;word-break:break-all
+            }
+            #myDiv .table-bordered tr th{
+                font-weight: bold;
+                font-size:14px;
+                line-height:24px;
+                text-align:center;
+                vertical-align: middle;
+            }
+            #myDiv .table-bordered tr td{
+                font-size:14px;
+                line-height:24px;
+                text-align:center;
+                vertical-align: middle;
+                white-space: normal;
+                word-wrap: break-word;
+                word-break: break-all;
+            }
+
+            .datagrid-mask{
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0.3;
+                filter: alpha(opacity=30);
+                display: none;
+                background: #ccc;
+            }
+
+            .datagrid-mask-msg {
+                position: absolute;
+                top: 50%;
+                margin-top: -10px;
+                padding: 10px 5px 10px 30px;
+                width: auto;
+                font-size:12px;
+                border-width: 2px;
+                border-style: solid;
+                display: none;
+                background: #ffffff url(../images/loading.gif) no-repeat scroll 5px center;
+                border-color: #D3D3D3;
+            }
+        </style>
+    </head>
+    <body class="hold-transition skin-blue sidebar-mini">
+        <section class="content">
+            <div class="row ">
+                <!--月历-->
+                <div class="col-md-12" id="myDiv" style="overflow:auto;min-height:500px;">
+
+                </div>
+            </div>
+
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+                <div class="modal-dialog" style="width: 70%;margin-top: 5%" >
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" >
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                污染日分布图
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <!-- TODO  加载柱状图，参数后传 -->
+                            <br>
+                            <div id="contrast" style="width: 100%;height:600px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        </section>
+    </body>
+    <script src="../../javascript/plugins/jQuery/jquery-3.3.1.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap3.3.7/bootstrap.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-year-calendar/js/bootstrap-year-calendar.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.zh-CN.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script src="../../javascript/plugins/bootstrap-dataTables/bootstrap-table.min.js"></script>
+    <script src="../../javascript/plugins/bootstrap-dataTables/bootstrap-table-zh-CN.js"></script>
+    <script src="../../javascript/plugins/echarts/echarts.min.js"></script>
+    <script src="../../javascript/plugins/loading/loading.js"></script>
+    <script type="application/javascript">
+
+        function getDayData(){
+           /* var deviceCodes =  $("#previewFeedbackTable").bootstrapTable("getSelections");
+            var deviceCodeList = [];
+            for(var i=0;i<deviceCodes.length;i++){
+                deviceCodeList.push(deviceCodes[i].deviceCode);
+            }
+
+            var date = $("#datetimepicker").data("datetimepicker").getDate();
+            var dataDay = date.getFullYear() + "-" +((date.getMonth() + 1) > 9 ? (date.getMonth() + 1):("0"+(date.getMonth() + 1))) + "-" + (date.getDate() > 9 ? date.getDate():("0"+date.getDate())) ;
+            //数据的查询
+            ajaxLoading("正在处理数据，请稍候...");
+            $.ajax({
+                url:'/comprehensiveAnalysis/getSitePollutionDayDistributeData',
+                type:'post',
+                data:{"deviceCodeList":deviceCodeList,"thingCode":pollutionDayCode,"dataDay":dataDay},
+                dataType:'json',
+                success:function (result) {
+                    if(result != null){
+                        var data = [];
+                        if(result.success){
+                            data = result.data;
+                        }
+                        getDayTable(data);
+                    }
+                    ajaxLoadEnd();
+                },
+                error:function (e) {
+                    ajaxLoadEnd();
+                    console.log("日历加载数据异常" + e);
+                }
+            });*/
+           var testData = {"success":true,"code":"201","msg":"操作成功","data":[{"deviceCode":"1234567890000b","deviceName":"测试B设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 09:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 10:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 11:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 12:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 13:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 14:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 15:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 16:00:00"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null}]},{"deviceCode":"1234567890000c","deviceName":"测试C设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 09:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 10:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 11:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 12:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 13:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 14:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 15:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 16:00:00"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null}]},{"deviceCode":"1234567890000d","deviceName":"测试D设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 09:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 10:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 11:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 12:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 13:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 14:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 15:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 16:00:00"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null}]},{"deviceCode":"1234567890000a","deviceName":"测试A设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 09:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 10:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 11:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 12:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 13:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 14:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 15:00:00"},{"thingName":"PM10","thingName":"总烃","thingAvg":"150.0","levelName":"轻度","levelNo":"3","levelColor":"#fa0","dataDate":"2019-02-28 16:00:00"},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null}]},{"deviceCode":"123456789001aa","deviceName":"测试AA设备","pmdmList":[{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null},{"thingCode":null,"thingName":null,"thingAvg":null,"levelName":null,"levelNo":null,"levelColor":null,"dataDate":null}]}]};
+           getDayTable(testData.data);
+        }
+        /**
+         *
+         * @param total 后台传来的数据，表示天数或者小时数
+         * @param datas 后台传来的数据
+         * @param type 时间格式：月(month)，日(day)
+         * @param name 物质类型，aqi，so2等等
+         */
+        function getDayTable(data){
+            $("#myDiv").html();
+            //表格组件
+            var th = ' <table class="table table-bordered" id="dayTable" data-target="#myModal" style="text-align: center;">\n'+ '<tr><th width="50px;">序号</th>\n' + '<th width="100px;">名称</th>\n';
+            var total = 24;
+            for(var i = 0 ; i < total; i++){
+                if(i < 10){
+                    th += '<th width="70px;">' + '0'+ i + '</th>\n'
+                }else{
+                    th += '<th width="70px;">' + i + '</th>\n'
+                }
+            }
+            th += '</tr>';
+            //表格内容
+            for(var i = 1 ;i <=data.length ; i++){
+                th += '<tr id='+data[i-1].deviceCode+'>';
+                //添加序号
+                th += '<td>'+ i +'</td>';
+                //添加名称
+                th += '<td>'+ data[i-1].deviceName +'</td>';
+                var pmdmList = data[i-1].pmdmList;
+                //添加颜色
+                for(var j = 0; j < pmdmList.length ; j ++){
+                    if(pmdmList[j].thingAvg != null){
+                        var bgcolor = pmdmList[j].levelColor;
+                        var color = "black";
+
+                        if(bgcolor==null || bgcolor==""){
+                            bgcolor = "#fff";
+                        }
+                        if(pmdmList[j].levelNo!=null&&pmdmList[j].levelNo!=""&& Number(pmdmList[j].levelNo)>3){
+                            color = "#fff";
+                        }
+                        th += '<td  style="color:'+color+';background-color: '+ bgcolor + '"' +'>'+ pmdmList[j].thingAvg + '</td>';
+                    }else{
+                        th += '<td></td>';
+                    }
+                }
+                th += '</tr>';
+            }
+            th += '</table>';
+            //加载表格
+            $("#myDiv").html(th);
+            bindDayTableTrClick();
+        }
+
+        getDayData();
+
+        /**
+         *绑定表格的行事件
+         * */
+        function bindDayTableTrClick(){
+            $("#dayTable tr").unbind("click").click(function(e){
+                var deviceCode =  e.currentTarget.id;
+                if(e.currentTarget.id!="" && e.currentTarget.id!=undefined){
+                    handleData(deviceCode);
+                }
+            })
+        }
+        /**
+         * 关闭模态窗口
+         */
+        $(function () { $('#myModal').on('hide.bs.modal', function () {
+            $(this).removeData("bs.modal");
+        })});
+
+        function handleData(deviceCode){
+            var date = $("#datetimepicker").data("datetimepicker").getDate();
+            var dataDay = date.getFullYear() + "-" +((date.getMonth() + 1) > 9 ? (date.getMonth() + 1):("0"+(date.getMonth() + 1))) + "-" + (date.getDate() > 9 ? date.getDate():("0"+date.getDate())) ;
+            ajaxLoading("正在处理数据，请稍候...");
+            $('#myModal').modal();
+            $.ajax({
+                url:'/comprehensiveAnalysis/getSitePollutionSingleDayChartData',
+                type:'post',
+                dataType:'json',
+                data:{"deviceCode":deviceCode,"thingCode":pollutionDayCode,"dataDay":dataDay},
+                success:function (result) {
+                    var deviceName = "";
+                    var colorList = [];
+                    var xAxisData =  [];
+                    var serieData = [];
+                    if(result != null && result.success && result.data!=undefined){
+                        deviceName = result.data.deviceName;
+                        colorList =  result.data.colorList;
+                        for(var i=0;i<result.data.timeList.length;i++){
+                            var strArr = result.data.timeList[i].split(" ");
+                            if(strArr.length>=2){
+                                xAxisData.push(strArr[1]);
+                            }
+                        }
+                        //xAxisData =  result.data.timeList;
+                        serieData = result.data.dataList;
+                        //此处即为修改modal的标题
+                        $("#myModalLabel").text(deviceName + pollutionDayName + "污染日分布图");
+                    }
+                    getDayDataModel(dataDay,deviceName,colorList,xAxisData,serieData);
+                    ajaxLoadEnd();
+                },
+                error:function (e) {
+                    ajaxLoadEnd();
+                    console.log("日历加载数据异常" + e);
+                }
+            });
+        }
+        //点击弹出模态框，参数：时间，检测物质，地区
+        function getDayDataModel(dataDay,deviceName,colorList,xAxisData,serieData){
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('contrast'));
+            option = {
+                title: {
+                    show: "true",//是否显示标题，默认显示，可以不设置
+                    text: dataDay,//图表标题文本内容
+                    textStyle: {//标题内容的样式
+                        color: '#000',//京东红
+                        fontStyle: 'normal',//主标题文字字体风格，默认normal，有italic(斜体),oblique(斜体)
+                        fontWeight: "lighter",//可选normal(正常)，bold(加粗)，bolder(加粗)，lighter(变细)，100|200|300|400|500...
+                        fontFamily: "san-serif",//主题文字字体，默认微软雅黑
+                        fontSize: 18//主题文字字体大小，默认为18px
+                    },
+                    textBaseline: "top",//默认就好,垂直对齐方式,不要设置
+                    left:"center"
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255,255,255,0.7)',
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    formatter: function(params) {
+                        var res = '<div style="color:black;">';
+                        res += '<strong>' + params[0].name + '</strong>'
+                        for (var i = 0, l = params.length; i < l; i++) {
+                            res += '<br/>' + params[i].seriesName + ' : ' + (params[i].value==""?"无":params[i].value)
+                        }
+                        res += '</div>';
+                        return res;
+                    }
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable: true,
+                xAxis: [
+                    {
+                        type : 'category',
+                        axisLabel:{
+                            interval:0,//0：全部显示，1：间隔为1显示对应类目，2：依次类推，（简单试一下就明白了，这样说是不是有点抽象）
+                            rotate:-30//倾斜显示，-：顺时针旋转，+或不写：逆时针旋转
+                        },
+                        data : xAxisData
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name:deviceName,
+                        type:'bar',
+                        data:serieData,
+                        markPoint : {
+                            itemStyle: {
+                                normal: {
+                                    color: 'red',
+                                    borderColor: "red",
+                                    borderWidth: 1.5
+                                }
+                            },
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        itemStyle: {
+                            normal: {
+                                // 定制显示（按顺序）
+                                color: function(params) {
+                                    if(colorList.length>0){
+                                        return colorList[params.dataIndex]
+                                    }else{
+                                        return "gray";
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option,true);
+            setTimeout(function (){
+                window.onresize = function () {
+                    myChart.resize();
+                }
+            },200)
+
+        }
+    </script>
+</html>

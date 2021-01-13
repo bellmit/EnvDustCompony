@@ -1,0 +1,162 @@
+<!--
+@author hiYuzu
+@description 报警查询页面（APP端）
+@version V1.0
+@date 2019/4/17 15:47
+-->
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          name='viewport'>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <link rel="stylesheet" href="./css/bootstrap3.3.7/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./css/Ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="./css/bootstrap-select.min.css" type="text/css"/>
+    <link rel="stylesheet" href="./css/bootstrap-dataTables/bootstrap-table.min.css">
+    <link href="./css/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"
+          rel="stylesheet"
+          media="screen">
+    <!-- Theme style -->
+    <link title="stylenew" rel="stylesheet" type="text/css" href="./css/stylenew.css"/>
+    <link rel="stylesheet" href="./css/alarmQuery.css" type="text/css">
+    <!-- Google Font -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="skin-black">
+<div class="wrapper row-offcanvas row-offcanvas-left">
+  <!--  <aside class="left-side sidebar-offcanvas ">
+        <section class="sidebar">
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="./img/user1.png" class="img-circle" alt="User Image"/>
+                </div>
+                <div class="pull-left info">
+                    <p>欢迎，<label id="userName"></label></p>
+                </div>
+            </div>
+            <ul class="sidebar-menu" id="sideBarMenuAlarm">
+              &lt;!&ndash;  <li><a href="indexWeb.html"> <i class="fa fa-home"></i> <span>首页</span></a></li>
+                <li><a href="mapMonitorWeb.html"> <i class="fa fa-map-marker"></i> <span>地图</span></a></li>
+                <li><a href="dataQueryWeb.html"><i class="fa fa-list"></i><span>数据</span> </a></li>
+                <li><a href="chartQueryWeb.html"><i class="fa fa-line-chart"></i><span>趋势</span> </a></li>
+                <li><a href="#" onclick="mainlogOutFunc()"> <i class="fa fa fa-sign-out"></i> <span></span>注销</a></li>&ndash;&gt;
+            </ul>
+        </section>
+    </aside>-->
+    <aside class="right-side ">
+        <section>
+            <div class="row no-margin">
+                <form role="form" class="form-inline"
+                      style="padding-top: 9px;padding-bottom: 9px;background-color: #00ca6d;color: #fff;">
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="control-label" style="font-size: 15px;">&emsp;&emsp;开始时间：</label>
+                            <input type="text" id="timePicker1" class="form_datetime form-control"
+                                   style="height: 30px; width: 170px;" readonly required>
+                        </div>
+                        <div class="row">
+                            <label class="control-label" style="font-size: 15px;">&emsp;&emsp;结束时间：</label>
+                            <input type="text" id="timePicker2" class="form_datetime form-control"
+                                   style="height: 30px; width: 170px;" readonly required>&emsp;
+                        </div>
+                        <div class="row">
+                            <label class="control-label" style="font-size: 15px;">&emsp;&emsp;设备名称：</label>
+                            <input type="text" id="deviceName" class="form-control"
+                                   style="height: 30px; width: 170px;">&emsp;
+                            <button type="button" class="fa fa-search btn btn-info" id="searchBtn2"
+                                    style="height: 30px;" onclick="btnClick()">查询
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="row no-margin">
+                    <div class="col-xs-12 no-padding"
+                         style="border-bottom: 2px solid #a0a6ad;border-left: 2px solid #a0a6ad;border-right: 2px solid #a0a6ad;">
+                        <div class="box box-primary" id="alarmBox">
+                            <div class="box-body no-padding" style="z-index: 9999999999;">
+                                <table class="table table-striped" id="alarmTable"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </aside>
+</div>
+</body>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/bootstrap-select.min.js"></script>
+<script src="./js/plugins/adminlte/adminlte.min.js"></script>
+<script src="./js/defaults-zh_CN.min.js"></script>
+<script src="./js/plugins/bootstrap-dataTables/bootstrap-table.min.js"></script>
+<script src="./js/plugins/bootstrap-dataTables/bootstrap-table-zh-CN.js"></script>
+<script src="./js/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+<script src="./js/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="./js/dataUtil.js"></script>
+<script src="./../util/ctrl.js"></script>
+<script src="./js/Director/app.js"></script>
+<script src="./js/alarmQuery.js"></script>
+<script>
+    $(".form_datetime").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language: 'zh-CN',
+        autoclose: true,
+        startView: 2,
+        minView: 2,
+        forceParse: false
+    });
+</script>
+
+<script type="text/javascript">
+/*    //初始化左侧栏
+    initSidebarMenu("sideBarMenuAlarm");
+    //默认左侧导航栏折叠
+    $('.left-side').toggleClass("collapse-left");*/
+    $(".right-side").toggleClass("strech");
+    var loginname = "";
+    loginname = getCookieValue('EnvDustusername');
+    if (loginname != null && loginname != "") {
+        $("#userName").html(loginname);
+    } else {
+        $("#userName").html("");
+    }
+    $('input').on('ifChecked', function (event) {
+        $(this).parents('li').addClass("task-done");
+        console.log('ok');
+    });
+    $('input').on('ifUnchecked', function (event) {
+        $(this).parents('li').removeClass("task-done");
+        console.log('not');
+    });
+</script>
+
+<script type="text/javascript">
+    $.ajaxSetup({
+        contentType: "application/x-www-form-urlencoded;charset=utf-8",
+        complete: function (XMLHttpRequest, textStatus) {
+            var sessionstatus = XMLHttpRequest
+                .getResponseHeader("sessionstatus"); //通过XMLHttpRequest取得响应头，sessionstatus，
+            if (sessionstatus == "timeout") {
+                //如果超时就处理 ，指定要跳转的页面
+                window.location.href = "/loginPhone.html";
+            }
+        }
+    });
+    initLayout();
+</script>
+
+</html>

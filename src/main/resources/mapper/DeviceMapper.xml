@@ -1,0 +1,1189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IDeviceDao">
+
+    <resultMap type="com.tcb.env.pojo.Device" id="deviceResultMap">
+        <id property="deviceId" column="device_id"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="deviceMn" column="device_mn"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="deviceIp" column="device_ip"/>
+        <result property="devicePort" column="device_port"/>
+        <result property="devicePwd" column="device_pwd"/>
+        <result property="deviceX" column="device_x"/>
+        <result property="deviceY" column="device_y"/>
+        <result property="gpsX" column="gps_x"/>
+        <result property="gpsY" column="gps_y"/>
+        <result property="systemVersion" column="system_version"/>
+        <result property="inspectTime" column="inspect_time"/>
+        <result property="optUser" column="opt_user"/>
+        <result property="optTime" column="opt_time"/>
+        <result property="buildFirm" column="build_firm"/>
+        <result property="deviceAddress" column="device_address"/>
+        <result property="deviceKm" column="device_km"/>
+        <result property="staMinute" column="sta_minute"/>
+        <result property="staHour" column="sta_hour"/>
+        <result property="staDay" column="sta_day"/>
+        <result property="replyFlag" column="reply_flag"/>
+        <result property="forceReply" column="force_reply"/>
+        <result property="haveAhr" column="have_ahr"/>
+        <result property="smsFlag" column="sms_flag"/>
+        <result property="staFlow" column="sta_flow"/>
+        <result property="pipeArea" column="pipe_area"/>
+        <result property="hourCount" column="hour_count"/>
+        <!-- 级联表 -->
+        <association property="manufacturer" javaType="com.tcb.env.pojo.Manufacturer"
+                     resultMap="com.tcb.env.dao.IManufacturerDao.mfrResultMap"></association>
+        <association property="area" javaType="com.tcb.env.pojo.Area"
+                     resultMap="com.tcb.env.dao.IAreaDao.areaResultMap"></association>
+        <association property="status" javaType="com.tcb.env.pojo.Status"
+                     resultMap="com.tcb.env.dao.IStatusDao.statusResultMap"></association>
+        <association property="user" javaType="com.tcb.env.pojo.User"
+                     resultMap="com.tcb.env.dao.IUserDao.userResultMap"></association>
+        <association property="oranization" javaType="com.tcb.env.pojo.Oranization"
+                     resultMap="com.tcb.env.dao.IOranizationDao.orgResultMap"></association>
+        <association property="deviceProject" javaType="com.tcb.env.pojo.DeviceProject"
+                     resultMap="com.tcb.env.dao.IDeviceProjectDao.deviceProjectResultMap"></association>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.MapDeviceModel" id="mapDevResultMap">
+        <id property="deviceCode" column="device_code"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="deviceMn" column="device_mn"/>
+        <result property="deviceX" column="device_x"/>
+        <result property="deviceY" column="device_y"/>
+        <result property="statusCode" column="status_code"/>
+        <result property="statusInfo" column="status_info"/>
+        <result property="alarmStatus" column="alarm_status"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userTel" column="user_tel"/>
+        <result property="areaName" column="area_name"/>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.ThermodynamicModel" id="thermodynamicResultMap">
+        <result property="lng" column="lng"/>
+        <result property="lat" column="lat"/>
+        <result property="count" column="count"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="deviceName" column="device_name"/>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.LocationModel" id="locationModelResultMap">
+        <result property="code" column="code"/>
+        <result property="lng" column="lng"/>
+        <result property="lat" column="lat"/>
+        <result property="val" column="val"/>
+        <result property="info" column="info"/>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.AreaDeviceValueModel" id="areaDeviceValueResultMap">
+        <result property="areaId" column="area_id"/>
+        <result property="areaName" column="area_name"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="thingCode" column="thing_code"/>
+        <result property="dataType" column="data_type"/>
+        <result property="dataTime" column="data_time"/>
+        <result property="dataValue" column="data_value"/>
+    </resultMap>
+
+    <resultMap type="com.tcb.env.model.GasPathModel" id="gasPathModelResultMap">
+        <result property="gasPath" column="gas_path"/>
+        <result property="switchTime" column="switch_time"/>
+    </resultMap>
+
+    <!-- 查询数据个数 -->
+    <select id="getAreaAuthDevice" resultMap="deviceResultMap">
+		SELECT
+			DISTINCT tbl_device.device_id,
+			tbl_device.device_code,
+			tbl_device.device_mn,
+			tbl_device.device_name,
+			tbl_device.device_ip,
+			tbl_device.device_port,
+			tbl_device.device_pwd,
+			tbl_device.device_x,
+			tbl_device.device_y,
+			tbl_device.gps_x,
+			tbl_device.gps_y,
+			tbl_device.system_version,
+			tbl_device.inspect_time,
+			tbl_device.build_firm,
+			tbl_device.device_address,
+			tbl_device.device_km,
+			tbl_device.sta_minute,
+			tbl_device.sta_hour,
+			tbl_device.sta_day,
+			tbl_device.reply_flag,
+			tbl_device.force_reply,
+			tbl_device.sms_flag,
+			tbl_device.sta_flow,
+			tbl_device.pipe_area,
+			tbl_device.hour_count,
+			tbl_device.opt_user,
+			tbl_device.opt_time,
+			tbl_manufacturer.mfr_id,
+			tbl_manufacturer.mfr_code,
+			tbl_manufacturer.mfr_name,
+			tbl_manufacturer.mfr_address,
+			tbl_manufacturer.mfr_remark,
+			tbl_manufacturer.opt_user,
+			tbl_manufacturer.opt_time,
+			tbl_status.status_id,
+			tbl_status.status_code,
+			tbl_status.status_name,
+			tbl_area.area_id,
+			tbl_area.area_name,
+			tbl_area.parent_id,
+			tbl_area.level_id,
+			tbl_area.area_path,
+			tbl_area.opt_user,
+			tbl_area.opt_time,
+			tbl_user.user_id,
+			tbl_user.user_code,
+			tbl_user.user_password,
+			tbl_user.user_name,
+			tbl_user.user_tel,
+			tbl_user.user_email,
+			tbl_user.user_delete,
+			tbl_user.user_remark,
+			tbl_user.opt_user,
+			tbl_user.opt_time,
+			tbl_oranization.org_id,
+			tbl_oranization.org_id_parent,
+			tbl_oranization.org_name,
+			tbl_oranization.level_type,
+			tbl_oranization.org_address,
+			tbl_oranization.org_path,
+			tbl_oranization.org_telephone,
+			tbl_oranization.org_fax,
+			tbl_oranization.org_liaison,
+			tbl_oranization.opt_user,
+			tbl_oranization.opt_time,
+            tbl_device_project.project_id,
+            tbl_device_project.project_code,
+            tbl_device_project.project_name,
+            tbl_device_project.project_order,
+            tbl_device_project.opt_user,
+            tbl_device_project.opt_time
+		FROM
+			tbl_device
+		INNER JOIN tbl_status ON tbl_device.status_code = tbl_status.status_code
+		INNER JOIN tbl_area ON tbl_device.area_id = tbl_area.area_id
+		LEFT JOIN tbl_oranization ON tbl_device.oversight_unit = tbl_oranization.org_id
+		LEFT JOIN tbl_manufacturer ON tbl_device.mfr_code = tbl_manufacturer.mfr_code
+		LEFT JOIN tbl_user ON tbl_device.device_principal = tbl_user.user_id
+		LEFT JOIN tbl_device_project ON tbl_device.project_id = tbl_device_project.project_id
+		WHERE tbl_area.area_id= #{areaId}
+		AND tbl_device.device_code IN (
+			SELECT DISTINCT tad.device_code
+			FROM tbl_access_device tad
+			INNER JOIN tbl_user_ahr tua ON tad.authority_code = tua.authority_code
+			WHERE tua.user_code = #{userCode}
+		)
+		AND tbl_device.device_type = '1'
+	</select>
+
+    <!-- 查询数据个数 -->
+    <select id="getCount" resultType="java.lang.Integer">
+        SELECT COUNT(0)
+        FROM tbl_device
+        LEFT JOIN tbl_oranization ON tbl_device.oversight_unit = tbl_oranization.org_id
+        LEFT JOIN tbl_manufacturer ON tbl_device.mfr_code = tbl_manufacturer.mfr_code
+        LEFT JOIN tbl_status ON tbl_device.status_code = tbl_status.status_code
+        LEFT JOIN tbl_area ON tbl_device.area_id = tbl_area.area_id
+        LEFT JOIN tbl_user ON tbl_device.device_principal = tbl_user.user_id
+        LEFT JOIN tbl_device_project ON tbl_device.project_id = tbl_device_project.project_id
+        WHERE tbl_device.device_type = '1'
+        <if test="device.deviceId != -1">
+            AND tbl_device.device_id = #{device.deviceId, jdbcType = INTEGER}
+        </if>
+        <if test="device.deviceCode != null and device.deviceCode != ''">
+            AND tbl_device.device_code = #{device.deviceCode,jdbcType = VARCHAR}
+        </if>
+        <if test="device.deviceMn != null and device.deviceMn != ''">
+            OR tbl_device.device_mn = #{device.deviceMn,jdbcType = VARCHAR}
+        </if>
+        <if test="device.deviceName != null and device.deviceName != ''">
+            AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{device.deviceName},'%'))
+        </if>
+        <if test="device.area != null and device.area.areaId != null and device.area.areaId > 0">
+            AND tbl_area.area_id = #{device.area.areaId}
+        </if>
+    </select>
+    <!-- 插入操作 -->
+    <insert id="insertDevice">
+        INSERT INTO tbl_device
+        (
+        device_code,
+        device_mn,
+        device_name,
+        device_ip,
+        device_port,
+        device_pwd,
+        device_x,
+        device_y,
+        <if test="device.gpsX != -1">
+            gps_x,
+        </if>
+        <if test="device.gpsY != -1">
+            gps_y,
+        </if>
+        system_version,
+        inspect_time,
+        mfr_code,
+        area_id,
+        status_code,
+        opt_user,
+        build_firm,
+        <if test="device.user.userId != -1">
+            device_principal,
+        </if>
+        <if test="device.oranization.orgId != -1">
+            oversight_unit,
+        </if>
+        <if test="device.replyFlag != null and device.replyFlag != ''">
+            reply_flag,
+        </if>
+        force_reply,
+        sms_flag,
+        device_address,
+        device_km,
+        <if test="device.deviceProject != null and device.deviceProject.projectId != null
+					and device.deviceProject.projectId > 0">
+            project_id,
+        </if>
+        sta_minute,
+        sta_hour,
+        sta_day,
+        sta_flow,
+        pipe_area,
+        hour_count
+        )
+        VALUES
+        (
+        #{device.deviceCode},
+        #{device.deviceMn},
+        #{device.deviceName},
+        #{device.deviceIp},
+        #{device.devicePort},
+        #{device.devicePwd},
+        #{device.deviceX},
+        #{device.deviceY},
+        <if test="device.gpsX != -1">
+            #{device.gpsX},
+        </if>
+        <if test="device.gpsY != -1">
+            #{device.gpsY},
+        </if>
+        #{device.systemVersion},
+        #{device.inspectTime},
+        #{device.manufacturer.mfrCode},
+        #{device.area.areaId},
+        #{device.status.statusCode},
+        #{device.optUser},
+        #{device.buildFirm},
+        <if test="device.user.userId != -1">
+            #{device.user.userId},
+        </if>
+        <if test="device.oranization.orgId != -1">
+            #{device.oranization.orgId},
+        </if>
+        <if test="device.replyFlag != null and device.replyFlag != ''">
+            #{device.replyFlag},
+        </if>
+        #{device.forceReply},
+        #{device.smsFlag},
+        #{device.deviceAddress},
+        #{device.deviceKm},
+        <if test="device.deviceProject != null and device.deviceProject.projectId != null
+						and device.deviceProject.projectId > 0">
+            #{device.deviceProject.projectId},
+        </if>
+        #{device.staMinute},
+        #{device.staHour},
+        #{device.staDay},
+        #{device.staFlow},
+        #{device.pipeArea},
+        #{device.hourCount}
+        )
+    </insert>
+    <!-- 查询数据操作 -->
+    <select id="getDevice" resultMap="deviceResultMap">
+        SELECT
+        tbl_device.device_id,
+        tbl_device.device_code,
+        tbl_device.device_mn,
+        tbl_device.device_name,
+        tbl_device.device_ip,
+        tbl_device.device_port,
+        tbl_device.device_pwd,
+        tbl_device.device_x,
+        tbl_device.device_y,
+        tbl_device.gps_x,
+        tbl_device.gps_y,
+        tbl_device.system_version,
+        tbl_device.inspect_time,
+        tbl_device.build_firm,
+        tbl_device.device_address,
+        tbl_device.device_km,
+        tbl_device.sta_minute,
+        tbl_device.sta_hour,
+        tbl_device.sta_day,
+        tbl_device.reply_flag,
+        tbl_device.force_reply,
+        tbl_device.sms_flag,
+        tbl_device.sta_flow,
+        tbl_device.pipe_area,
+        tbl_device.hour_count,
+        tbl_device.opt_user,
+        tbl_device.opt_time,
+        tbl_manufacturer.mfr_id,
+        tbl_manufacturer.mfr_code,
+        tbl_manufacturer.mfr_name,
+        tbl_manufacturer.mfr_address,
+        tbl_manufacturer.mfr_remark,
+        tbl_manufacturer.opt_user,
+        tbl_manufacturer.opt_time,
+        tbl_status.status_id,
+        tbl_status.status_code,
+        tbl_status.status_name,
+        tbl_area.area_id,
+        tbl_area.area_name,
+        tbl_area.parent_id,
+        tbl_area.level_id,
+        tbl_area.area_path,
+        tbl_area.opt_user,
+        tbl_area.opt_time,
+        tbl_user.user_id,
+        tbl_user.user_code,
+        tbl_user.user_password,
+        tbl_user.user_name,
+        tbl_user.user_tel,
+        tbl_user.user_email,
+        tbl_user.user_delete,
+        tbl_user.user_remark,
+        tbl_user.opt_user,
+        tbl_user.opt_time,
+        tbl_oranization.org_id,
+        tbl_oranization.org_id_parent,
+        tbl_oranization.org_name,
+        tbl_oranization.level_type,
+        tbl_oranization.org_address,
+        tbl_oranization.org_path,
+        tbl_oranization.org_telephone,
+        tbl_oranization.org_fax,
+        tbl_oranization.org_liaison,
+        tbl_oranization.opt_user,
+        tbl_oranization.opt_time,
+        tbl_device_project.project_id,
+        tbl_device_project.project_code,
+        tbl_device_project.project_name,
+        tbl_device_project.project_order,
+        tbl_device_project.opt_user,
+        tbl_device_project.opt_time
+        FROM
+        tbl_device
+        LEFT JOIN tbl_oranization ON tbl_device.oversight_unit = tbl_oranization.org_id
+        LEFT JOIN tbl_manufacturer ON tbl_device.mfr_code = tbl_manufacturer.mfr_code
+        LEFT JOIN tbl_status ON tbl_device.status_code = tbl_status.status_code
+        LEFT JOIN tbl_area ON tbl_device.area_id = tbl_area.area_id
+        LEFT JOIN tbl_user ON tbl_device.device_principal = tbl_user.user_id
+        LEFT JOIN tbl_device_project ON tbl_device.project_id = tbl_device_project.project_id
+        WHERE tbl_device.device_type = '1'
+        <if test="device.deviceId != -1">
+            AND tbl_device.device_id = #{device.deviceId, jdbcType = INTEGER}
+        </if>
+        <if test="device.deviceCode != null and device.deviceCode != ''">
+            AND tbl_device.device_code = #{device.deviceCode,jdbcType = VARCHAR}
+        </if>
+        <if test="device.deviceMn != null and device.deviceMn != ''">
+            AND tbl_device.device_mn = #{device.deviceMn,jdbcType = VARCHAR}
+        </if>
+        <if test="device.deviceName != null and device.deviceName != ''">
+            AND tbl_device.device_name LIKE CONCAT('%',CONCAT(#{device.deviceName},'%'))
+        </if>
+        <if test="device.area != null and device.area.areaId != null and device.area.areaId > 0">
+            AND tbl_area.area_id = #{device.area.areaId}
+        </if>
+        <if test="device.rowCount != -1 and device.rowIndex != -1">
+            LIMIT #{device.rowIndex, jdbcType = INTEGER},#{device.rowCount,jdbcType = INTEGER}
+        </if>
+    </select>
+    <!-- 删除语句 成功返回1，不成功返回0 -->
+    <delete id="deleteDevice" parameterType="java.util.List">
+        DELETE FROM tbl_device
+        WHERE
+        tbl_device.device_id IN
+        <foreach collection="deviceid" item="item" open="(" separator=","
+                 close=")">
+            #{item,jdbcType = INTEGER}
+        </foreach>
+    </delete>
+    <!-- 更新信息 -->
+    <update id="updateDevice" parameterType="java.util.List">
+        <!-- SET列名称，新值，具体哪一行看where -->
+        <foreach collection="list" item="item" index="index"
+                 separator=",">
+            UPDATE
+            tbl_device
+            SET
+            tbl_device.device_x = #{item.deviceX}
+            ,tbl_device.device_y = #{item.deviceY}
+            ,tbl_device.inspect_time = #{item.inspectTime}
+            ,tbl_device.sta_minute = #{item.staMinute}
+            ,tbl_device.sta_hour = #{item.staHour}
+            ,tbl_device.sta_day = #{item.staDay}
+            ,tbl_device.reply_flag = #{item.replyFlag}
+            ,tbl_device.force_reply = #{item.forceReply}
+            ,tbl_device.sms_flag = #{item.smsFlag}
+            ,tbl_device.sta_flow = #{item.staFlow}
+            ,tbl_device.pipe_area = #{item.pipeArea}
+            ,tbl_device.hour_count = #{item.hourCount}
+            ,tbl_device.opt_time = #{item.optTime}
+            <!-- 不能修改设备编号 -->
+            <!--
+            <if test="item.deviceCode!= null and item.deviceCode != ''">
+                ,tbl_device.device_code = #{item.deviceCode}
+            </if>
+             -->
+            <if test="item.deviceMn != null and item.deviceMn != ''">
+                ,tbl_device.device_mn = #{item.deviceMn}
+            </if>
+            <if test="item.deviceName != null and item.deviceName != ''">
+                ,tbl_device.device_name = #{item.deviceName}
+            </if>
+            <if
+                    test="item.manufacturer.mfrCode != null and item.manufacturer.mfrCode != ''">
+                ,tbl_device.mfr_code = #{item.manufacturer.mfrCode}
+            </if>
+            <if test="item.status.statusCode != null and item.status.statusCode != ''">
+                ,tbl_device.status_code = #{item.status.statusCode}
+            </if>
+            <if test="item.deviceIp != null and item.deviceIp != ''">
+                ,tbl_device.device_ip = #{item.deviceIp}
+            </if>
+            <if test="item.devicePort != -1">
+                ,tbl_device.device_port = #{item.devicePort}
+            </if>
+            <if test="item.devicePwd != null and item.devicePwd != ''">
+                ,tbl_device.device_pwd = #{item.devicePwd}
+            </if>
+            <if test="item.area.areaId != -1">
+                ,tbl_device.area_id = #{item.area.areaId}
+            </if>
+            <if test="item.systemVersion != null and item.systemVersion != ''">
+                ,tbl_device.system_version = #{item.systemVersion}
+            </if>
+            <if test="item.optUser != -1">
+                ,tbl_device.opt_user = #{item.optUser}
+            </if>
+            <if test="item.buildFirm != null and item.buildFirm != ''">
+                ,tbl_device.build_firm = #{item.buildFirm}
+            </if>
+            <if test="item.user.userId != -1">
+                ,tbl_device.device_principal = #{item.user.userId}
+            </if>
+            <if test="item.user.userId == -1">
+                ,tbl_device.device_principal = NULL
+            </if>
+            <if test="item.deviceAddress != null and item.deviceAddress != ''">
+                ,tbl_device.device_address = #{item.deviceAddress}
+            </if>
+            <if test="item.oranization.orgId != -1">
+                ,tbl_device.oversight_unit = #{item.oranization.orgId}
+            </if>
+            <if test="item.oranization.orgId == -1">
+                ,tbl_device.oversight_unit = NULL
+            </if>
+            <if test="item.deviceKm != null and item.deviceKm != ''">
+                ,tbl_device.device_km = #{item.deviceKm}
+            </if>
+            <if test="item.deviceProject != null and item.deviceProject.projectId != null
+								and item.deviceProject.projectId > 0">
+                ,tbl_device.project_id = #{item.deviceProject.projectId}
+            </if>
+            <!-- where列名称，某值，修改某行的标识 -->
+            WHERE tbl_device.device_id = #{item.deviceId, jdbcType = INTEGER}
+        </foreach>
+    </update>
+    <!-- 查询是否存在用户 -->
+    <select id="getDeviceCodeExist" resultType="java.lang.Integer">
+        SELECT
+        COUNT(0)
+        FROM tbl_device
+        WHERE 1=1
+        <if test="deviceid != -1">
+            AND tbl_device.device_id != #{deviceid, jdbcType = INTEGER}
+        </if>
+        <if test="devicecode != null and devicecode != ''">
+            AND tbl_device.device_code = #{devicecode,jdbcType = VARCHAR}
+        </if>
+    </select>
+
+    <!-- 查询设备MN号 -->
+    <select id="getDeviceMn" resultType="java.lang.String">
+		SELECT
+			device_mn
+		FROM tbl_device td
+		WHERE td.device_code = #{deviceCode,jdbcType = VARCHAR}
+		LIMIT 0,1
+	</select>
+
+    <!-- 查询设备MN号是都存在 -->
+    <select id="getDeviceMnExist" resultType="java.lang.Integer">
+        SELECT
+        COUNT(0)
+        FROM tbl_device
+        WHERE 1=1
+        <if test="deviceid != -1">
+            AND tbl_device.device_id != #{deviceid, jdbcType = INTEGER}
+        </if>
+        <if test="devicemn != null and devicemn != ''">
+            AND tbl_device.device_mn = #{devicemn,jdbcType = VARCHAR}
+        </if>
+    </select>
+
+    <!-- 创建监测物存储表 -->
+    <update id="createStorageTable">
+        CREATE TABLE IF NOT EXISTS ${tableName} (
+        storage_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '递增id',
+        device_code varchar(100) NOT NULL COMMENT '设备编码',
+        thing_code varchar(100) NOT NULL COMMENT '监测物编号',
+        thing_rtd double(14,3) DEFAULT NULL COMMENT '监测物上报实时值数据',
+        thing_avg double(14,3) DEFAULT NULL COMMENT '监测物上报平均值数据',
+        thing_max double(14,3) DEFAULT NULL COMMENT '监测物上报最大值数据',
+        thing_min double(14,3) DEFAULT NULL COMMENT '监测物上报最小值数据',
+        thing_zsrtd double(14,3) DEFAULT NULL COMMENT '监测物上报折算实时值数据',
+        thing_zsavg double(14,3) DEFAULT NULL COMMENT '监测物上报折算平均值数据',
+        thing_zsmax double(14,3) DEFAULT NULL COMMENT '监测物上报折算最大值数据',
+        thing_zsmin double(14,3) DEFAULT NULL COMMENT '监测物上报折算最小值数据',
+        thing_cou double(20,6) DEFAULT NULL COMMENT '监测物上报累计排放量',
+        thing_zscou double(20,6) DEFAULT NULL COMMENT '监测物上报累计排放量',
+        thing_flag varchar(50) DEFAULT 'N' COMMENT '监测物上报标识',
+        update_type int(11) NOT NULL COMMENT '监测物上报类型',
+        update_time datetime DEFAULT NULL COMMENT '监测物上报系统时间',
+        rtd_time datetime DEFAULT NULL COMMENT '监测物上报实时时间',
+        begin_time datetime DEFAULT NULL COMMENT '监测物上报开始采集时间',
+        end_time datetime DEFAULT NULL COMMENT '监测物上报结束采集时间',
+        PRIMARY KEY (storage_id,update_type)
+        <!--
+        KEY un_${tableName}_thingcode (thing_code) USING BTREE,
+        KEY un_${tableName}_updatetime (`update_time`) USING BTREE
+        -->
+        )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+        PARTITION BY LIST(update_type) (
+        PARTITION mRld VALUES IN (2011),
+        PARTITION mDay VALUES IN (2031),
+        PARTITION mMin VALUES IN (2051),
+        PARTITION mHour VALUES IN (2061)
+        );
+    </update>
+
+    <!-- ：创建采样设备物质存储表-->
+    <update id="createSampleTable">
+		CREATE TABLE ${tableName} (
+		  sample_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '递增字段',
+		  thing_code varchar(100) DEFAULT NULL COMMENT '采样物质',
+		  thing_value double(14,3) DEFAULT NULL COMMENT '采样物质数值',
+		  thing_limit double(14,3) DEFAULT NULL COMMENT '物质限制',
+		  thing_flag varchar(10) DEFAULT NULL COMMENT '数据标识',
+		  vase_no varchar(50) DEFAULT NULL COMMENT '采样编码',
+		  simple_mode varchar(2) DEFAULT NULL COMMENT '采样方式(0平台 1手动采样 2在线监测触发 3开关量模拟量触发)',
+		  opt_user int(11) DEFAULT NULL COMMENT '操作者',
+		  opt_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+		  PRIMARY KEY (sample_id),
+		  KEY in_${tableName}_vaseno(vase_no) USING BTREE,
+		  CONSTRAINT fk_${tableName}_vaseno FOREIGN KEY (vase_no) REFERENCES tbl_collect_device_box_vase(vase_no) ON DELETE CASCADE ON UPDATE CASCADE
+		) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+	</update>
+
+    <!-- 判断是否存在表 -->
+    <select id="extStorageTable" resultType="java.lang.String">
+		SELECT
+			TABLE_NAME
+		FROM
+			information_schema. TABLES
+		WHERE
+			TABLE_SCHEMA = #{dbName}
+		AND TABLE_NAME = #{tableName}
+	</select>
+
+    <!-- 删除表 -->
+    <update id="dropStorageTable">
+		DROP TABLE ${dbName}.${tableName};
+	</update>
+
+    <!-- 查询地图数据信息个数(非statusCode) -->
+    <select id="getMapDeviceCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(0)
+        FROM
+        tbl_device
+        LEFT JOIN tbl_status ON tbl_device.status_code = tbl_status.status_code
+        <if test="beginAlarmTime != null or endAlarmTime != null">
+            INNER JOIN tbl_alarm ON tbl_device.device_code = tbl_alarm.device_code
+            <if test="beginAlarmTime != null">
+                AND TIMESTAMPDIFF(SECOND,#{beginAlarmTime},tbl_alarm.alarm_time)>=0
+            </if>
+            <if test="endAlarmTime != null">
+                AND TIMESTAMPDIFF(SECOND,tbl_alarm.alarm_time,#{endAlarmTime})>=0
+            </if>
+            <if test="overAlarmId != null and overAlarmId != ''">
+                AND tbl_alarm.alarm_id > #{overAlarmId}
+            </if>
+        </if>
+        LEFT JOIN tbl_user ON tbl_device.device_principal = tbl_user.user_id
+        WHERE tbl_device.device_code IN
+        <foreach collection="listDevCode" item="item" open="(" separator="," close=")">
+            #{item,jdbcType = VARCHAR}
+        </foreach>
+        <if test="statusCode != null and statusCode != ''">
+            AND tbl_device.status_code = #{statusCode,jdbcType = VARCHAR}
+        </if>
+        <if test="noStatusCode != null and noStatusCode != ''">
+            AND tbl_device.status_code != #{noStatusCode,jdbcType = VARCHAR}
+        </if>
+    </select>
+
+    <!-- 查询地图数据信息(非statusCode) -->
+    <select id="getMapDevice" resultMap="mapDevResultMap">
+        SELECT
+        DISTINCT(tbl_device.device_code) AS device_code,
+        tbl_device.device_name,
+        tbl_device.device_mn,
+        tbl_device.device_x,
+        tbl_device.device_y,
+        tbl_device.status_code,
+        tbl_user.user_id,
+        tbl_user.user_name,
+        tbl_user.user_tel,
+        tbl_area.area_name,
+        CASE
+        WHEN tbl_status.status_code IS NOT NULL THEN
+        tbl_status.status_name
+        ELSE
+        '未知原因'
+        END AS status_info
+        FROM
+        tbl_device
+        LEFT JOIN tbl_status ON tbl_device.status_code = tbl_status.status_code
+        <if test="beginAlarmTime != null or endAlarmTime != null">
+            INNER JOIN tbl_alarm ON tbl_device.device_code = tbl_alarm.device_code
+            <if test="beginAlarmTime != null">
+                AND TIMESTAMPDIFF(SECOND,#{beginAlarmTime},tbl_alarm.alarm_time)>=0
+            </if>
+            <if test="endAlarmTime != null">
+                AND TIMESTAMPDIFF(SECOND,tbl_alarm.alarm_time,#{endAlarmTime})>=0
+            </if>
+            <if test="overAlarmId != null and overAlarmId != ''">
+                AND tbl_alarm.alarm_id > #{overAlarmId}
+            </if>
+        </if>
+        LEFT JOIN tbl_user ON tbl_device.device_principal = tbl_user.user_id
+        LEFT JOIN tbl_area ON tbl_device.area_id = tbl_area.area_id
+        WHERE tbl_device.device_code IN
+        <foreach collection="listDevCode" item="item" open="(" separator="," close=")">
+            #{item,jdbcType = VARCHAR}
+        </foreach>
+        <if test="statusCode != null and statusCode != ''">
+            AND tbl_device.status_code = #{statusCode,jdbcType = VARCHAR}
+        </if>
+        <if test="noStatusCode != null and noStatusCode != ''">
+            AND tbl_device.status_code != #{noStatusCode,jdbcType = VARCHAR}
+        </if>
+        <if test="rowCount != -1 and rowIndex != -1">
+            LIMIT #{rowIndex, jdbcType = INTEGER},#{rowCount,jdbcType = INTEGER}
+        </if>
+    </select>
+
+    <!-- 查询地图是否有新的报警(非statusCode) -->
+    <select id="getMapAlarmDeviceCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(0)
+        FROM
+        tbl_alarm ta
+        INNER JOIN tbl_device td ON ta.device_code = td.device_code AND (ta.alarm_type = td.status_code OR
+        td.status_code = 'N')
+        <where>
+            <if test="originalUpdateTime != null">
+                ta.update_time
+                BETWEEN (
+                #{originalUpdateTime}
+                )
+                AND NOW()
+            </if>
+            <choose>
+                <when test="listDevCode != null and listDevCode.size()>0">
+                    AND td.device_code IN
+                    <foreach collection="listDevCode" item="item" open="(" separator="," close=")">
+                        #{item,jdbcType = VARCHAR}
+                    </foreach>
+                </when>
+                <otherwise>
+                    AND td.device_code IS NULL
+                </otherwise>
+            </choose>
+            <if test="statusCode != null and statusCode != ''">
+                AND td.status_code != #{statusCode,jdbcType = VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询地图报警数据信息(非statusCode) -->
+    <select id="getMapAlarmDevice" resultMap="mapDevResultMap">
+        SELECT
+        DISTINCT td.device_code,
+        td.device_name,
+        td.status_code,
+        td.device_x,
+        td.device_y,
+        CASE
+        WHEN ts.status_code IS NOT NULL THEN
+        ts.status_name
+        ELSE
+        '未知原因'
+        END AS status_info
+        FROM
+        tbl_alarm ta
+        INNER JOIN tbl_device td ON ta.device_code = td.device_code AND (ta.alarm_type = td.status_code OR
+        td.status_code = 'N')
+        LEFT JOIN tbl_status ts ON ta.alarm_type = ts.status_code
+        WHERE (ta.alarm_status='1' OR (ta.alarm_status='2' AND ta.action_time = (SELECT
+        sys_value
+        FROM
+        tbl_sys_flag
+        WHERE
+        sys_flag_code = 'alarmupd'
+        LIMIT 0,1 )))
+        AND td.device_code IN
+        <foreach collection="listDevCode" item="item" open="(" separator="," close=")">
+            #{item,jdbcType = VARCHAR}
+        </foreach>
+        <if test="statusCode != null and statusCode != ''">
+            AND td.status_code != #{statusCode,jdbcType = VARCHAR}
+        </if>
+    </select>
+
+    <!-- 查询设备监测物报警信息 -->
+    <select id="getDeviceOverThingAvg" resultType="java.lang.String">
+        SELECT
+        DISTINCT
+        CASE
+        WHEN tda.max_value &lt;= tms.thing_avg THEN
+        CONCAT(
+        tm.thing_name,
+        '(',
+        tms.thing_avg,
+        ')'
+        )
+        WHEN tda.min_value &gt;= tms.thing_avg THEN
+        CONCAT(
+        tm.thing_name,
+        '(',
+        tms.thing_avg,
+        ')'
+        )
+        ELSE
+        ''
+        END AS overstatus
+        FROM
+        ${deviceCode} tms
+        INNER JOIN tbl_monitor tm ON tms.thing_code = tm.thing_code
+        INNER JOIN tbl_device_alarmset tda ON tms.device_code = tda.device_code AND tda.thing_code = tm.thing_code AND
+        tda.device_code = #{deviceCode}
+        INNER JOIN tbl_device_time tdt ON (tms.update_time = tdt.hour_time OR tms.update_time = tdt.update_time) AND
+        tdt.device_code = #{deviceCode}
+        WHERE 1=1
+        <if test="listThingCode.size()>0">
+            AND tm.thing_code IN
+            <foreach collection="listThingCode" item="item" open="(" separator="," close=")">
+                #{item,jdbcType = VARCHAR}
+            </foreach>
+        </if>
+        <if test="listThingCode.size()==0">
+            AND tm.thing_code IS NULL
+        </if>
+    </select>
+
+    <!-- 查询设备监测物报警信息 -->
+    <select id="getDeviceOverThing" resultType="java.lang.String">
+        SELECT
+        CASE
+        WHEN tm.thing_max &lt;= tms.thing_rtd THEN
+        CONCAT(
+        tm.thing_name,
+        '(',
+        tms.thing_rtd,
+        ')'
+        )
+        WHEN tm.thing_min &gt;= tms.thing_rtd THEN
+        CONCAT(
+        tm.thing_name,
+        '(',
+        tms.thing_rtd,
+        ')'
+        )
+        ELSE
+        ''
+        END AS overstatus
+        FROM
+        ${deviceCode} tms
+        INNER JOIN tbl_monitor tm ON tms.thing_code = tm.thing_code
+        WHERE
+        tm.thing_code IN
+        <foreach collection="listThingCode" item="item" open="(" separator="," close=")">
+            #{item,jdbcType = VARCHAR}
+        </foreach>
+        AND tms.update_time = (
+        SELECT
+        MAX(update_time)
+        FROM
+        ${deviceCode}
+        WHERE
+        thing_code = tms.thing_code
+        )
+    </select>
+
+    <!-- 通过设备编码获取名称 -->
+    <select id="getDeviceName" resultType="java.lang.String">
+		SELECT
+		td.device_name
+		FROM
+			tbl_device td
+		WHERE
+			td.device_code = #{deviceCode,jdbcType = VARCHAR}
+		LIMIT 0,1
+	</select>
+
+    <!-- 通过设备ID获取编码 -->
+    <select id="getDeviceCode" resultType="java.lang.String">
+		SELECT
+			td.device_code
+		FROM
+			tbl_device td
+		WHERE
+			td.device_id = #{deviceId}
+		LIMIT 0,1
+	</select>
+
+    <!-- 通过设备编码获取所属区域名称 -->
+    <select id="getAreaName" resultType="java.lang.String">
+		SELECT
+			ta.area_name
+		FROM
+			tbl_device td
+		INNER JOIN tbl_area ta ON td.area_id = ta.area_id
+		WHERE
+			td.device_code = #{deviceCode,jdbcType = VARCHAR}
+		LIMIT 0,1
+	</select>
+
+    <!-- 插入设备时间记录表 -->
+    <insert id="insertDeviceTime">
+		INSERT INTO tbl_device_time 
+		(
+			device_code
+		)
+		VALUES
+		(
+			#{device.deviceCode}
+		)
+	</insert>
+
+    <!-- 获取设备热力图信息（分表数据） -->
+    <select id="getThermodynamic" resultMap="thermodynamicResultMap">
+        SELECT td.device_x AS lng,
+        td.device_y AS lat,
+        CASE WHEN tms.update_type = '2011' THEN tms.thing_rtd ELSE tms.thing_avg END AS count,
+        td.device_code,
+        td.device_name
+        FROM tbl_device td
+        INNER JOIN ${dbName}.${deviceCode} tms ON td.device_code = tms.device_code
+        AND tms.thing_code = #{thingCode}
+        AND update_type = #{dataType}
+        <choose>
+            <when test="dataType != null and dataType == '2011'">
+                AND DATE(tms.rtd_time) = DATE(#{selectTime})
+                AND HOUR(tms.rtd_time) = HOUR(#{selectTime})
+                AND MINUTE(tms.rtd_time) = MINUTE(#{selectTime})
+            </when>
+            <when test="dataType != null and dataType == '2051'">
+                AND DATE(tms.begin_time) = DATE(#{selectTime})
+                AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+                AND MINUTE(tms.begin_time) = MINUTE(#{selectTime})
+            </when>
+            <when test="dataType != null and dataType == '2061'">
+                AND DATE(tms.begin_time) = DATE(#{selectTime})
+                AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+            </when>
+            <when test="dataType != null and dataType == '2031'">
+                AND DATE(tms.begin_time) = DATE(#{selectTime})
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        WHERE td.device_code = #{deviceCode}
+        ORDER BY tms.update_time DESC
+        LIMIT 0,1
+    </select>
+
+    <!-- 获取设备热力图信息 （热力表）-->
+    <select id="getThermTableData" resultMap="thermodynamicResultMap">
+        SELECT DISTINCT td.device_x AS lng,
+        td.device_y AS lat,
+        ttd.data_value AS count,
+        td.device_code,
+        td.device_name
+        FROM ${dbName}.tbl_therm_data ttd
+        INNER JOIN tbl_device td ON ttd.device_code = td.device_code
+        WHERE ttd.thing_code = #{thingCode}
+        AND ttd.data_type = #{dataType}
+        <if test="listDeviceCode != null and listDeviceCode.size() >0">
+            AND td.device_code IN
+            <foreach collection="listDeviceCode" item="item" open="(" separator="," close=")">
+                #{item,jdbcType = VARCHAR}
+            </foreach>
+        </if>
+        <choose>
+            <when test="dataType != null and dataType == '2011'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+                AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+            </when>
+            <when test="dataType != null and dataType == '2051'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+                AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+            </when>
+            <when test="dataType != null and dataType == '2061'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+                AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+            </when>
+            <when test="dataType != null and dataType == '2031'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        ORDER BY ttd.data_time DESC
+    </select>
+
+    <!-- 获取设备热力图最近数据 -->
+    <select id="getThermRecently" resultMap="thermodynamicResultMap">
+        SELECT DISTINCT
+        td.device_x AS lng,
+        td.device_y AS lat,
+        tdd.recent_data AS count,
+        td.device_code,
+        td.device_name
+        FROM
+        tbl_device_data tdd
+        INNER JOIN tbl_device td ON tdd.device_code = td.device_code
+        WHERE tdd.thing_code = #{thingCode}
+        AND tdd.data_type = '2011'
+        <if test="listDeviceCode != null and listDeviceCode.size() >0">
+            AND tdd.device_code IN
+            <foreach collection="listDeviceCode" item="item" open="(" separator="," close=")">
+                #{item,jdbcType = VARCHAR}
+            </foreach>
+        </if>
+    </select>
+
+    <!-- 获取设备最近上传数据 -->
+    <select id="getLocationRecently" resultMap="locationModelResultMap">
+        SELECT DISTINCT
+        td.device_x AS lng,
+        td.device_y AS lat,
+        tdd.recent_data AS val,
+        td.device_code AS code,
+        tdd.thing_code AS info
+        FROM
+        tbl_device_data tdd
+        INNER JOIN tbl_device td ON tdd.device_code = td.device_code
+        WHERE tdd.data_type = '2011'
+        AND tdd.thing_code = #{thingCode}
+        <if test="listDeviceCode != null and listDeviceCode.size() >0">
+            AND tdd.device_code IN
+            <foreach collection="listDeviceCode" item="item" open="(" separator="," close=")">
+                #{item,jdbcType = VARCHAR}
+            </foreach>
+        </if>
+    </select>
+
+    <!-- 获取工地园区设备排放信息 -->
+    <select id="getAreaDeviceValue" resultMap="areaDeviceValueResultMap">
+        SELECT
+        temp.area_id,
+        temp.area_name,
+        temp.device_code,
+        temp.thing_code,
+        temp.data_type,
+        temp.data_time,
+        temp.data_value
+        FROM (
+        <if test="dbOldName != null and dbOldName != ''">
+            SELECT
+            DISTINCT ta.area_id,
+            ta.area_name,
+            ttd.device_code,
+            ttd.thing_code,
+            ttd.data_type,
+            ttd.data_time,
+            ttd.data_value
+            FROM
+            ${dbOldName}.tbl_therm_data ttd
+            INNER JOIN ${dbName}.tbl_device td ON ttd.device_code = td.device_code
+            INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+            WHERE
+            td.area_id = #{areaId}
+            <if test="deviceCode != null and deviceCode != ''">
+                AND ttd.device_code = #{deviceCode}
+            </if>
+            AND ttd.data_type = #{dataType}
+            AND ttd.thing_code = #{thingCode}
+            <choose>
+                <when test="dataType != null and dataType == '2011'">
+                    AND DATE(ttd.data_time) = DATE(#{beginTime})
+                    AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                    AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+                </when>
+                <when test="dataType != null and dataType == '2051'">
+                    AND DATE(ttd.data_time) = DATE(#{beginTime})
+                    AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                    AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+                </when>
+                <when test="dataType != null and dataType == '2061'">
+                    AND DATE(ttd.data_time) = DATE(#{beginTime})
+                    AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                </when>
+                <when test="dataType != null and dataType == '2031'">
+                    AND DATE(ttd.data_time) = DATE(#{beginTime})
+                </when>
+                <otherwise>
+                </otherwise>
+            </choose>
+            UNION
+        </if>
+        SELECT
+        DISTINCT ta.area_id,
+        ta.area_name,
+        ttd.device_code,
+        ttd.thing_code,
+        ttd.data_type,
+        ttd.data_time,
+        ttd.data_value
+        FROM
+        ${dbName}.tbl_therm_data ttd
+        INNER JOIN ${dbName}.tbl_device td ON ttd.device_code = td.device_code
+        INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+        WHERE
+        td.area_id = #{areaId}
+        <if test="deviceCode != null and deviceCode != ''">
+            AND ttd.device_code = #{deviceCode}
+        </if>
+        AND ttd.data_type = #{dataType}
+        AND ttd.thing_code = #{thingCode}
+        <choose>
+            <when test="dataType != null and dataType == '2011'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+                AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+            </when>
+            <when test="dataType != null and dataType == '2051'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+                AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+                AND MINUTE(ttd.data_time) = MINUTE(#{beginTime})
+            </when>
+            <when test="dataType != null and dataType == '2061'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+                AND HOUR(ttd.data_time) = HOUR(#{beginTime})
+            </when>
+            <when test="dataType != null and dataType == '2031'">
+                AND DATE(ttd.data_time) = DATE(#{beginTime})
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        ) temp
+    </select>
+
+    <!-- 更新设备状态 -->
+    <update id="updateDeviceStatus">
+		UPDATE tbl_device
+		SET status_code = #{statusCode}
+		WHERE device_code = #{deviceCode}
+	</update>
+
+    <!-- 更新设备地图坐标 -->
+    <update id="updateDeviceLocation">
+		UPDATE tbl_device
+		SET device_x = #{deviceX},device_y = #{deviceY}
+		WHERE device_code = #{deviceCode}
+	</update>
+
+    <!-- 获取指定时间物质的数值 -->
+    <select id="getDeviceAppointValue" resultType="java.lang.String">
+        SELECT
+        CASE WHEN update_type = '2011' THEN thing_rtd ELSE thing_avg END
+        FROM
+        ${dbName}.${deviceCode}
+        WHERE
+        thing_code = #{thingCode}
+        AND update_type = #{dataType}
+        <choose>
+            <when test="dataType != null and dataType == '2011'">
+                AND DATE(rtd_time) = DATE(#{selectTime})
+                AND HOUR(rtd_time) = HOUR(#{selectTime})
+                AND MINUTE(rtd_time) = MINUTE(#{selectTime})
+            </when>
+            <when test="dataType != null and dataType == '2051'">
+                AND DATE(begin_time) = DATE(#{selectTime})
+                AND HOUR(begin_time) = HOUR(#{selectTime})
+                AND MINUTE(begin_time) = MINUTE(#{selectTime})
+            </when>
+            <when test="dataType != null and dataType == '2061'">
+                AND DATE(begin_time) = DATE(#{selectTime})
+                AND HOUR(begin_time) = HOUR(#{selectTime})
+            </when>
+            <when test="dataType != null and dataType == '2031'">
+                AND DATE(begin_time) = DATE(#{selectTime})
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 获取某个时间段类的 TVOC 数据值。每个设备获取离endTime最近的一条 -->
+    <select id="getDeviceTvocData" resultMap="locationModelResultMap">
+        SELECT
+         td.device_x AS lng,
+         td.device_y AS lat,
+         tdd.data_value AS val,
+         td.device_code AS code,
+         td.device_name AS info
+        FROM
+         tbl_therm_data tdd
+         LEFT JOIN envdust.tbl_device td ON tdd.device_code = td.device_code
+        WHERE
+         thing_code = 'a34002'
+         AND area_id = #{areaId}
+
+         AND tdd.data_type = 2061
+         AND tdd.data_time BETWEEN #{beginTime} AND #{endTime}
+
+        GROUP BY
+         tdd.device_code
+	</select>
+
+    <!-- 获取设备进气状态信息 -->
+    <select id="getGapPath" resultMap="gasPathModelResultMap">
+        SELECT td.gas_path,
+               DATE_FORMAT(td.switch_time,'%Y-%m-%d %T') AS switch_time
+        FROM tbl_device td
+        WHERE td.device_code = #{deviceCode}
+        LIMIT 0,1
+    </select>
+
+</mapper>

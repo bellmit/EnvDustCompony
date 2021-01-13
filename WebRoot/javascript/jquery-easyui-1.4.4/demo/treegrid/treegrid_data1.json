@@ -1,0 +1,73 @@
+[{
+	"areaId":1,
+	"areaName":"C",
+	"areaPath":"",
+	"date":"02/19/2010",
+	"children":[{
+		"areaId":2,
+		"areaName":"Program Files",
+		"areaPath":"120 MB",
+		"date":"03/20/2010",
+		"children":[{
+			"areaId":21,
+			"areaName":"Java",
+			"areaPath":"",
+			"date":"01/13/2010",
+			"state":"closed",
+			"children":[{
+				"areaId":211,
+				"areaName":"java.exe",
+				"areaPath":"142 KB",
+				"date":"01/13/2010"
+			},{
+				"areaId":212,
+				"areaName":"jawt.dll",
+				"areaPath":"5 KB",
+				"date":"01/13/2010"
+			}]
+		},{
+			"areaId":22,
+			"areaName":"MySQL",
+			"areaPath":"",
+			"date":"01/13/2010",
+			"state":"closed",
+			"children":[{
+				"areaId":221,
+				"areaName":"my.ini",
+				"areaPath":"10 KB",
+				"date":"02/26/2009"
+			},{
+				"areaId":222,
+				"areaName":"my-huge.ini",
+				"areaPath":"5 KB",
+				"date":"02/26/2009"
+			},{
+				"areaId":223,
+				"areaName":"my-large.ini",
+				"areaPath":"5 KB",
+				"date":"02/26/2009"
+			}]
+		}]
+	},{
+		"areaId":3,
+		"areaName":"eclipse",
+		"areaPath":"",
+		"date":"01/20/2010",
+		"children":[{
+			"areaId":31,
+			"areaName":"eclipse.exe",
+			"areaPath":"56 KB",
+			"date":"05/19/2009"
+		},{
+			"areaId":32,
+			"areaName":"eclipse.ini",
+			"areaPath":"1 KB",
+			"date":"04/20/2010"
+		},{
+			"areaareaId":33,
+			"areaName":"notice.html",
+			"areaPath":"7 KB",
+			"date":"03/17/2005"
+		}]
+	}]
+}]

@@ -1,0 +1,86 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="description" content="loginPage">
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" media="screen" />
+	<link rel="stylesheet" type="text/css" href="javascript/jquery-easyui-1.4.4/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="styles/login.css" />
+	<title></title>
+	<script type="text/javascript"
+		src="javascript/jquery-easyui-1.4.4/jquery.min.js"></script>
+	<script type="text/javascript"
+		src="javascript/jquery-easyui-1.4.4/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="javascript/util/extendValid.js"></script>
+	<script type="text/javascript" src="javascript/util/config.js"></script>
+	<script type="text/javascript" src="javascript/util/login.js"></script>
+</head>
+<body>
+	<div id="page">
+		<div id="title">
+			<div style="float: left;display: inline;margin-top: 0;" id="companyLogoId">
+				<!--<img src="images/logo.png" alt="公司标志" class="titleImg" />-->
+			</div>
+			<div
+				style="float: left;display: inline;margin-top: 20;margin-left: 5px;"><!-- #ed1720 #ba102b ca0000-->
+				<span style="font-size:43px/*38px*/;font-weight:bold;color:#ba102b" id="sysName"></span>
+			</div>
+		</div>
+		<div
+			style="width:100%;background: url(images/loginbg.png) repeat-x #ffffff;z-index:-1">
+			<!-- <div style="float: left;margin-top: 20px;margin-left: 5px;z-index:1000">
+					<img alt="安卓应用下载" src="images/android_qr.png" title="安卓应用下载" style="position:absolute;z-index:10001;" />
+			</div> -->
+			
+		    <div class="twobar">
+			   <a href="javascript:;" class="twobar-item twobar-item-android"><span class="twobar-layer"></span></a>
+<!-- 			   <a href="javascript:;" class="twobar-item twobar-item-apple"><span class="twobar-layer"></span></a> -->
+			</div>
+			
+			<div id="home">
+				
+				<img src="images/login.png" id="car" alt="公司Logo" style="z-index:2"/>
+				<form id="Form1" action="./UserController/toMain" method="post" onSubmit="return ajaxVaild()">
+					<div id="info">
+						<h3 style="margin-bottom:10px;">用户登录</h3>
+						<label class="user">登录ID <input id="userID" name="userCode"
+							class="easyui-validatebox input-border" data-options="validType:'loginId'" />
+							<span id="idMsg">登录ID为空</span>
+						</label> 
+						<label class="user">密&nbsp;码 <input id="userPwd" name="userPassword"
+							class="easyui-validatebox" type="password"
+							data-options="validType:'loginPwd'" /> <span id="pwdMsg">密码为空</span>
+						</label> 
+						<button type="submit" id="btn" value="loginbtn" style="margin-top:5px;">登录<span class="btnLoading">中<span class="dot">...</span></span></button>
+						<label style="color:#ba102b;font-size:12px;border:0px;">IE浏览器，建议用IE10以上版本
+							<a href="../loginPhone.html" style="margin-left:20px;">手机版</a>
+						</label>
+						
+					</div>
+				</form>
+			</div>
+		</div>
+		<div id="copyright">
+			Copyright ©&nbsp;<span id="currentyear"></span><span id="copyRightInfo"></span>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+        $('title').html(SYS_NAME);
+        $("#sysName").html(SYS_NAME);
+        $("#copyRightInfo").html(COPYRIGHT_INFO);
+        setLogoWeb("./");
+
+		document.onkeydown = function(e) {
+			var theEvent = window.event || e;
+			var code = theEvent.keyCode || theEvent.which;
+			if (code == 13) {
+				$("button").click();
+			}
+		};
+		//设置版权所有时间为当前年份
+		var currentdate = new Date();
+		var currentyear = currentdate.getFullYear();
+		document.getElementById("currentyear").innerHTML = currentyear;
+	</script>
+</body>
+</html>

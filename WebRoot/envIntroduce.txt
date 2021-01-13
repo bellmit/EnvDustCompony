@@ -1,0 +1,14 @@
+一、在线地图配置
+	1.在main.html中注释掉离线地图的js，使此js不起作用
+	<!--<script type="text/javascript" src="../javascript/util/map_load.js"></script>-->
+	
+	2.在map.js中设置
+	 isOnLoadMap = true;
+ 
+ 
+二、离线地图配置
+	1.在main.html中取消离线地图js的注释，启用此js
+	<script type="text/javascript" src="../javascript/util/map_load.js"></script>
+	
+	2.在map.js中设置
+	 isOnLoadMap = false;

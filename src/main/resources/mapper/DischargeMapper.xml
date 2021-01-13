@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcb.env.dao.IDischargeDao">
+	
+	<resultMap type="com.tcb.env.model.DischargeModel" id="dischargeResultMap">
+		<result property="areaId" column="area_id" />
+		<result property="areaName" column="area_name" />
+		<result property="deviceCode" column="device_code" />
+		<result property="deviceName" column="device_name" />
+		<result property="thingCode" column="thing_code" />
+		<result property="thingName" column="thing_name" />
+		<result property="beginTime" column="begin_time" />
+		<result property="endTime" column="end_time" />
+		<result property="thingCou" column="thing_cou" />
+		<result property="thingZsCou" column="thing_zscou" />
+	</resultMap>
+	
+	<!-- 获取设备小时排放量 -->
+	<select id="getDeviceHourDischarge" resultMap="dischargeResultMap">
+		SELECT 	temp.area_id,
+				temp.area_name,	
+				temp.device_code,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m-%d %H') AS begin_time,
+				DATE_FORMAT(#{selectTime},'%Y-%m-%d %H') AS end_time,
+				SUM(temp.thing_zscou) AS thing_zscou,
+				SUM(temp.thing_cou) AS thing_cou
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2061' 
+			AND tms.thing_code = #{thingCode}
+			AND DATE(tms.begin_time) = DATE(#{selectTime})
+			AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+		UNION
+		</if>
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2061' 
+			AND tms.thing_code = #{thingCode}
+			AND DATE(tms.begin_time) = DATE(#{selectTime})
+			AND HOUR(tms.begin_time) = HOUR(#{selectTime})
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code
+	</select>
+	
+	<!-- 获取设备日排放量 -->
+	<select id="getDeviceDayDischarge" resultMap="dischargeResultMap">
+		SELECT 	temp.area_id,
+				temp.area_name,	
+				temp.device_code,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m-%d') AS begin_time,
+				DATE_FORMAT(#{selectTime},'%Y-%m-%d') AS end_time,
+				SUM(temp.thing_zscou) AS thing_zscou,
+				SUM(temp.thing_cou) AS thing_cou
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND DATE(tms.begin_time) = DATE(#{selectTime})
+		UNION
+		</if>
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND DATE(tms.begin_time) = DATE(#{selectTime})
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code
+	</select>
+	
+	<!-- 获取设备月排放量 -->
+	<select id="getDeviceMonthDischarge" resultMap="dischargeResultMap">
+		SELECT 	temp.area_id,
+				temp.area_name,	
+				temp.device_code,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y-%m') AS begin_time,
+				DATE_FORMAT(#{selectTime},'%Y-%m') AS end_time,
+				SUM(temp.thing_zscou) AS thing_zscou,
+				SUM(temp.thing_cou) AS thing_cou
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+			AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+		UNION
+		</if>
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+			AND MONTH(tms.begin_time) = MONTH(#{selectTime})
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code
+	</select>
+	
+	<!-- 获取设备年排放量 -->
+	<select id="getDeviceYearDischarge" resultMap="dischargeResultMap">
+		SELECT 	temp.area_id,
+				temp.area_name,	
+				temp.device_code,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{selectTime},'%Y') AS begin_time,
+				DATE_FORMAT(#{selectTime},'%Y') AS end_time,
+				SUM(temp.thing_zscou) AS thing_zscou,
+				SUM(temp.thing_cou) AS thing_cou
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+		UNION
+		</if>
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND YEAR(tms.begin_time) = YEAR(#{selectTime})
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code
+	</select>
+	
+	<!-- 获取设备时间段排放量 -->
+	<select id="getDeviceTimesDischarge" resultMap="dischargeResultMap">
+		SELECT 	temp.area_id,
+				temp.area_name,	
+				temp.device_code,
+				temp.device_name,
+				temp.thing_code,
+				temp.thing_name,
+				DATE_FORMAT(#{beginTime},'%Y-%m-%d') AS begin_time,
+				DATE_FORMAT(#{endTime},'%Y-%m-%d') AS end_time,
+				SUM(temp.thing_zscou) AS thing_zscou,
+				SUM(temp.thing_cou) AS thing_cou
+		FROM (
+		<if test="dbOldName != null and dbOldName != ''">
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbOldName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND DATE(tms.begin_time) >= DATE(#{beginTime})
+			AND DATE(tms.end_time) &lt;= DATE(#{endTime})
+		UNION
+		</if>
+			SELECT
+				ta.area_id,
+				ta.area_name,
+				td.device_code,
+				td.device_name,
+				tm.thing_code,
+				tm.thing_name,
+				tms.thing_cou AS thing_cou,
+				tms.thing_zscou AS thing_zscou
+			FROM
+				${dbName}.${deviceCode} tms
+			INNER JOIN ${dbName}.tbl_device td ON tms.device_code = td.device_code
+			INNER JOIN ${dbName}.tbl_monitor tm ON tms.thing_code = tm.thing_code
+			INNER JOIN ${dbName}.tbl_area ta ON td.area_id = ta.area_id
+			WHERE tms.update_type = '2031' 
+			AND tms.thing_code = #{thingCode}
+			AND DATE(tms.begin_time) >= DATE(#{beginTime})
+			AND DATE(tms.end_time) &lt;= DATE(#{endTime})
+		) temp
+		GROUP BY temp.area_id,temp.device_code,temp.thing_code
+	</select>
+	
+</mapper>

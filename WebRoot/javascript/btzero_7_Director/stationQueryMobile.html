@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>移动在线监测系统</title>
+<meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+	name='viewport'>
+<meta name="description" content="Developed By M Abdur Rokib Promy">
+<meta name="keywords" content="Admin, Bootstrap 3, Template, Theme, Responsive">
+<!-- bootstrap 3.0.2 -->
+<link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<!-- font Awesome -->
+<link href="./css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+<!-- Ionicons -->
+<link href="./css/ionicons.min.css" rel="stylesheet" type="text/css" />
+<!-- Date Picker -->
+<link href="./css/bootstrap-datepicker-1.6.4/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+
+<link href="./css/iCheck/all.css" rel="stylesheet" type="text/css" />
+
+<!-- Theme style -->
+<link title="stylenew" rel="stylesheet" type="text/css" href="./css/stylenew.css"/>
+<link title="stylenew" rel="stylesheet" type="text/css" href="./css/selectOption.css"/>
+<link rel="stylesheet" type="text/css" href="./css/treeview/bootstrap-treeview.css"/>
+
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+          <![endif]-->
+
+<style type="text/css">
+body > .header .navbar{
+	margin-left:0px;
+}
+.table-responsive>.table>thead>tr>th, .table-responsive>.table>tbody>tr>th, 
+.table-responsive>.table>tfoot>tr>th, .table-responsive>.table>thead>tr>td,
+.table-responsive>.table>tbody>tr>td, .table-responsive>.table>tfoot>tr>td {
+     white-space:normal;
+}
+.pagination ul li{
+	list-style: none;
+}
+.pagination {
+    display: inline-block;
+    padding-left: -10px;
+    margin: 20px 0px;
+    border-radius: 4px;
+}
+.pageli.active{
+	background:#eee;
+}
+.pageli {
+    float:left;
+}
+
+.pagination .pageli > a, .pagination .pageli > span{
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.428571429;
+    text-decoration: none;
+/*     background-color: #ffffff; */
+    border: 1px solid #dddddd;
+}
+/*Right*/  
+.modal.right.fade .modal-dialog {  
+    right: -320px;  
+    -webkit-transition: opacity 0.3s linear, right 0.3s ease-out;  
+       -moz-transition: opacity 0.3s linear, right 0.3s ease-out;  
+         -o-transition: opacity 0.3s linear, right 0.3s ease-out;  
+            transition: opacity 0.3s linear, right 0.3s ease-out;  
+}  
+  
+.modal.right.fade.in .modal-dialog {  
+    right: 0;  
+}  
+/* .content{
+	padding:0px;
+} */
+.icon-bar{
+	background: #fff!important;
+    display: block;
+    width: 22px;
+    height: 2px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+</style>
+</head>
+ <body class="skin-black">
+       
+        <div class="wrapper row-offcanvas row-offcanvas-left">         
+            <aside class="right-side">
+		        <section class="content" style="overflow:hidden;">
+		            <div class="row">
+		                <div class="col-md-12">
+		                    <div class="panel">
+
+			                    <div class="panel-body table-responsive">
+			                    
+                                     <div class="box-tools m-b-15" style="padding-left:-13px;">
+						               <header id="header" class="wap-header">
+						              		<div style="margin-right:25px;margin-bottom:15px;float:left;">
+						              			<a id="headerFiltrate" class="wap-header-back wap-header-l"  href="javascript:void(0)" title="查询筛选条件"><label style="font-size:16px;">查询筛选条件</label><i class="fa fa-filter " style="font-size:16px;"></i></a>
+						              		</div>
+
+						              		<div  style="margin-right:25px;margin-bottom:15px;float:left;">
+		                                        <a  class="wap-header-back wap-header-l" data-toggle="tab"  href="javascript:void(0)" onclick="handleFunc(0)"><i class="fa fa-th" style="font-size:16px;"></i><label style="font-size:16px;">列表</label></a>
+						              		</div>
+						              		<div  style="margin-right:25px;margin-bottom:15px;float:left;">
+		                                        <a  class="wap-header-back wap-header-l" data-toggle="tab" href="javascript:void(0)" onclick="handleFunc(1)"><i class="fa fa fa-picture-o" aria-hidden="true" style="font-size:16px;"></i><label style="font-size:16px;">图像</label></a>
+						              		</div>
+										    <span></span>
+										</header>
+                                      </div>
+                        			 <div class="cbody  tab-content" class="col-md-12">
+	                                    <div class="ctab mytabcontent" id="datalist" >
+	                                        <table class="table table-hover" id="stationGrid" style="word-break:break-all; word-wrap:break-all;">
+						              		</table>
+					              			<div class="table-foot">
+		                          				<div id="mypaginator" style="float:left;"></div>
+		                                 	</div>
+                          	 			</div>
+	                                    <div id="mycharts"  class="ctab mytabcontent" style="display: none;min-height: 330px;max-height:500px;">
+	                                    </div>
+	                                </div>
+	          		        	</div>
+          		        	    
+			          		</div>
+		      			</div>
+		  			</div><!--end col-6 -->
+		        </section><!-- /.content -->
+		    </aside>
+
+		</div><!-- ./wrapper -->
+
+		<!--筛选-->
+		<div class="modal right fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">    
+					    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>     
+		                <h4 class="modal-title" id="myModalLabel">查询筛选条件</h4>  
+		            </div>  
+		            	<div class="modal-body">  
+		     			   <section id="filtratePage" class="screening-conditions">
+
+							<article class="filtrate-cont">
+								<div id="stationPhone" class="filtrate-category" style="clear:both;    display: block;padding: 0 15px;background-size: 25px 193px;line-height: 44px;color: #646464;">
+										监控站点
+								</div>
+							
+								<div class="filtrate-stationPhone">
+									<ul class="filtrate-stationPhone-list" id="treeview-checkable">
+									</ul>
+								</div>
+								<div class="filtrate-timePhone">
+									 <div class="box-tools m-b-15" style="padding-left:-13px;">
+						                <label for="dtp_input2" class="control-label" style="margin-top:15px;float:left;font-weight:normal;">上报时间：</label>
+						                <div id="mydatepickerstart" class="input-group date form_datetime"   data-link-field="dtp_input2" style="float:left;margin-top:10px;margin-right:10px;width:230px;">
+						                    <input class="form-control" size="14" type="text" value="" readonly style="height:30px;">
+						                
+											<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+						                </div>
+										<input type="hidden" id="dtp_input2" value="" />
+					                                </div>
+					                                <div class="box-tools m-b-15" style="padding-left:-13px;">
+						                <label for="dtp_input2" class="control-label" style="margin-top:15px;float:left;font-weight:normal;">至：</label>
+						                <div id="mydatepickerend" class="input-group date form_datetime"  data-link-field="dtp_input3" data-link-format="yyyy-mm-dd" style="float:left;margin-top:10px;width:230px;">
+						                    <input class="form-control" size="14" type="text" value="" readonly style="height:30px;">
+						                  
+											<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+						                </div>
+										<input type="hidden" id="dtp_input3" value="" />
+					                                </div>
+								</div>
+								<div id="monitorstationPhone" class="filtrate-category" style="clear:both;">
+									<a href="javascript:void(0)">
+										监控物质<span>全部展开</span>
+									</a>
+								</div>
+								<div class="filtrate-monitorstationPhone">
+									<ul class="clearfix" id="monitorPhone">
+									</ul>
+								</div>
+								<div id="dataTypePhone" class="filtrate-category" style="clear:both;    display: block;padding: 0 15px;background-size: 25px 193px;line-height: 44px;color: #646464;">
+										数据类型<span>全部展开</span>
+								</div>
+								<div class="filtrate-dataTypePhone">
+									<ul class="clearfix" id="dataTypePhoneCombox">
+									</ul>
+								</div>
+							</article>
+							<footer class="filtrate-footer">
+								<ul class="filtrate-btn clearfix">
+									<li><input class="filtrate-submit" type="button" value="确定" ></li>
+									<li><input class="filtrate-cancle" type="button" value="取消"></li>
+								</ul>
+							</footer>
+						</section>
+					</div>  
+				</div>
+			</div>
+		</div>
+
+        <!-- jQuery 2.0.2 -->
+        <script src="./js/jquery.min.js" type="text/javascript"></script>
+
+        <!-- jQuery UI 1.10.3 -->
+        <script src="./js/jquery-ui-1.10.3.min.js" type="text/javascript"></script>
+        <!-- Bootstrap -->
+        <script src="./js/bootstrap.min.js" type="text/javascript"></script>
+        <!-- daterangepicker -->
+        <script src="./js/plugins/bootstrap-datepicker-1.6.4/bootstrap-datetimepicker.js" type="text/javascript"></script>
+        <script type="text/javascript" src="./js/plugins/bootstrap-datepicker-1.6.4/locales/bootstrap-datetimepicker.fr.js" charset="UTF-8"></script>
+        <script src="./js/plugins/bootstrap-paginator/bootstrap-paginator.js" type="text/javascript"></script>
+        <!-- iCheck -->
+        <script src="./js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>
+		<script src="./js/util.js" type="text/javascript"></script>
+        <!-- Director App -->
+        <script src="./js/Director/app.js" type="text/javascript"></script>
+ 		<script src="./../util/ctrl.js" type="text/javascript"></script>
+		<script src="./js/plugins/treeview/bootstrap-treeview.js"></script>
+		<script src="./js/selectOption.js" type="text/javascript"></script>
+		<script src="./js/echarts.min.js" type="text/javascript"></script>
+        <!-- Director for demo purposes -->
+        <script type="text/javascript">
+	        $(".right-side").toggleClass("strech");
+        	
+            $('input').on('ifChecked', function(event) {
+                $(this).parents('li').addClass("task-done");
+                console.log('ok');
+            });
+            $('input').on('ifUnchecked', function(event) {
+                $(this).parents('li').removeClass("task-done");
+                console.log('not');
+            });
+
+			$('#mydatepickerstart').datetimepicker({
+		        language:  'zh_TW',
+		        format: 'yyyy-mm-dd hh:ii:ss',
+		        weekStart: 1,
+		        todayBtn:  1,
+				autoclose: 1,
+				todayHighlight: 1,
+				startView: 2,
+				forceParse: 0,
+				showMeridian: 1
+	    	});
+ 	    	$('#mydatepickerstart').find("input").val(GetDateStr(0,0)); 
+ 	    	$('#mydatepickerend').datetimepicker({
+		        language:  'zh_TW',
+		        format: 'yyyy-mm-dd hh:ii:ss',
+		        weekStart: 1,
+		        todayBtn:  1,
+				autoclose: 1,
+				todayHighlight: 1,
+				startView: 2,
+				forceParse: 0,
+				showMeridian: 1
+	    	});
+	    	var endTimeInit = formatterDate(new Date());
+ 	    	$('#mydatepickerend').find("input").val(endTimeInit + " 23:59:59");        
+	   
+        var currentPageStation = 1;
+		var options;
+		function queryStationInfoGrid(params){
+			var beginTime = $("#mydatepickerstart").find("input").val();
+			var endTime = $("#mydatepickerend").find("input").val();
+			currentPageStation = 1;
+			loading();
+			$.ajax({
+			url : "../../../MonitorStorageController/getOriginalData",
+			type : "post",
+			dataType : "json",
+			async : true,
+			data:{	
+					"deviceCode":params["deviceCode"],
+					"updateType":params["updateType"],
+					"select":params["deviceCode"],
+					"thingCode":params["thingCode"],
+					"beginTime" : beginTime,
+					"endTime" : endTime,
+					"page":currentPageStation,
+					"rows":10},
+			error : function(data){
+				endLoading();
+			},
+			success : function(json) {
+				if(json!=null&&json.rows!=null ){
+					var htmlArr = "";
+					$("#stationGrid").html("");
+					$("#mypaginator").html("");	
+					htmlarr = createDateTable(json.rows,params["updateType"]);
+					$("#stationGrid").append(htmlarr);
+					if(json.rows.length>0){
+						initPage(json.total,params);
+					}
+				}
+				endLoading();
+			}
+			});
+		}
+		
+		function initPage(totals,params){
+			$("#mypaginator").html("");
+			var totalPages = 0;
+			if(totals%10==0){
+				totalPages = totals/10;
+			}else{
+				totalPages = totals/10+1;
+			}
+			 options = {
+		            currentPage: currentPageStation,//当前页
+		            totalPages: totalPages,//总页数
+		            numberofPages: 1,//显示的页数
+		            itemTexts: function(type, page, current) { //修改显示文字
+		                switch (type) {
+		                case "first":
+		                    return "<<";
+		                case "prev":
+		                    return "<";
+		                case "next":
+		                    return ">";
+		                case "last":
+		                    return ">>";
+		                case "page":
+		                    return page;
+		                }
+		            }, onPageClicked: function (event, originalEvent, type,page) { //异步换页
+			            currentPageStation = page;
+			            loading();
+			            var beginTime = $("#mydatepickerstart").find("input").val();
+						var endTime = $("#mydatepickerend").find("input").val();
+			            	$.ajax({
+								url : "../../../MonitorStorageController/getOriginalData",
+								type : "post",
+								dataType : "json",
+								async : true,
+								data:{		
+										"deviceCode":params["deviceCode"],
+										"updateType":params["updateType"],
+										"select":params["deviceCode"],
+										"thingCode":params["thingCode"],
+										"beginTime" : beginTime,
+										"endTime" : endTime,
+										"page":currentPageStation,
+										"rows":10},
+								error : function(data){
+									endLoading();
+								},
+								success : function(json) {
+									if(json!=null && json.rows!=null ){
+										var htmlArr = "";
+										$("#stationGrid").html("");
+										if(json.rows.length>0){
+											htmlarr = createDateTable(json.rows,params["updateType"]);
+											$("#stationGrid").append(htmlarr);
+												//initPage(json.total);
+										}else{
+											htmlarr = createDateTable(json.rows,params["updateType"]);
+											$("#stationGrid").append(htmlarr);
+											$("#mypaginator").html("");
+										}
+									}
+									endLoading();
+								}
+							});
+					}
+		    	};
+		        $("#mypaginator").bootstrapPaginator(options);
+		}
+		
+		function createDateTable(data,updateType){
+		    if(data.length>0){
+			    if(updateType=="2011"){//实时
+					return createRealDataTable(data);
+				}else if(updateType=="2061"){//小时
+					return createHourDataTable(data)
+				}else if(updateType=="2051"){//分钟
+					return createMinuteDataTable(data)
+				}else{//每日
+					return createDayDataTable(data)
+				}
+		    }else{
+		    	var htmlArr = [];
+				htmlArr.push("<thead id='stationDataGridHead'>");						                  
+				htmlArr.push("<tr>");
+				htmlArr.push("<th style='width:10px;'>#</th>");
+				htmlArr.push("<th style='min-width:125px;'>名称</th>");
+				htmlArr.push("<th style='min-width:68px;'>数值</th>");
+				htmlArr.push("<th style='min-width:89px;'>时间</th>");
+				htmlArr.push("</tr>");
+				htmlArr.push("</thead>");
+				htmlArr.push("<tbody id='stationDataGrid'>");
+				htmlArr.push("<tr>");
+				htmlArr.push("<td colspan='4' align=center>没有查询到相应的数据</td>");
+				htmlArr.push("</tr></tbody>");
+				return htmlArr.join("");	   
+		    }
+		}
+	function createRealDataTable(data){  
+			var htmlArr = [];
+			htmlArr.push("<thead id='stationDataGridHead'>");						                  
+			htmlArr.push("<tr>");
+			htmlArr.push("<th style='width:10px;'>#</th>");
+/* 			htmlArr.push("<th style='min-width:55px;'>MN号</th>"); */
+			htmlArr.push("<th style='min-width:125px;'>名称</th>");
+			htmlArr.push("<th style='min-width:68px;'>数值</th>");
+			htmlArr.push("<th style='min-width:89px;'>时间</th>");
+			htmlArr.push("</tr>");
+			htmlArr.push("</thead>");
+			htmlArr.push("<tbody id='stationDataGrid'>");
+			for(var i=0;i<data.length;i++){
+				htmlArr.push("<tr>");
+				if(data[i].statusCode=="N"){
+					htmlArr.push("<td style='width:10px;'><span class='label label-success'>"+(i+1)+"</span></td>");
+				}else{
+					htmlArr.push("<td style='width:10px;'><span class='label label-danger'>"+(i+1)+"</span></td>");
+				}
+				
+			/* 	htmlArr.push("<td style='min-width:55px;'>"+data[i].deviceMn+"</td>"); */
+				htmlArr.push("<td style='min-width:60px;'>"+data[i].deviceName+"</td>");
+				htmlArr.push("<td>"+data[i].thingRtd+"</td>");
+				htmlArr.push("<td>"+data[i].rtdTime+"</td>");
+				htmlArr.push("</tr>");					         
+			}
+			htmlArr.push("</tbody>");
+			return htmlArr.join("");	    
+		}
+		function createHourDataTable(data){  
+			var htmlArr = [];
+			htmlArr.push("<thead id='stationDataGridHead'>");						                  
+			htmlArr.push("<tr>");
+			htmlArr.push("<th style='width:10px;'>#</th>");
+/* 			htmlArr.push("<th style='min-width:55px;'>MN号</th>"); */
+			htmlArr.push("<th style='min-width:125px;'>名称</th>");
+			htmlArr.push("<th style='min-width:68px;'>数值</th>");
+			htmlArr.push("<th style='min-width:89px;'>时间</th>");
+			htmlArr.push("</tr>");
+			htmlArr.push("</thead>");
+			htmlArr.push("<tbody id='stationDataGrid'>");
+			for(var i=0;i<data.length;i++){
+				htmlArr.push("<tr>");
+				htmlArr.push("<td style='width:10px;'><span class='label label-success'>"+(i+1)+"</span></td>");
+			/* 	htmlArr.push("<td style='min-width:55px;'>"+data[i].deviceMn+"</td>"); */
+				htmlArr.push("<td style='min-width:60px;'>"+data[i].deviceName+"</td>");
+				htmlArr.push("<td>"+data[i].thingAvg+"</td>");
+				htmlArr.push("<td>"+data[i].beginTime+"</td>");
+				htmlArr.push("</tr>");					         
+			}
+			htmlArr.push("</tbody>");
+			return htmlArr.join("");	    
+		}
+		function createMinuteDataTable(data){  
+			var htmlArr = [];
+			htmlArr.push("<thead id='stationDataGridHead'>");						                  
+			htmlArr.push("<tr>");
+			htmlArr.push("<th style='width:10px;'>#</th>");
+	/* 		htmlArr.push("<th style='min-width:55px;'>MN号</th>"); */
+			htmlArr.push("<th style='min-width:125px;'>名称</th>");
+			htmlArr.push("<th style='min-width:68px;'>数值</th>");
+			htmlArr.push("<th style='min-width:89px;'>时间</th>");
+			htmlArr.push("</tr>");
+			htmlArr.push("</thead>");
+			htmlArr.push("<tbody id='stationDataGrid'>");
+			for(var i=0;i<data.length;i++){
+				htmlArr.push("<tr>");
+				htmlArr.push("<td style='width:10px;'><span class='label label-success'>"+(i+1)+"</span></td>");
+		/* 		htmlArr.push("<td style='min-width:55px;'>"+data[i].deviceMn+"</td>"); */
+				htmlArr.push("<td style='min-width:60px;'>"+data[i].deviceName+"</td>");
+				htmlArr.push("<td>"+data[i].thingAvg+"</td>");
+				htmlArr.push("<td>"+data[i].beginTime+"</td>");
+			/* 	htmlArr.push("<td>"+data[i].updateTime+"</td>"); */           
+				htmlArr.push("</tr>");					         
+			}
+			htmlArr.push("</tbody>");
+			return htmlArr.join("");	    
+		}
+		function createDayDataTable(data){  
+			var htmlArr = [];
+			htmlArr.push("<thead id='stationDataGridHead'>");						                  
+			htmlArr.push("<tr>");
+			htmlArr.push("<th style='width:10px;'>#</th>");
+/* 			htmlArr.push("<th style='min-width:55px;'>MN号</th>"); */
+			htmlArr.push("<th style='min-width:125px;'>名称</th>");
+			htmlArr.push("<th style='min-width:68px;'>数值</th>");
+			htmlArr.push("<th style='min-width:89px;'>时间</th>");
+			htmlArr.push("</tr>");
+			htmlArr.push("</thead>");
+			htmlArr.push("<tbody id='stationDataGrid'>");
+			for(var i=0;i<data.length;i++){
+				htmlArr.push("<tr>");
+				htmlArr.push("<td style='width:10px;'><span class='label label-success'>"+(i+1)+"</span></td>");
+				/* htmlArr.push("<td style='min-width:55px;'>"+data[i].deviceMn+"</td>"); */
+				htmlArr.push("<td style='min-width:60px;'>"+data[i].deviceName+"</td>");
+				htmlArr.push("<td>"+data[i].thingAvg+"</td>");
+				htmlArr.push("<td>"+data[i].beginTime+"</td>");
+				htmlArr.push("</tr>");					         
+			}
+			htmlArr.push("</tbody>");
+			return htmlArr.join("");	    
+		}
+var mychart ;
+function handleFunc(flag){
+	 if(flag=="0"){
+       	$('#mycharts').css("display","none");
+       	$('#datalist').css("display","");
+       	currentTab = 0;
+       	queryStationInfoGrid(filterData);
+     }else{
+       	$('#datalist').css("display","none");
+       	$('#datalist').css('display','none');
+       	$('#mycharts').css('display','');
+       	currentTab = 1;
+       	searchChartFunction(filterData);
+     }
+}
+$(function(){
+	window.onorientationchange = orientationChange;
+	
+});
+
+function orientationChange(){
+ 	if(filterData != null && filterData.deviceCode != ""){
+ 		queryStationInfoGrid(filterData);
+ 	}    
+    $(window).resize(function(){
+	     if(currentTab == 1){
+     		  mychart.resize();
+	     }
+   });
+}
+
+/*查询图表信息*/
+function searchChartFunction(params) {
+
+	var beginTime = $("#mydatepickerstart").find("input").val();
+	var endTime = $("#mydatepickerend").find("input").val();
+		var timelist = {};
+	$.ajax({
+		url : "../../../MonitorStorageController/getOriginalChartData",
+		type : "post",
+		dataType : "json",
+		async : true,
+		data : {
+			"deviceCode":params["deviceCode"],
+			"updateType":params["updateType"],
+			"select":params["deviceCode"],
+			"thingCode":params["thingCode"],
+			"beginTime" : beginTime,
+			"endTime" : endTime
+		},
+		error : function(json) {
+			ajaxLoadEnd();
+		},
+		success : function(json) {
+			ajaxLoadEnd();
+			var legendData = [];
+			var seriesData = [];
+			if (json.time != undefined) {
+				var timeArry = json["time"];
+				var max = null;
+				for ( var index in json) {
+					if (index != "time") {
+						legendData.push(index);
+						seriesData.push({
+							"name" : index,
+							"type" : 'line',
+							"data" : json[index],
+							markPoint : {
+								data : [ {
+									type : 'max',
+									name : '最大值'
+								},{
+									type : 'min',
+									name : '最小值'
+								} ]
+							},
+							markLine : {
+								itemStyle : {
+									normal : {
+										lineStyle : {
+											width : 2
+										}
+									}
+								}
+							}
+						});
+					} else {
+						timelist[index] = json[index];
+					}
+				}
+				initChart(timelist, legendData, seriesData, '数值');
+			} else {
+				//$.messager.alert("提示", "当前时间段内无数据，没有可查看的图表！", "warning");
+				initChart(timelist, legendData, seriesData, '数值');
+			}
+		}
+	});
+}
+
+/*初始化表格*/
+function initChart(timelist,legendData,seriesData,yname){
+	var dom = document.getElementById("mycharts");
+	mychart = echarts.init(document.getElementById("mycharts"));
+	var option = {
+		    title: {
+		        text: '图表',
+	        	textStyle: {
+	                  fontSize: 18,
+	                  fontWeight: 'bolder',
+	                  color: '#333'          // 主标题文字颜色
+	            }
+		    },
+		    tooltip: {
+		        trigger: 'axis'
+		    },
+		    legend: {
+		        data:legendData
+		    },
+		    toolbox: {
+		        show : true,
+		        orient:	'vertical',
+		        y:'center',
+		        feature : {
+		            mark : {show: true},
+		            magicType : {show: true, type: ['line', 'bar']},
+		            restore : {show: true},
+		            dataZoom: {},
+		            saveAsImage : {show: true}
+		        }
+		    },
+		    xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+		        data: timelist["time"],
+		        axisLine : {    // 轴线
+	                show: true,
+	                lineStyle: {
+	                    color: 'green',
+	                    type: 'solid',
+	                    width: 2
+	                }
+	            },
+		        axisLabel : {
+	                show:true,
+	                textStyle: {
+	                    color: 'green',
+	                    fontFamily: 'sans-serif',
+	                    fontSize: 13,
+	                    fontWeight: 'bold'
+	                }
+	            }
+		    },
+		    yAxis: {
+		    	name:yname,
+		        type: 'value',
+		        axisLine : {    // 轴线
+	                show: true,
+	                lineStyle: {
+	                    color: 'green',
+	                    type: 'solid',
+	                    width: 2
+	                }
+	            },
+		        axisLabel: {
+		            formatter: '{value}',
+		            textStyle: {
+	                    color: 'green',
+	                    fontFamily: 'sans-serif',
+	                    fontSize: 13,
+	                    fontWeight: 'bold'
+	                }
+		        }
+		    },
+		    series:seriesData
+		};
+	mychart.clear();
+	mychart.setOption(option,true);
+	mychart.resize(); 
+}
+function goPage(url){
+	   $('.left-side').toggleClass("collapse-left");
+	   $(".right-side").toggleClass("strech");
+	   window.location.href=url;
+	   
+}
+
+</script>
+<script>
+	 $('#noti-box').slimScroll({
+	     height: '400px',
+	     size: '5px',
+	     BorderRadius: '5px'
+	 });
+	
+	 $('input[type="checkbox"].flat-grey, input[type="radio"].flat-grey').iCheck({
+	     checkboxClass: 'icheckbox_flat-grey',
+	     radioClass: 'iradio_flat-grey'
+	 });
+</script>
+<script type="text/javascript">
+	$.ajaxSetup({
+		contentType : "application/x-www-form-urlencoded;charset=utf-8",
+		complete : function(XMLHttpRequest, textStatus) {
+			var sessionstatus = XMLHttpRequest
+					.getResponseHeader("sessionstatus"); //通过XMLHttpRequest取得响应头，sessionstatus，  
+			if (sessionstatus == "timeout") {
+				//如果超时就处理 ，指定要跳转的页面 
+				window.location.href = "/loginPhone.html";
+			}
+		}
+	});
+</script>
+</body>
+</html>
